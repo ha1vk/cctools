@@ -1,0 +1,35 @@
+1. Prepare standalone android compiler:
+
+/home/sash/Work/android/android-ndk-r8d/build/tools/make-standalone-toolchain.sh --arch=arm --install-dir=/tmp/arm-android
+/home/sash/Work/android/android-ndk-r8d/build/tools/make-standalone-toolchain.sh --arch=mips --install-dir=/tmp/mips-android
+/home/sash/Work/android/android-ndk-r8d/build/tools/make-standalone-toolchain.sh --arch=x86 --install-dir=/tmp/x86-android
+
+2. Get ndk compiler sources:
+
+/home/sash/Work/android/android-ndk-r8d/build/tools/download-toolchain-sources.sh \
+/home/sash/Work/android/ndk-source
+
+3. Set PATH to compilers
+
+export PATH=/tmp/arm-android/bin:/tmp/mips-android/bin:/tmp/x86-android/bin:$PATH
+
+4. Build native compiler:
+
+MAKEARGS=-j2 ./build-native-toolchain.sh \
+/home/sash/Work/android/ndk-source \
+mipsel-linux-android \
+/home/sash/Work/android/android-ndk-r8d/platforms/android-14/arch-mips
+
+MAKEARGS=-j2 ./build-native-toolchain.sh \
+/home/sash/Work/android/ndk-source \
+arm-linux-androideabi \
+/home/sash/Work/android/android-ndk-r8d/platforms/android-9/arch-arm
+
+MAKEARGS=-j2 ./build-native-toolchain.sh \
+/home/sash/Work/android/ndk-source \
+i686-linux-android \
+/home/sash/Work/android/android-ndk-r8d/platforms/android-14/arch-x86
+
+5. Pack platform files
+
+./pack-platform-files.sh /home/sash/Work/android/android-ndk-r8d/platforms/
