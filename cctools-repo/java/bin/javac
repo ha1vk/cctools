@@ -1,0 +1,7 @@
+#!/system/bin/sh
+
+if [ "$JAVAC_CLASSPATH" = "" ]; then
+    JAVAC_CLASSPATH=${CCTOOLSDIR}/classes/android.jar
+fi
+
+exec dalvikvm -Xss262912 -Xmx64M -cp ${CCTOOLSDIR}/classes/javac.jar com.sun.tools.javac.Main -cp $JAVAC_CLASSPATH $@
