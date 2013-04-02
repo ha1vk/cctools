@@ -1,0 +1,9 @@
+#!/system/bin/sh
+
+if [ "$JAVAC_CLASSPATH" = "" ]; then
+    JAVAC_CLASSPATH=${CCTOOLSDIR}/classes/android.jar
+fi
+
+dalvikvm -Xss262912 -Xmx64M -cp ${CCTOOLSDIR}/classes/javac.jar com.sun.tools.javac.Main -cp $JAVAC_CLASSPATH "$1".java && \
+dalvikvm -Xss262912 -Xmx64M -cp ${CCTOOLSDIR}/classes/dx.jar com.android.dx.command.Main --dex --output="$1".jar "$1".class
+rm "$1".class

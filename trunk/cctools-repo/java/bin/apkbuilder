@@ -1,0 +1,3 @@
+#!/system/bin/sh
+
+exec dalvikvm -Xss262912 -Xmx64M -cp ${CCTOOLSDIR}/classes/apkbuilder.jar com.android.sdklib.build.ApkBuilderMain $@
