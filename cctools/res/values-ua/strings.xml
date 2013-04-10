@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CCTools</string>
+    
+    <string name="updating_caption">Установка</string>
+    <string name="removing_caption">Удаление</string>
+    <string name="establishing_handshake_message">Установка з\'єднання.\nБудь ласка, зачекайте</string>
+   	<string name="wait_message">Будь ласка, зачекайте...</string>
+    <string name="download_cctools">Завантаження рiдних iнструментiв </string>
+    <string name="received"> Отриманих</string>
+    <string name="from"> вiд </string>
+    <string name="bytes"> байта</string>
+    <string name="download_file"> Завантаження</string>
+    <string name="unpacking_file"> Розпакування</string>
+    <string name="error_downloading">Помилка при завантаженні файлу, перезапустіть програму та спробуйте ще раз</string>
+    <string name="bad_archive">Помилковий або пошкоджений архiв файлiв, перезапустіть програму та спробуйте ще раз</string>
+    <string name="sd_no_memory">Немає вільного місця на карті пам\'яті SD, необхіднi </string>
+    <string name="sd_no_memory2">MB. Видаліть непотрібні файли і спробуйте ще раз.</string>
+    <string name="cache_no_memory">Немає вільного місця, необхіднi </string>
+    <string name="cache_no_memory1">MB, але </string>
+   	<string name="cache_no_memory2">MB доступні. Видаліть непотрібні файли і спробуйте ще раз</string>
+   	
+   	<string name="exit_dialog">Підтвердіть вихід</string>
+   	<string name="exit_dialog_text">Текст був змінений, але не збережений. Ви дійсно бажаєте вийти?</string>
+   	<string name="exit_dialog_yes">Так</string>
+   	<string name="exit_dialog_no">Нi</string>
+
+   	<string name="save_warn_dialog">Внимание!</string>
+   	<string name="save_warn_text">Имеются несохраненные изменения, которые будут потеряны. Продолжить?</string>
+   			
+   	<string name="about_dialog">CCTools IDE</string>
+   	<string name="about_dialog_text">C/C++ iнструменти розрiбки\nВерсiя</string>
+   	<string name="about_dialog_text2">\nCopyright &#169; 2012, Alexander Chukov</string>
+   	<string name="about_dialog_show">Домашня сторiнка</string>
+   	
+   	<string name="about_button">О</string>
+   	<string name="prefs_button">Налаштування</string>
+   	
+   	<string name="preferences">Налаштування</string>
+   	<string name="pref_toolbar">Панель інструментів</string>
+	<string name="pref_syntax">Підсвічування синтаксису</string>
+	<string name="pref_linenumbers">Нумерация строк</string>	
+	<string name="pref_fontsize">Розмір шрифту</string>
+	<string name="pref_dialog_fontsize">розмір шрифту</string>
+	<string name="pref_console_fontsize">Розмір шрифту консолі</string>
+		
+    <string name="exit_button">Вихiд</string>
+    <string name="selectFileOrFolder">Виберіть файл або папку</string>
+    <string name="pathButton">Вiдкрити</string>
+    <string name="unsupported_device">Цей пристрій ще не підтримується</string>
+    <string name="filebrowser_name">Файловий менеджер</string>
+    <string name="newButton">Новий</string>
+    <string name="saveButton">Зберегти</string>
+    <string name="saveAsButton">Зберегти як</string>
+    <string name="buildButton">Зiбрати</string>
+    <string name="imgbuttdesc"></string>
+    <string name="menu_goto">Перейти</string>
+    <string name="menu_search">Пошук</string>
+    <string name="menu_undo">Отменить</string>
+    <string name="menu_redo">Повторить</string>
+    
+    <string name="goto_line">Рядок</string>
+    <string name="search_string">Введіть рядок пошуку</string>
+    
+    <string name="buildwindow_name">Зiбрати</string>
+    <string name="buildwindow_name_error">Не вдалося</string>
+    <string name="buildwindow_name_done">Завершення</string>
+    <string name="button_continue">Продовження</string>
+    <string name="button_cancel">Вихiд</string>
+    <string name="make_title">Створити утиліти</string>
+    <string name="make_args">Введіть параметри</string>
+    <string name="gcc_title">Компіляція вихідного файлу</string>
+    <string name="gcc_args">Введіть аргументи</string>
+    <string name="gccbuildexe">Зробити виконуваним</string>
+    <string name="gccrunexe">Виконання операцii</string>
+    <string name="gccnativeactivity">Native Activity</string>
+	<string name="unknown_filetype">Невідомий тип файлу - нічого не виконувати</string>
+	<string name="known_filetypes">Наступні типи файлів можуть бути оброблені: .c .cpp .c++ .s .mk .mak Makefile makefile</string>
+	<string name="build_done">Зроблено</string>
+	<string name="build_finished">Завершено</string>
+	<string name="build_error">Код помилки </string>
+	<string name="exe_dialog">Запустити файл</string>
+	<string name="exe_args">Аргументи командного рядка</string>
+    
+    <string name="console_name">Термiнал</string>
+    <string name="console_executing">Виконування операцii</string>
+    <string name="console_finished">Завершено</string>
+    <string name="console_stopped">Припинено</string>
+    
+    <string name="new_file">Новий файл</string>
+    <string name="file_loaded">Файл успішно завантажен</string>
+	<string name="file_not_loaded">Не вдається прочитати файл</string>
+	<string name="file_saved">Файл успішно збережений</string>
+	<string name="file_not_saved">Неможливо написати файл</string>
+    
+	<string name="open_file">Вiдкрити файл</string>
+	<string name="save_file">Зберегти файл</string>
+    <string name="location">Розташування</string>
+    <string name="cant_read_folder">Папка може/не може бути прочитана</string>
+    <string name="nnew">Новий</string>
+    <string name="select">Виберіть</string>
+    <string name="file_name">Назва файлу:</string>
+    <string name="cancel">Вихiд</string>
+    <string name="create">Зберегти</string>
+    <string name="no_data">Немає даних</string>
+    <color name="gray">#ffff0000</color>
+    <string name="err">Помилка</string>
+    <string name="newDirectory">Нова папка</string>
+    <string name="create_new">Створити:</string>
+    <string name="cannot_create">Неможливо створити!</string>
+</resources>

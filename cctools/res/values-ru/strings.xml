@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CCTools</string>
+    
+    <string name="updating_caption">Установка</string>
+    <string name="removing_caption">Удаление</string>
+    <string name="establishing_handshake_message">Установка соединения.\nПожалуйста подождите</string>
+    <string name="wait_message">Пожалуйста, подождите...</string>
+    <string name="download_cctools">Загрузка инструментов</string>
+    <string name="received">Принято\u0020</string>
+    <string name="from">\u0020из\u0020</string>
+    <string name="bytes">\u0020байт(ов)</string>
+    <string name="download_file">Загрузка</string>
+    <string name="unpacking_file">Распаковка</string>
+    <string name="error_downloading">Ошибка загрузки файла, перезапустите приложение чтобы повторить</string>
+    <string name="bad_archive">Плохой или поврежденный архивный файл, перезапустите приложение для новой загрузки</string>
+    <string name="sd_no_memory">Нет свободного места на SD карте, нужно\u0020</string>
+    <string name="sd_no_memory2">МБ. Удалите ненужные файлы и перезапустите программу.</string>
+    <string name="cache_no_memory">Нет свободного места, нужно\u0020</string>
+    <string name="cache_no_memory1">МБ, но\u0020</string>
+   	<string name="cache_no_memory2">МБ доступно. Удалите ненужные приложения и перезапустите программу.</string>
+
+   	<string name="exit_dialog">Подтверждение выхода</string>
+   	<string name="exit_dialog_text">Имеются несохраненные изменения, которые будут потеряны. Продолжить?</string>
+   	<string name="exit_dialog_yes">Да</string>
+   	<string name="exit_dialog_no">Нет</string>
+
+   	<string name="save_warn_dialog">Внимание!</string>
+   	<string name="save_warn_text">Имеются несохраненные изменения, которые будут потеряны. Продолжить?</string>
+   	
+   	<string name="about_dialog">CCTools IDE</string>
+   	<string name="about_dialog_text">C/C++ средства разработки\nВерсия</string>
+   	<string name="about_dialog_text2">\nCopyright &#169; 2012, Alexander Chukov</string>
+   	<string name="about_dialog_show">Домашняя страница</string>
+   			
+   	<string name="about_button">О программе</string>
+   	<string name="prefs_button">Настройки</string>
+   	
+   	<string name="preferences">Настройки</string>
+   	<string name="pref_toolbar">Панель инструментов</string>
+	<string name="pref_syntax">Подсветка синтаксиса</string>
+	<string name="pref_linenumbers">Нумерация строк</string>
+	<string name="pref_fontsize">Размер шрифта</string>
+	<string name="pref_dialog_fontsize">Размер шрифта</string>
+	<string name="pref_console_fontsize">Размер консольного шрифта</string>
+	<string name="pref_force_run">Быстрый запуск</string>
+	<string name="pref_ccopts">C опции</string>
+	<string name="pref_cxxopts">C++ опции</string>
+	<string name="pref_runargs">Выполнить без аргументов</string>
+	<string name="pref_codeeditor">Редактор кода</string>
+	<string name="pref_autopair">Закрывать открытые символы</string>
+	<string name="pref_autoindent">Авто-отступы</string>
+			
+    <string name="exit_button">Выход</string>
+    <string name="selectFileOrFolder">Выберите файл или папку</string>
+    <string name="pathButton">Открыть</string>
+    <string name="unsupported_device">Версия этого устройства еще не поддерживается</string>
+    <string name="filebrowser_name">Файловый менеджер</string>
+    <string name="newButton">Новый</string>
+    <string name="saveButton">Сохранить</string>
+    <string name="saveAsButton">Сохранить как</string>
+    <string name="buildButton">Собрать</string>
+    <string name="playButton">Запустить</string>
+	<string name="logButton">Журнал сборки</string>
+    <string name="imgbuttdesc"></string>
+    <string name="menu_goto">Перейти</string>
+    <string name="menu_search">Поиск</string>
+    <string name="menu_undo">Отменить</string>
+    <string name="menu_redo">Повторить</string>
+    
+    <string name="goto_line">Cтрока</string>
+    <string name="search_string">Строка для поиска</string>
+    
+    <string name="buildwindow_name">Собрать</string>
+    <string name="buildwindow_name_error">Неудачно</string>
+    <string name="buildwindow_name_done">Собрано</string>
+    <string name="button_continue">Продолжить</string>
+    <string name="button_cancel">Отмена</string>
+    <string name="button_yes">Да</string>
+    <string name="button_no">Нет</string>
+    <string name="make_title">Make утилита</string>
+    <string name="make_args">Введите параметры</string>
+    <string name="gcc_title">Настройка компиляции</string>
+    <string name="gcc_args">Введите дополнительные аргументы</string>
+    <string name="gccbuildexe">Исполняемый файл</string>
+    <string name="gccnativeactivity">Native Activity</string>
+    <string name="gccrunexe">Запустить</string>
+	<string name="unknown_filetype">Неизвестный тип файла - нечего делать</string>
+	<string name="known_filetypes">Поддерживаются следующие типы файлов: .c .cpp .c++ .s .mk .mak Makefile makefile</string>
+	<string name="build_done">Готово</string>
+	<string name="build_finished">Завершено</string>
+	<string name="build_error">Код ошибки </string>
+	<string name="exe_dialog">Запуск программы</string>
+	<string name="exe_args">Аргументы командной строки</string>
+    
+	<string name="log_empty">Журнал пуст</string>
+	
+    <string name="console_name">Консоль</string>
+    <string name="console_executing">Выполняется</string>
+    <string name="console_finished">Завершено</string>
+    <string name="console_stopped">Прекращено</string>
+    
+    <string name="new_file">Новый файл</string>
+    <string name="file_loaded">Файл загружен</string>
+	<string name="file_not_loaded">Не могу прочитать файл</string>
+	<string name="file_saved">Файл сохранен</string>
+	<string name="file_not_saved">Не могу записать файл</string>
+    
+	<string name="open_file">Открыть файл</string>
+	<string name="save_file">Сохранить файл</string>
+	<string name="location">Путь</string>
+    <string name="cant_read_folder">папка не может быть прочитана!</string>
+    <string name="nnew">Новый</string>
+    <string name="select">Выбрать</string>
+    <string name="file_name">Имя файла:</string>
+    <string name="cancel">Отмена</string>
+    <string name="create">Сохранить</string>
+    <string name="no_data">Нет данных</string>
+    <color name="gray">#ffff0000</color>
+    <string name="err">Ошибка</string>
+    <string name="newDirectory">Новая папка</string>
+    <string name="create_new">Создать:</string>
+    <string name="cannot_create">Невозможно создать!</string>
+    
+    <string name="pkgmgrButton">Дополнения</string>
+    <string name="pkgmgr_name">Управление дополнениями</string>
+    <string name="pkginstaller_name">Добавить/Удалить дополнение</string>
+    <string name="pkg_name">Имя</string>
+    <string name="pkg_version">Версия:\u0020</string>
+    <string name="pkg_description">Описание</string>
+    <string name="pkg_file">Файл:\u0020</string>
+    <string name="pkg_size">Размер:\u0020</string>
+    <string name="pkg_selected">Выбрано\u0020</string>
+    <string name="pkg_install">Установить</string>
+    <string name="pkg_reinstall">Переустановить</string>
+    <string name="pkg_uninstall">Удалить</string>
+    <string name="pkg_status">Состояние: \u0020</string>
+    <string name="pkg_installed">Установлено</string>
+    <string name="pkg_notinstalled">Не установлено</string>
+</resources>
