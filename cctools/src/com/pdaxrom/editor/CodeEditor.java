@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.content.res.TypedArray;
 import com.pdaxrom.editor.CSyntax;
 import com.pdaxrom.editor.EditHistory;
 import com.pdaxrom.editor.EditItem;
@@ -16,7 +17,6 @@ import com.pdaxrom.editor.SyntaxHighLighting;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
 import android.graphics.Rect;
@@ -29,6 +29,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
+
+import com.pdaxrom.cctools.R;
 
 public class CodeEditor extends EditText {
 	private final static String TAG = "cctools-codeEditor";
@@ -56,20 +58,24 @@ public class CodeEditor extends EditText {
 	
 	public CodeEditor(Context context) {
 		super(context);
-		setDefaults();
+        setDefaults(null);
 	}
 
 	public CodeEditor(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		setDefaults();
+		setDefaults(attrs);
 	}
 
 	public CodeEditor(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		setDefaults();
+		setDefaults(attrs);
 	}
 	
-	public 	void	setDefaults() {
+    private int m_gutterTextColor;
+    private int m_gutterLineColor;
+    private int m_gutterPadding;
+
+	public void	setDefaults(AttributeSet attrs) {
 		resetTriggers();
 		resetHistory();
 		
@@ -77,26 +83,23 @@ public class CodeEditor extends EditText {
 		InputFilter[] FilterArray = new InputFilter[1];
 		FilterArray[0] = new InputFilter.LengthFilter(maxLength);
 		setFilters(FilterArray);
-		
-		// FIXME
-		setBackgroundColor(Color.BLACK);
-		setTextColor(Color.WHITE);
-		
-		m_drawLineNumbers = true;
-		m_drawGutterLine = true;
-		m_highlightText = true;
-		m_gutterSize = 60;
-		
+
+        if (attrs != null) {
+            readAttrs(attrs);
+        } else {
+            setDefaultAttrs();
+        }
+
 		m_gutterLineRect = new Rect();
 		m_gutterLinePaint = new Paint();	
 		m_gutterTextPaint = new Paint();
 		m_gutterTextPaint.setTextAlign(Paint.Align.RIGHT);
-		m_gutterTextPaint.setARGB(255, 127, 127, 127);
-		m_gutterLinePaint.setARGB(255, 127, 127, 127);
+		m_gutterTextPaint.setColor(m_gutterTextColor);
+		m_gutterLinePaint.setColor(m_gutterLineColor);
 		m_gutterTextPaint.setTextSize(getTextSize());
 		fm = m_gutterTextPaint.getFontMetrics();
 		
-		super.setPadding(m_gutterSize, 5, 5, 5);
+		super.setPadding(m_gutterSize, m_gutterPadding, m_gutterPadding, m_gutterPadding);
 		super.setHorizontallyScrolling(true);
 		addTextChangedListener(new TextWatcher() {
 		    private CharSequence mmBeforeChange;
@@ -212,7 +215,33 @@ public class CodeEditor extends EditText {
 		});
 	}
 
-	private void resetTriggers() {
+    private void setDefaultAttrs() {
+        m_gutterTextColor = getContext().getResources().getColor(R.color.grey);
+        m_gutterLineColor = getContext().getResources().getColor(R.color.grey);
+        m_drawLineNumbers = true;
+        m_drawGutterLine = true;
+        m_highlightText = true;
+        m_gutterSize = 60;
+        m_gutterPadding = 5;
+    }
+
+    private void readAttrs(AttributeSet attrs) {
+        TypedArray a = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.CodeEditor, 0, 0);
+
+        try {
+            m_gutterTextColor = a.getColor(R.styleable.CodeEditor_gutterTextColor, getContext().getResources().getColor(R.color.grey));
+            m_gutterLineColor = a.getColor(R.styleable.CodeEditor_gutterLineColor, getContext().getResources().getColor(R.color.grey));
+            m_drawLineNumbers = a.getBoolean(R.styleable.CodeEditor_drawLineNumbers, true);
+            m_drawGutterLine = a.getBoolean(R.styleable.CodeEditor_drawGutterLine, true);
+            m_highlightText = a.getBoolean(R.styleable.CodeEditor_highlightText, true);
+            m_gutterSize = (int)a.getDimension(R.styleable.CodeEditor_gutterSize, getContext().getResources().getDimension(R.dimen.gutter_size));
+            m_gutterPadding = (int)a.getDimension(R.styleable.CodeEditor_gutterPadding, getContext().getResources().getDimension(R.dimen.gutter_padding));
+        } finally {
+            a.recycle();
+        }
+    }
+
+    private void resetTriggers() {
 		m_textHasChanged = false;
 		m_lastSearchPos = 0;		
 	}
