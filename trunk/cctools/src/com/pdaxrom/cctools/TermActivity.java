@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 public class TermActivity extends Activity {
@@ -20,8 +21,25 @@ public class TermActivity extends Activity {
 	private String cmdline;
 	private String workdir;
 	private String cctoolsDir;
+
+	private boolean isRunning = false;
 	
     private Handler handler = new Handler();
+
+    private Handler mMsgHandler = new Handler() {
+	    @Override
+	    public void handleMessage(Message msg) {
+	    	if (!isRunning) {
+	    		return;
+	    	}
+	    	if (msg.what == 123) {
+	    		Log.i(TAG, "Message - Process exited!!!");
+	    		showTitle(getString(R.string.console_name) + " - " + getString(R.string.console_finished));
+	    		isRunning = false;
+	    	}
+	    }
+	};
+
 //	MyThread exeThread;
 
 	public void onCreate(Bundle savedInstanceState) {
@@ -78,16 +96,16 @@ public class TermActivity extends Activity {
 		}
 		super.onDestroy();
 	}
-/*
+
     public void onBackPressed() {
-    	if (exeThread != null && exeThread.isAlive()) {
+    	if (isRunning) {
     		Log.i(TAG, "kill process group");
     		mSession.hangup();
         } else {
              super.onBackPressed(); // this will actually finish the Activity
         }
     }
-*/
+
 	
 	private void showTitle(final String str) {
     	Runnable proc = new Runnable() {
@@ -128,6 +146,8 @@ public class TermActivity extends Activity {
 		Log.i(TAG, "argv " + argv[0]);
 		Log.i(TAG, "envp " + envp);
 		
-		return new ShellTermSession(argv, envp, workdir);
+		isRunning = true;
+		
+		return new ShellTermSession(argv, envp, workdir, mMsgHandler);
 	}
 }

@@ -969,16 +969,16 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	}
 	
 	final int sdk2ndk_arm[] = {
-			/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  */
-			-1, -1, -1,  3,  4,  5,  5,  5,  8,  9,  9,  9,  9,  9, 14, 14, 14, 14, 14, 14, -1
+			/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  */
+			-1, -1, -1,  3,  4,  5,  5,  5,  8,  9,  9,  9,  9,  9, 14, 14, 14, 14, 14, 14, 14, 14, 14, -1
 	};
 	final int sdk2ndk_mips[] = {
 			/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 */
-			-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, -1, 14, 14, 14, 14, 14, 14, -1
+			-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, -1, 14, 14, 14, 14, 14, 14, 14, 14, 14, -1
 	};
 	final int sdk2ndk_x86[] = {
 			/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 */
-			-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, -1, 14, 14, 14, 14, 14, 14, -1
+			-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, -1, 14, 14, 14, 14, 14, 14, 14, 14, 14, -1
 	};
 	final Handler handler = new Handler();
 
@@ -1091,6 +1091,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 					output(getString(R.string.received) + " " + totalread + " " + getString(R.string.from) + " " + file_size + " " + getString(R.string.bytes));
 				} while (true);
 				stream.close();
+				out.close();
 				if (totalread != file_size) {
 					throw new RuntimeException("Partially downloaded file!");
 				}

@@ -21,6 +21,7 @@ public class ShellTermSession extends TermSession {
 
 	private static final int PROCESS_EXITED = 1;
 
+/*
 	private Handler mMsgHandler = new Handler() {
 	    @Override
 	    public void handleMessage(Message msg) {
@@ -32,15 +33,19 @@ public class ShellTermSession extends TermSession {
 	    	}
 	    }
 	};
-
+ */
+	private Handler mMsgHandler;
+	
 	private UpdateCallback mUTF8ModeNotify = new UpdateCallback() {
 		public void onUpdate() {
 			Utils.setPtyUTF8Mode(mFd, getUTF8Mode());
 		}
 	};
 	
-	public ShellTermSession(String[] argv, String envp[], String cwd) {
+	public ShellTermSession(String[] argv, String envp[], String cwd, Handler handler) {
 		super();
+		
+		mMsgHandler = handler;
 		
 		setDefaultUTF8Mode(true);
 		
@@ -52,7 +57,8 @@ public class ShellTermSession extends TermSession {
                Log.i(TAG, "waiting for: " + mProcId);
                int result = Utils.waitFor(mProcId);
                Log.i(TAG, "Subprocess exited: " + result);
-               mMsgHandler.sendMessage(mMsgHandler.obtainMessage(PROCESS_EXITED, result));
+               //mMsgHandler.sendMessage(mMsgHandler.obtainMessage(PROCESS_EXITED, result));
+               mMsgHandler.sendEmptyMessage(123);
             }
        };
        mWatcherThread.setName("Process watcher");
