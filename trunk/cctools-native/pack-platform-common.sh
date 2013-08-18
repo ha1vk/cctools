@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=r8d
+VERSION=r9
 
 TOPDIR=$PWD
 NDK_DIR="$1"
