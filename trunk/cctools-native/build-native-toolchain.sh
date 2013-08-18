@@ -445,6 +445,8 @@ build_gcc() {
     rm -rf $TARGET_DIR/man
     rm -rf $TARGET_DIR/share
 
+    rm -f ${TARGET_DIR}/lib/libiberty.a
+
     popd
     s_tag $PKG
 }
