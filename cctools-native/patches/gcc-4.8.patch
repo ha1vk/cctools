@@ -1,0 +1,65 @@
+diff -Nur /home/sash/Work/android/ndk-source/gcc/gcc-4.8/gcc/system.h gcc-4.8/gcc/system.h
+--- /home/sash/Work/android/ndk-source/gcc/gcc-4.8/gcc/system.h	2013-08-13 16:44:18.000000000 +0300
++++ gcc-4.8/gcc/system.h	2013-08-14 13:47:52.258219947 +0300
+@@ -70,7 +70,7 @@
+    extensions and need to be prototyped by hand (since we do not
+    define _GNU_SOURCE).  */
+ 
+-#if defined HAVE_DECL_PUTC_UNLOCKED && HAVE_DECL_PUTC_UNLOCKED
++#if defined HAVE_DECL_PUTC_UNLOCKED && HAVE_DECL_PUTC_UNLOCKED && !__BIONIC__
+ 
+ # ifdef HAVE_PUTC_UNLOCKED
+ #  undef putc
+diff -Nur /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libcpp/charset.c gcc-4.8/libcpp/charset.c
+--- /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libcpp/charset.c	2013-08-13 16:44:30.000000000 +0300
++++ gcc-4.8/libcpp/charset.c	2013-08-14 13:08:59.842157487 +0300
+@@ -1696,7 +1696,7 @@
+ uchar * 
+ _cpp_convert_input (cpp_reader *pfile, const char *input_charset,
+ 		    uchar *input, size_t size, size_t len,
+-		    const unsigned char **buffer_start, off_t *st_size)
++		    const unsigned char **buffer_start, loff_t *st_size)
+ {
+   struct cset_converter input_cset;
+   struct _cpp_strbuf to;
+diff -Nur /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libcpp/internal.h gcc-4.8/libcpp/internal.h
+--- /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libcpp/internal.h	2013-08-13 16:44:30.000000000 +0300
++++ gcc-4.8/libcpp/internal.h	2013-08-14 13:08:59.846157487 +0300
+@@ -732,7 +732,7 @@
+ extern void _cpp_destroy_iconv (cpp_reader *);
+ extern unsigned char *_cpp_convert_input (cpp_reader *, const char *,
+ 					  unsigned char *, size_t, size_t,
+-					  const unsigned char **, off_t *);
++					  const unsigned char **, loff_t *);
+ extern const char *_cpp_default_encoding (void);
+ extern cpp_hashnode * _cpp_interpret_identifier (cpp_reader *pfile,
+ 						 const unsigned char *id,
+diff -Nur /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libcpp/macro.c gcc-4.8/libcpp/macro.c
+--- /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libcpp/macro.c	2013-08-13 16:44:30.000000000 +0300
++++ gcc-4.8/libcpp/macro.c	2013-08-14 13:08:59.866157487 +0300
+@@ -246,7 +246,7 @@
+ 		struct tm *tb = NULL;
+ 		struct stat *st = _cpp_get_file_stat (file);
+ 		if (st)
+-		  tb = localtime (&st->st_mtime);
++		  tb = localtime ((const time_t *)&st->st_mtime);
+ 		if (tb)
+ 		  {
+ 		    char *str = asctime (tb);
+diff -Nur /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libiberty/getpagesize.c gcc-4.8/libiberty/getpagesize.c
+--- /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libiberty/getpagesize.c	2013-08-13 16:44:32.000000000 +0300
++++ gcc-4.8/libiberty/getpagesize.c	2013-08-14 13:08:59.870157487 +0300
+@@ -60,11 +60,13 @@
+ # endif /* PAGESIZE */
+ #endif /* GNU_OUR_PAGESIZE */
+ 
++#ifndef __BIONIC__
+ int
+ getpagesize (void)
+ {
+   return (GNU_OUR_PAGESIZE);
+ }
++#endif
+ 
+ #else /* VMS */
+ 

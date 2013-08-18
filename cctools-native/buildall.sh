@@ -2,12 +2,11 @@
 
 TOPDIR=$PWD
 SRCDIR=/home/sash/Work/android/ndk-source
-NDKDIR=/home/sash/Work/android/android-ndk-r8d
+NDKDIR=/home/opt/android-ndk-r9
 
-
-${NDKDIR}/build/tools/make-standalone-toolchain.sh --arch=arm  --install-dir=${TOPDIR}/tmp/arm-android --toolchain=arm-linux-androideabi-4.7
-${NDKDIR}/build/tools/make-standalone-toolchain.sh --arch=mips --install-dir=${TOPDIR}/tmp/mips-android --toolchain=mipsel-linux-android-4.7
-${NDKDIR}/build/tools/make-standalone-toolchain.sh --arch=x86  --install-dir=${TOPDIR}/tmp/x86-android --toolchain=x86-4.7
+${NDKDIR}/build/tools/make-standalone-toolchain.sh --arch=arm  --install-dir=${TOPDIR}/tmp/arm-android --toolchain=arm-linux-androideabi-4.8
+${NDKDIR}/build/tools/make-standalone-toolchain.sh --arch=mips --install-dir=${TOPDIR}/tmp/mips-android --toolchain=mipsel-linux-android-4.8
+${NDKDIR}/build/tools/make-standalone-toolchain.sh --arch=x86  --install-dir=${TOPDIR}/tmp/x86-android --toolchain=x86-4.8
 
 export PATH=${TOPDIR}/tmp/arm-android/bin:${TOPDIR}/tmp/mips-android/bin:${TOPDIR}/tmp/x86-android/bin:$PATH
 

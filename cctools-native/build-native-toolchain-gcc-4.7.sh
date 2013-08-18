@@ -38,14 +38,11 @@ arm*|i*86*)
 esac
 
 
-binutils_version="2.23"
-gcc_version="4.8"
+binutils_version="2.22"
+gcc_version="4.7"
 gmp_version="5.0.5"
-mpc_version="1.0.1"
-mpfr_version="3.1.1"
-cloog_version="0.18.0"
-isl_version="0.11.1"
-ppl_version="1.0"
+mpc_version="0.8.1"
+mpfr_version="2.4.2"
 make_version="3.82"
 expat_version="2.0.1"
 ncurses_version="5.9"
@@ -100,9 +97,6 @@ makedirs() {
     mkdir -p $build_dir/gmp
     mkdir -p $build_dir/mpc
     mkdir -p $build_dir/mpfr
-    mkdir -p $build_dir/isl
-    mkdir -p $build_dir/ppl
-    mkdir -p $build_dir/cloog
     mkdir -p $build_dir/binutils
     mkdir -p $build_dir/gcc
 }
@@ -175,12 +169,9 @@ build_gmp() {
 
     tar jxf $O_FILE -C $src_dir || error "tar jxf $O_FILE"
 
-    cd $S_DIR
-    patch -p1 < $patch_dir/gmp-$gmp_version.patch || error "patch"
-
     cd $B_DIR
 
-    $S_DIR/configure --target=$TARGET_ARCH --host=$TARGET_ARCH --prefix=$TMPINST_DIR --enable-cxx --disable-werror --enable-static --disable-shared || error "configure"
+    $S_DIR/configure --target=$TARGET_ARCH --host=$TARGET_ARCH --prefix=$TMPINST_DIR --disable-werror --enable-static --disable-shared || error "configure"
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
@@ -248,90 +239,6 @@ build_mpc() {
     s_tag $PKG
 }
 
-build_isl() {
-    PKG=isl
-    O_FILE=$SRC_PREFIX/isl/isl-$isl_version.tar.bz2
-    S_DIR=$src_dir/isl-$isl_version
-    B_DIR=$build_dir/isl
-
-    c_tag $PKG && return
-
-    echo "build $PKG"
-
-    pushd .
-
-    tar jxf $O_FILE -C $src_dir || error "tar jxf $O_FILE"
-
-    cd $B_DIR
-
-    $S_DIR/configure --target=$TARGET_ARCH --host=$TARGET_ARCH --prefix=$TMPINST_DIR --with-gmp-prefix=$TMPINST_DIR --disable-werror --enable-static --disable-shared || error "configure"
-
-    $MAKE $MAKEARGS || error "make $MAKEARGS"
-
-    $MAKE install || error "make install"
-
-    popd
-    s_tag $PKG
-}
-
-build_ppl() {
-    PKG=ppl
-    O_FILE=$SRC_PREFIX/ppl/ppl-$ppl_version.tar.bz2
-    S_DIR=$src_dir/ppl-$ppl_version
-    B_DIR=$build_dir/ppl
-
-    c_tag $PKG && return
-
-    echo "build $PKG"
-
-    pushd .
-
-    tar jxf $O_FILE -C $src_dir || error "tar jxf $O_FILE"
-
-#    cd $S_DIR
-#    patch -p1 < $patch_dir/ppl-$ppl_version.patch || error "patch"
-
-    cd $B_DIR
-
-    $S_DIR/configure --target=$TARGET_ARCH --host=$TARGET_ARCH --prefix=$TMPINST_DIR --with-gmp=$TMPINST_DIR --disable-werror --enable-static --disable-shared || error "configure"
-
-    $MAKE $MAKEARGS || error "make $MAKEARGS"
-
-    $MAKE install || error "make install"
-
-    popd
-    s_tag $PKG
-}
-
-build_cloog() {
-    PKG=cloog
-    O_FILE=$SRC_PREFIX/cloog/cloog-$cloog_version.tar.gz
-    S_DIR=$src_dir/cloog-$cloog_version
-    B_DIR=$build_dir/cloog
-
-    c_tag $PKG && return
-
-    echo "build $PKG"
-
-    pushd .
-
-    tar zxf $O_FILE -C $src_dir || error "tar zxf $O_FILE"
-
-#    cd $S_DIR
-#    patch -p1 < $patch_dir/cloog-$cloog_version.patch || error "patch"
-
-    cd $B_DIR
-
-    $S_DIR/configure --target=$TARGET_ARCH --host=$TARGET_ARCH --prefix=$TMPINST_DIR --with-gmp-prefix=$TMPINST_DIR --with-isl-prefix=$TMPINST_DIR --disable-werror --enable-static --disable-shared || error "configure"
-
-    $MAKE $MAKEARGS || error "make $MAKEARGS"
-
-    $MAKE install || error "make install"
-
-    popd
-    s_tag $PKG
-}
-
 build_gcc() {
     PKG=gcc
     O_DIR=$SRC_PREFIX/gcc/gcc-$gcc_version
@@ -363,34 +270,17 @@ build_gcc() {
 	;;
     esac
 
-#    ac_cv_func_getc_unlocked=no \
-#    ac_cv_func_getchar_unlocked=no \
-#    ac_cv_func_putc_unlocked=no \
-#    ac_cv_func_putchar_unlocked=no \
-#    ac_cv_func_getc_unlocked=no \
-#    ac_cv_func_getchar_unlocked=no \
-#    ac_cv_func_putc_unlocked=no \
-#    ac_cv_func_putchar_unlocked=no
-
     $S_DIR/configure \
 	--target=$TARGET_ARCH \
 	--host=$TARGET_ARCH \
 	--prefix=$TARGET_DIR \
-	--build=x86_64-linux-gnu \
 	--with-gnu-as \
 	--with-gnu-ld \
 	--enable-languages=c,c++ \
 	--with-gmp=$TMPINST_DIR \
 	--with-mpfr=$TMPINST_DIR \
-	--with-mpc=$TMPINST_DIR \
-	--with-cloog=$TMPINST_DIR \
-	--with-isl=$TMPINST_DIR \
-	--with-ppl=$TMPINST_DIR \
-	--disable-ppl-version-check \
-	--disable-cloog-version-check \
-	--disable-isl-version-check \
-	--enable-cloog-backend=isl \
-	--with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
+	--without-ppl \
+	--without-cloog \
 	--disable-libssp \
 	--enable-threads \
 	--disable-nls \
@@ -411,12 +301,7 @@ build_gcc() {
 	--with-gcc-version=$gcc_version \
 	--disable-bootstrap \
 	--disable-libquadmath \
-	--enable-plugins \
-	--enable-libgomp \
-	--disable-libsanitizer \
-	--enable-graphite=yes \
-	--with-cloog-version=$cloog_version \
-	--with-isl-version=$isl_version \
+	--disable-plugin \
 	--with-sysroot=$SYSROOT_DIR \
 	$EXTRA_CONF \
 	|| error "configure"
@@ -427,9 +312,6 @@ build_gcc() {
 
     $MAKE install || error "make install"
 
-    rm -f $TARGET_DIR/bin/$TARGET_ARCH-gcc-ar
-    rm -f $TARGET_DIR/bin/$TARGET_ARCH-gcc-nm
-    rm -f $TARGET_DIR/bin/$TARGET_ARCH-gcc-ranlib
     rm -f $TARGET_DIR/bin/$TARGET_ARCH-c++
     rm -f $TARGET_DIR/bin/$TARGET_ARCH-g++
     rm -f $TARGET_DIR/bin/$TARGET_ARCH-gcc
@@ -743,9 +625,6 @@ build_binutils
 build_gmp
 build_mpfr
 build_mpc
-build_isl
-build_ppl
-build_cloog
 build_gcc
 build_cxxstl
 build_make
