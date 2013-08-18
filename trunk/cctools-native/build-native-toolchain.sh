@@ -157,6 +157,10 @@ build_binutils() {
 	ln -sf ../../bin/$f $f
     done
 
+    rm -f ${TARGET_DIR}/lib/libbfd.*a
+    rm -f ${TARGET_DIR}/lib/libiberty.a
+    rm -f ${TARGET_DIR}/lib/libopcodes.*a
+
     popd
     s_tag $PKG
 }
@@ -698,6 +702,8 @@ strip_bins() {
     $TARGET_ARCH-strip $TARGET_DIR/libexec/gcc/$TARGET_ARCH/$gcc_version/lto-wrapper
     $TARGET_ARCH-strip $TARGET_DIR/libexec/gcc/$TARGET_ARCH/$gcc_version/lto1
     $TARGET_ARCH-strip $TARGET_DIR/libexec/gcc/$TARGET_ARCH/$gcc_version/install-tools/fixincl
+    $TARGET_ARCH-strip $TARGET_DIR/libexec/gcc/$TARGET_ARCH/$gcc_version/liblto_plugin.so.0.0.0
+    $TARGET_ARCH-strip $TARGET_DIR/libexec/gcc/$TARGET_ARCH/$gcc_version/plugin/gengtype
 }
 
 install_sysroot() {
