@@ -31,7 +31,7 @@ import android.widget.TextView;
 
 public class PkgMgrActivity extends ListActivity {
 	private static final String TAG = "PkgMgrActivity";
-	private static final String URL = "http://cctools.info/repo-4.7/" + Build.CPU_ABI;
+	private static final String URL = "http://cctools.info/repo-4.8/" + Build.CPU_ABI;
 	private Context context = this;
 	private static final String PKGS_LISTS_DIR = "/installed/";
 	
