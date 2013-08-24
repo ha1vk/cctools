@@ -76,7 +76,8 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	private String tmpDir;
 	private String filesDir;
 	private String serviceDir;
-	private String downloadPath = "http://cctools.info/cctools/gcc-4.7";
+	private String toolsVersion = "4.8";
+	private String downloadPath = "http://cctools.info/cctools/gcc-" + toolsVersion;
 	private String fileName;
 	private String buildBaseDir; // Project base directory
 	private boolean buildAfterSave = false;
@@ -431,17 +432,25 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
         }
         return true;
     }
+
+    private String getPrefString(String key) {
+	    SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
+		return settings.getString(key, Environment.getExternalStorageDirectory().getPath() + "/CCTools/Examples");    	
+    }
+    
+    private void setPrefString(String key, String value) {
+		SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(key, value);
+		editor.commit();
+    }
     
     private String getLastOpenedDir() {
-	    SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
-		return settings.getString("lastdir", Environment.getExternalStorageDirectory().getPath() + "/CCTools/Examples");    	
+    	return getPrefString("lastdir");
     }
     
     private void setLastOpenedDir(String dir) {
-		SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
-		SharedPreferences.Editor editor = settings.edit();
-		editor.putString("lastdir", dir);
-		editor.commit();
+    	setPrefString("lastdir", dir);
     }
     
     private void newTitle(String title) {
@@ -919,6 +928,45 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		t.start();
 	}
 	
+	private void removeFilesByList(String name) {
+		if (name != null) {
+			show_progress();
+			outputTitle(getString(R.string.removing_caption));
+			output(getString(R.string.wait_message));
+			String prermFile = toolchainDir + PKGS_LISTS_DIR + name + ".prerm";
+			if ((new File(prermFile)).exists()) {
+				Log.i(TAG, "Execute prerm script " + prermFile);
+				system(prermFile);
+				(new File(prermFile)).delete();
+			}
+			String descFile = toolchainDir + PKGS_LISTS_DIR + name + ".pkgdesc";
+			if ((new File(descFile)).exists()) {
+				(new File(descFile)).delete();
+			}
+			String logFile = toolchainDir + PKGS_LISTS_DIR + name + ".list";
+			if (!(new File(logFile)).exists()) {
+				hide_progress();
+				return;
+			}
+			try {
+				FileInputStream fin = new FileInputStream(logFile);
+				DataInputStream in = new DataInputStream(fin);
+				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+				String line = "";
+				while((line = reader.readLine()) != null) {
+					Log.i(TAG, "Delete file: " + line);
+					(new File(toolchainDir + "/" + line)).delete();
+				}
+				in.close();
+				(new File(logFile)).delete();
+			} catch (Exception e) {
+				Log.e(TAG, "Error during remove files " + e);
+			}
+			
+		}
+		hide_progress();		
+	}
+	
 	private void uninstallPackage(final String pkgName, final String file) {
 		Thread t = new Thread() {
 			public void run() {
@@ -926,42 +974,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 				if (name == null) {
 					name = file;
 				}
-				if (name != null) {
-					show_progress();
-					outputTitle(getString(R.string.removing_caption));
-					output(getString(R.string.wait_message));
-					String prermFile = toolchainDir + PKGS_LISTS_DIR + name + ".prerm";
-					if ((new File(prermFile)).exists()) {
-						Log.i(TAG, "Execute prerm script " + prermFile);
-						system(prermFile);
-						(new File(prermFile)).delete();
-					}
-					String descFile = toolchainDir + PKGS_LISTS_DIR + name + ".pkgdesc";
-					if ((new File(descFile)).exists()) {
-						(new File(descFile)).delete();
-					}
-					String logFile = toolchainDir + PKGS_LISTS_DIR + name + ".list";
-					if (!(new File(logFile)).exists()) {
-						hide_progress();
-						return;
-					}
-					try {
-						FileInputStream fin = new FileInputStream(logFile);
-						DataInputStream in = new DataInputStream(fin);
-						BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-						String line = "";
-						while((line = reader.readLine()) != null) {
-							Log.i(TAG, "Delete file: " + line);
-							(new File(toolchainDir + "/" + line)).delete();
-						}
-						in.close();
-						(new File(logFile)).delete();
-					} catch (Exception e) {
-						Log.e(TAG, "Error during remove files " + e);
-					}
-					
-				}
-				hide_progress();
+				removeFilesByList(name);
 				finishExternalCommand();
 			}
 		};
@@ -970,15 +983,15 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	
 	final int sdk2ndk_arm[] = {
 			/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  */
-			-1, -1, -1,  3,  4,  5,  5,  5,  8,  9,  9,  9,  9,  9, 14, 14, 14, 14, 14, 14, 14, 14, 14, -1
+			-1, -1, -1,  3,  4,  5,  5,  5,  8,  9,  9,  9,  9,  9, 14, 14, 14, 14, 18, 18, 18, 18, 18, -1
 	};
 	final int sdk2ndk_mips[] = {
 			/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 */
-			-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, -1, 14, 14, 14, 14, 14, 14, 14, 14, 14, -1
+			-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, -1, 14, 14, 14, 14, 18, 18, 18, 18, 18, -1
 	};
 	final int sdk2ndk_x86[] = {
 			/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 */
-			-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, -1, 14, 14, 14, 14, 14, 14, 14, 14, 14, -1
+			-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, -1, 14, 14, 14, 14, 18, 18, 18, 18, 18, -1
 	};
 	final Handler handler = new Handler();
 
@@ -1017,24 +1030,41 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		cctools_base += ".zip";
 		cctools_sdk  += ".zip";
 
-		if (!(new File(toolchainDir + "/installed/" + cctools_base + ".list")).exists()) {
+		Log.i(TAG, "TOOLCHAIN VERSION " + toolsVersion + " (" + getPrefString("base_version") + ")");
+		
+		if (!getPrefString("base_version").contentEquals(toolsVersion)) {
+			if ((new File(toolchainDir + "/installed/" + cctools_base + ".list")).exists()) {
+				removeFilesByList(cctools_base);
+				new File(filesDir + "/" + cctools_base).delete();
+			}
 			if (!downloadAndUnpack(cctools_base, downloadPath, toolchainDir, null, null)) {
 				return;
 			}
+			setPrefString("base_version", toolsVersion);
 		}
 		
-		if (!(new File(toolchainDir + "/installed/" + cctools_sdk + ".list")).exists()) {
+		if (!getPrefString("sdk_version").contentEquals(toolsVersion)) {
+			if ((new File(toolchainDir + "/installed/" + cctools_sdk + ".list")).exists()) {
+				removeFilesByList(cctools_sdk);
+				new File(filesDir + "/" + cctools_sdk).delete();
+			}
 			if (!downloadAndUnpack(cctools_sdk, downloadPath, toolchainDir, null, null)) {
 				return;
 			}
+			setPrefString("sdk_version", toolsVersion);
 		}
 		
 		// Common support files
 		String cctools_common = "platform-common.zip";
-		if (!(new File(toolchainDir + "/installed/" + cctools_common + ".list")).exists()) {
+		if (!getPrefString("common_version").contentEquals(toolsVersion)) {
+			if ((new File(toolchainDir + "/installed/" + cctools_common + ".list")).exists()) {
+				removeFilesByList(cctools_common);
+				new File(filesDir + "/" + cctools_common).delete();
+			}
 			if (!downloadAndUnpack(cctools_common, downloadPath, toolchainDir, null, null)) {
 				return;
 			}
+			setPrefString("common_version", toolsVersion);
 		}
 
 		// Examples
