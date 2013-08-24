@@ -1,17 +1,8 @@
 #!/bin/bash
 
-binutils_version="2.23"
-gcc_version="4.8"
-gmp_version="5.0.5"
-mpc_version="1.0.1"
-mpfr_version="3.1.1"
-cloog_version="0.18.0"
-isl_version="0.11.1"
-ppl_version="1.0"
-
 ncurses_version=5.9
 nano_version=2.2.6
-busybox_version=1.21.1
+busybox_version=1.20.2
 emacs_version=24.2
 
 TARGET_INST_DIR="/data/data/com.pdaxrom.cctools/root/cctools"
@@ -1256,7 +1247,7 @@ build_git() {
 
 build_binutils_avr_host() {
     PKG=binutils
-    PKG_VERSION=$binutils_version
+    PKG_VERSION=2.22
     PKG_DESC="Binary utilities supporting Atmel's AVR targets"
     O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
@@ -1291,7 +1282,7 @@ build_binutils_avr_host() {
 
 build_binutils_avr() {
     PKG=binutils
-    PKG_VERSION=$binutils_version
+    PKG_VERSION=2.22
     PKG_DESC="Binary utilities supporting Atmel's AVR targets"
     O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
@@ -1350,7 +1341,7 @@ build_binutils_avr() {
 
 build_gmp_host() {
     PKG=gmp
-    PKG_VERSION=$gmp_version
+    PKG_VERSION=5.0.5
     PKG_DESC="Multiprecision arithmetic library."
     O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.bz2
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
@@ -1364,13 +1355,10 @@ build_gmp_host() {
 
     tar jxf $O_FILE -C $src_dir || error "tar jxf $O_FILE"
 
-    cd $S_DIR
-    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
-
     mkdir -p $B_DIR
     cd $B_DIR
 
-    $S_DIR/configure --prefix=${TARGET_DIR}-host --enable-cxx --disable-werror --enable-static --disable-shared || error "configure"
+    $S_DIR/configure --prefix=${TARGET_DIR}-host --disable-werror --enable-static --disable-shared || error "configure"
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
@@ -1382,7 +1370,7 @@ build_gmp_host() {
 
 build_gmp() {
     PKG=gmp
-    PKG_VERSION=$gmp_version
+    PKG_VERSION=5.0.5
     PKG_DESC="Multiprecision arithmetic library."
     O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.bz2
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
@@ -1399,7 +1387,7 @@ build_gmp() {
     mkdir -p $B_DIR
     cd $B_DIR
 
-    $S_DIR/configure --target=$TARGET_ARCH --host=$TARGET_ARCH --prefix=$TMPINST_DIR --enable-cxx --disable-werror --enable-static --disable-shared || error "configure"
+    $S_DIR/configure --target=$TARGET_ARCH --host=$TARGET_ARCH --prefix=$TMPINST_DIR --disable-werror --enable-static --disable-shared || error "configure"
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
@@ -1421,7 +1409,7 @@ build_gmp() {
 
 build_mpfr_host() {
     PKG=mpfr
-    PKG_VERSION=$mpfr_version
+    PKG_VERSION=2.4.2
     PKG_DESC="Multiple precision floating-point computation."
     O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.bz2
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
@@ -1453,7 +1441,7 @@ build_mpfr_host() {
 
 build_mpfr() {
     PKG=mpfr
-    PKG_VERSION=$mpfr_version
+    PKG_VERSION=2.4.2
     PKG_DESC="Multiple precision floating-point computation."
     O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.bz2
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
@@ -1495,7 +1483,7 @@ build_mpfr() {
 
 build_mpc_host() {
     PKG=mpc
-    PKG_VERSION=$mpc_version
+    PKG_VERSION=0.8.1
     PKG_DESC="multiple precision complex floating-point library"
     O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.gz
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
@@ -1527,7 +1515,7 @@ build_mpc_host() {
 
 build_mpc() {
     PKG=mpc
-    PKG_VERSION=$mpc_version
+    PKG_VERSION=0.8.1
     PKG_DESC="multiple precision complex floating-point library"
     O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.gz
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
@@ -1567,231 +1555,9 @@ build_mpc() {
     s_tag $PKG
 }
 
-build_isl_host() {
-    PKG=isl
-    PKG_VERSION=$isl_version
-    PKG_DESC="manipulating sets and relations of integer points bounded by linear constraints"
-    O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.bz2
-    S_DIR=$src_dir/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/host-${PKG}
-
-    c_tag ${PKG}-host && return
-
-    echo "build $PKG"
-
-    pushd .
-
-    tar jxf $O_FILE -C $src_dir || error "tar zxf $O_FILE"
-
-#    cd $S_DIR
-#    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
-
-    mkdir -p $B_DIR
-    cd $B_DIR
-
-    $S_DIR/configure --prefix=${TARGET_DIR}-host --with-gmp-prefix=${TARGET_DIR}-host --disable-werror --enable-static --disable-shared || error "configure"
-
-    $MAKE $MAKEARGS || error "make $MAKEARGS"
-
-    $MAKE install || error "make install"
-
-    popd
-    s_tag ${PKG}-host
-}
-
-build_isl() {
-    PKG=isl
-    PKG_VERSION=$isl_version
-    PKG_DESC="manipulating sets and relations of integer points bounded by linear constraints"
-    O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.gz
-    S_DIR=$src_dir/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/$PKG
-
-    c_tag $PKG && return
-
-    echo "build $PKG"
-
-    pushd .
-
-#    tar zxf $O_FILE -C $src_dir || error "tar zxf $O_FILE"
-
-#    cd $S_DIR
-#    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
-
-    mkdir -p $B_DIR
-    cd $B_DIR
-
-    $S_DIR/configure --target=$TARGET_ARCH --host=$TARGET_ARCH --prefix=$TMPINST_DIR --with-gmp-prefix=$TMPINST_DIR --disable-werror --enable-static --disable-shared || error "configure"
-
-    $MAKE $MAKEARGS || error "make $MAKEARGS"
-
-    $MAKE install || error "make install"
-
-    $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
-
-    rm -rf ${TMPINST_DIR}/${PKG}/cctools/share
-    rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/*.la
-
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC"
-    cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ../$filename cctools pkgdesc
-
-    popd
-    s_tag $PKG
-}
-
-build_ppl_host() {
-    PKG=ppl
-    PKG_VERSION=$ppl_version
-    PKG_DESC="Parma Polyhedra library"
-    O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.bz2
-    S_DIR=$src_dir/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/host-${PKG}
-
-    c_tag ${PKG}-host && return
-
-    echo "build $PKG"
-
-    pushd .
-
-    tar jxf $O_FILE -C $src_dir || error "tar zxf $O_FILE"
-
-#    cd $S_DIR
-#    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
-
-    mkdir -p $B_DIR
-    cd $B_DIR
-
-    $S_DIR/configure --prefix=${TARGET_DIR}-host --with-gmp=${TARGET_DIR}-host --disable-werror --enable-static --disable-shared || error "configure"
-
-    $MAKE $MAKEARGS || error "make $MAKEARGS"
-
-    $MAKE install || error "make install"
-
-    popd
-    s_tag ${PKG}-host
-}
-
-build_ppl() {
-    PKG=ppl
-    PKG_VERSION=$ppl_version
-    PKG_DESC="Parma Polyhedra library"
-    O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.gz
-    S_DIR=$src_dir/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/$PKG
-
-    c_tag $PKG && return
-
-    echo "build $PKG"
-
-    pushd .
-
-#    tar zxf $O_FILE -C $src_dir || error "tar zxf $O_FILE"
-
-#    cd $S_DIR
-#    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
-
-    mkdir -p $B_DIR
-    cd $B_DIR
-
-    $S_DIR/configure --target=$TARGET_ARCH --host=$TARGET_ARCH --prefix=$TMPINST_DIR --with-gmp=$TMPINST_DIR --disable-werror --enable-static --disable-shared || error "configure"
-
-    $MAKE $MAKEARGS || error "make $MAKEARGS"
-
-    $MAKE install || error "make install"
-
-    $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
-
-    rm -rf ${TMPINST_DIR}/${PKG}/cctools/share
-    rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/*.la
-
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC"
-    cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ../$filename cctools pkgdesc
-
-    popd
-    s_tag $PKG
-}
-
-build_cloog_host() {
-    PKG=cloog
-    PKG_VERSION=$cloog_version
-    PKG_DESC="Chunky Loop Generator"
-    O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.gz
-    S_DIR=$src_dir/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/host-${PKG}
-
-    c_tag ${PKG}-host && return
-
-    echo "build $PKG"
-
-    pushd .
-
-    tar zxf $O_FILE -C $src_dir || error "tar zxf $O_FILE"
-
-#    cd $S_DIR
-#    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
-
-    mkdir -p $B_DIR
-    cd $B_DIR
-
-    $S_DIR/configure --prefix=${TARGET_DIR}-host --with-gmp-prefix=${TARGET_DIR}-host --with-isl-prefix=${TARGET_DIR}-host --disable-werror --enable-static --disable-shared || error "configure"
-
-    $MAKE $MAKEARGS || error "make $MAKEARGS"
-
-    $MAKE install || error "make install"
-
-    popd
-    s_tag ${PKG}-host
-}
-
-build_cloog() {
-    PKG=cloog
-    PKG_VERSION=$cloog_version
-    PKG_DESC="Chunky Loop Generator"
-    O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.gz
-    S_DIR=$src_dir/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/$PKG
-
-    c_tag $PKG && return
-
-    echo "build $PKG"
-
-    pushd .
-
-#    tar zxf $O_FILE -C $src_dir || error "tar zxf $O_FILE"
-
-#    cd $S_DIR
-#    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
-
-    mkdir -p $B_DIR
-    cd $B_DIR
-
-    $S_DIR/configure --target=$TARGET_ARCH --host=$TARGET_ARCH --prefix=$TMPINST_DIR --with-gmp-prefix=$TMPINST_DIR --with-isl-prefix=$TMPINST_DIR --disable-werror --enable-static --disable-shared || error "configure"
-
-    $MAKE $MAKEARGS || error "make $MAKEARGS"
-
-    $MAKE install || error "make install"
-
-    $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
-
-    rm -rf ${TMPINST_DIR}/${PKG}/cctools/share
-    rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/*.la
-
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC"
-    cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ../$filename cctools pkgdesc
-
-    popd
-    s_tag $PKG
-}
-
 build_gcc_avr_host() {
     PKG=gcc
-    PKG_VERSION=$gcc_version
+    PKG_VERSION=4.7
     PKG_DESC="The GNU C compiler (cross compiler for avr)"
     O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
@@ -1824,11 +1590,11 @@ build_gcc_avr_host() {
 	--disable-libssp \
 	--disable-nls \
 	--disable-shared \
-	--with-binutils-version=$binutils_version \
-	--with-mpfr-version=$mpfr_version \
-	--with-mpc-version=$mpc_version \
-	--with-gmp-version=$gmp_version \
-	--with-gcc-version=$gcc_version \
+	--with-binutils-version=2.22 \
+	--with-mpfr-version=2.4.2 \
+	--with-mpc-version=0.8.1 \
+	--with-gmp-version=5.0.5 \
+	--with-gcc-version=4.7 \
 	--disable-bootstrap \
 	--disable-libquadmath \
 	--disable-plugin \
@@ -1844,7 +1610,7 @@ build_gcc_avr_host() {
 
 build_gcc_avr() {
     PKG=gcc
-    PKG_VERSION=$gcc_version
+    PKG_VERSION=4.7
     PKG_DESC="The GNU C compiler (cross compiler for avr)"
     O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
@@ -1879,11 +1645,11 @@ build_gcc_avr() {
 	--disable-libssp \
 	--disable-nls \
 	--disable-shared \
-	--with-binutils-version=$binutils_version \
-	--with-mpfr-version=$mpfr_version \
-	--with-mpc-version=$mpc_version \
-	--with-gmp-version=$gmp_version \
-	--with-gcc-version=$gcc_version \
+	--with-binutils-version=2.22 \
+	--with-mpfr-version=2.4.2 \
+	--with-mpc-version=0.8.1 \
+	--with-gmp-version=5.0.5 \
+	--with-gcc-version=4.7 \
 	--disable-bootstrap \
 	--disable-libquadmath \
 	--disable-plugin \
@@ -1898,12 +1664,12 @@ build_gcc_avr() {
     rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/libiberty.a
 
     ln -sf avr-g++ ${TMPINST_DIR}/${PKG}/cctools/bin/avr-c++
-    ln -sf avr-gcc ${TMPINST_DIR}/${PKG}/cctools/bin/avr-gcc-${PKG_VERSION}
+    ln -sf avr-gcc ${TMPINST_DIR}/${PKG}/cctools/bin/avr-gcc-4.7
     ln -sf avr-gcc ${TMPINST_DIR}/${PKG}/cctools/bin/avr-cc
 
     $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/bin/*
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/avr/${PKG_VERSION}/*
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/avr/${PKG_VERSION}/install-tools/*
+    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/avr/4.7/*
+    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/avr/4.7/install-tools/*
 
     local filename="${PKG}-avr_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-avr $PKG_VERSION $PKG_ARCH "$PKG_DESC"
@@ -1962,13 +1728,13 @@ build_avr_libc() {
 
 build_fortran_host() {
     PKG=gcc
-    PKG_VERSION=$gcc_version
+    PKG_VERSION=4.7
     PKG_DESC="The GNU C compiler (cross compiler for avr)"
     O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
     B_DIR=$build_dir/host-${PKG}-fortran
 
-    c_tag ${PKG}-host-fortran && return
+    c_tag ${PKG}-host && return
 
     echo "build $PKG"
 
@@ -1992,32 +1758,21 @@ build_fortran_host() {
     arm*)
 	EXTRA_CONF="--with-arch=armv5te --with-float=soft --with-fpu=vfp"
 	;;
-    *86*)
-	EXTRA_CONF="--disable-libquadmath-support"
-	;;
     *)
 	;;
     esac
 
     $S_DIR/configure \
 	--target=$TARGET_ARCH \
-	--host=x86_64-linux-gnu \
 	--prefix=${TARGET_DIR}-host \
-	--build=x86_64-linux-gnu \
-	--with-gnu-as \
-	--with-gnu-ld \
 	--enable-languages=fortran \
 	--with-gmp=${TARGET_DIR}-host \
 	--with-mpfr=${TARGET_DIR}-host \
 	--with-mpc=${TARGET_DIR}-host \
-	--with-cloog=${TARGET_DIR}-host \
-	--with-isl=${TARGET_DIR}-host \
-	--with-ppl=${TARGET_DIR}-host \
-	--disable-ppl-version-check \
-	--disable-cloog-version-check \
-	--disable-isl-version-check \
-	--enable-cloog-backend=isl \
-	--with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
+	--with-gnu-as \
+	--with-gnu-ld \
+	--without-ppl \
+	--without-cloog \
 	--disable-libssp \
 	--enable-threads \
 	--disable-nls \
@@ -2030,21 +1785,17 @@ build_fortran_host() {
 	--disable-libitm \
 	--enable-initfini-array \
 	--disable-nls \
-	--with-binutils-version=$binutils_version \
-	--with-mpfr-version=$mpfr_version \
-	--with-mpc-version=$mpc_version \
-	--with-gmp-version=$gmp_version \
-	--with-gcc-version=$gcc_version \
+	--with-binutils-version=2.22 \
+	--with-mpfr-version=2.4.2 \
+	--with-mpc-version=0.8.1 \
+	--with-gmp-version=5.0.5 \
+	--with-gcc-version=4.7 \
 	--disable-bootstrap \
 	--disable-libquadmath \
-	--enable-plugins \
-	--enable-libgomp \
-	--disable-libsanitizer \
-	--enable-graphite=yes \
-	--with-cloog-version=$cloog_version \
-	--with-isl-version=$isl_version \
-	--with-sysroot=$SYSROOT \
+	--disable-libquadmath-support \
+	--disable-plugin \
 	$EXTRA_CONF \
+	--with-sysroot=$SYSROOT \
 	|| error "configure"
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
@@ -2053,17 +1804,13 @@ build_fortran_host() {
 
     ln -sf ${SYSROOT}/../${TARGET_ARCH}/bin ${TARGET_DIR}-host/${TARGET_ARCH}/bin
 
-    rm -f ${TARGET_DIR}-host/bin/${TARGET_ARCH}-cpp*
-    rm -f ${TARGET_DIR}-host/bin/${TARGET_ARCH}-gcc*
-    rm -f ${TARGET_DIR}-host/bin/${TARGET_ARCH}-gcov*
-
     popd
-    s_tag ${PKG}-host-fortran
+    s_tag ${PKG}-host
 }
 
 build_fortran() {
     PKG=gfortran
-    PKG_VERSION=4.8
+    PKG_VERSION=4.7
     PKG_DESC="The GNU fortran compiler"
     O_DIR=$SRC_PREFIX/gcc/gcc-${PKG_VERSION}
     S_DIR=$src_dir/gcc-${PKG_VERSION}
@@ -2093,9 +1840,6 @@ build_fortran() {
     arm*)
 	EXTRA_CONF="--with-arch=armv5te --with-float=soft --with-fpu=vfp"
 	;;
-    *86*)
-	EXTRA_CONF="--disable-libquadmath-support"
-	;;
     *)
 	;;
     esac
@@ -2103,22 +1847,14 @@ build_fortran() {
     $S_DIR/configure \
 	--target=$TARGET_ARCH \
 	--host=$TARGET_ARCH \
-	--prefix=${TARGET_DIR} \
-	--build=x86_64-linux-gnu \
+	--prefix=$TARGET_DIR \
 	--with-gnu-as \
 	--with-gnu-ld \
 	--enable-languages=fortran \
-	--with-gmp=${TMPINST_DIR} \
-	--with-mpfr=${TMPINST_DIR} \
-	--with-mpc=${TMPINST_DIR} \
-	--with-cloog=${TMPINST_DIR} \
-	--with-isl=${TMPINST_DIR} \
-	--with-ppl=${TMPINST_DIR} \
-	--disable-ppl-version-check \
-	--disable-cloog-version-check \
-	--disable-isl-version-check \
-	--enable-cloog-backend=isl \
-	--with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
+	--with-gmp=$TMPINST_DIR \
+	--with-mpfr=$TMPINST_DIR \
+	--without-ppl \
+	--without-cloog \
 	--disable-libssp \
 	--enable-threads \
 	--disable-nls \
@@ -2131,21 +1867,16 @@ build_fortran() {
 	--disable-libitm \
 	--enable-initfini-array \
 	--disable-nls \
-	--prefix=${TARGET_DIR} \
-	--with-binutils-version=$binutils_version \
-	--with-mpfr-version=$mpfr_version \
-	--with-mpc-version=$mpc_version \
-	--with-gmp-version=$gmp_version \
-	--with-gcc-version=$gcc_version \
+	--with-binutils-version=2.22 \
+	--with-mpfr-version=2.4.2 \
+	--with-mpc-version=0.8.1 \
+	--with-gmp-version=5.0.5 \
+	--with-gcc-version=4.7 \
 	--disable-bootstrap \
 	--disable-libquadmath \
-	--enable-plugins \
-	--enable-libgomp \
-	--disable-libsanitizer \
-	--enable-graphite=yes \
-	--with-cloog-version=$cloog_version \
-	--with-isl-version=$isl_version \
-	--with-sysroot=$SYSROOT \
+	--disable-libquadmath-support \
+	--disable-plugin \
+	--with-sysroot=$SYSROOT_DIR \
 	$EXTRA_CONF \
 	|| error "configure"
 
@@ -2157,27 +1888,30 @@ build_fortran() {
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/include
 
     for f in bin/gcc-nm bin/*-gcc-ar bin/*-gfortran bin/*-gcc bin/gcc-ar bin/*-gcc-nm \
-	bin/*-ranlib bin/gcc bin/cpp bin/*-gcc-${PKG_VERSION} bin/gcc-ranlib bin/gcov; do
+	bin/*-ranlib bin/gcc bin/cpp bin/*-gcc-4.7 bin/gcc-ranlib bin/gcov; do
 	rm -f ${TMPINST_DIR}/${PKG}/cctools/${f}
     done
 
     find ${TMPINST_DIR}/${PKG}/cctools/lib -name "*.la" | xargs rm -f
     rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/libiberty.a
 
-    find ${TMPINST_DIR}/${PKG}/cctools/lib -name "crtbegin*" -or -name "crtend*" | xargs rm -f
-    find ${TMPINST_DIR}/${PKG}/cctools -name "libatomic.*" -or -name "libgomp.*" | xargs rm -f
-    find ${TMPINST_DIR}/${PKG}/cctools -name "libgcc.*" -or -name "libgcov.*" | xargs rm -f
+    mv ${TMPINST_DIR}/${PKG}/cctools/lib/gcc ${TMPINST_DIR}/${PKG}/cctools/
+
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/gcc/${TARGET_ARCH}/${PKG_VERSION}/include
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/gcc/${TARGET_ARCH}/${PKG_VERSION}/include-fixed
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/gcc/${TARGET_ARCH}/${PKG_VERSION}/install-tools
+
+    find ${TMPINST_DIR}/${PKG}/cctools/gcc/${TARGET_ARCH}/${PKG_VERSION} -name "*.o" | xargs rm -f
+    find ${TMPINST_DIR}/${PKG}/cctools/gcc/${TARGET_ARCH}/${PKG_VERSION} -name "libgcc.*" | xargs rm -f
+    find ${TMPINST_DIR}/${PKG}/cctools/gcc/${TARGET_ARCH}/${PKG_VERSION} -name "libgcov.*" | xargs rm -f
+
+    cp -a ${TMPINST_DIR}/${PKG}/cctools/lib/* ${TMPINST_DIR}/${PKG}/cctools/gcc/${TARGET_ARCH}/${PKG_VERSION}/
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/*
+
+    mv ${TMPINST_DIR}/${PKG}/cctools/gcc ${TMPINST_DIR}/${PKG}/cctools/lib/
 
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/${TARGET_ARCH}/${PKG_VERSION}/install-tools
-    rm -rf ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/${TARGET_ARCH}/${PKG_VERSION}/plugin
-
-    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/include
-    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/include-fixed
-    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/install-tools
-    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/plugin
-
-    for f in cc1  collect2  liblto_plugin.la  liblto_plugin.so  liblto_plugin.so.0 \
-             liblto_plugin.so.0.0.0  lto1  lto-wrapper plugin/gengtype; do
+    for f in cc1  collect2  liblto_plugin.la  liblto_plugin.so  liblto_plugin.so.0  liblto_plugin.so.0.0.0  lto1  lto-wrapper; do
 	rm -f ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/${TARGET_ARCH}/${PKG_VERSION}/${f}
     done
 
@@ -2303,12 +2037,6 @@ build_mpfr_host
 build_mpfr
 build_mpc_host
 build_mpc
-build_isl_host
-build_isl
-build_ppl_host
-build_ppl
-build_cloog_host
-build_cloog
 build_gcc_avr_host
 build_gcc_avr
 build_avr_libc
