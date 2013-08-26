@@ -134,7 +134,11 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 
         if (!(new File(sdCardDir)).exists()) {
         	(new File(sdCardDir)).mkdir();
+        }
+        if (!(new File(tmpDir)).exists()) {
         	(new File(tmpDir)).mkdir();
+        }
+        if (!(new File(filesDir)).exists()) {
         	(new File(filesDir)).mkdir();
         }
         
