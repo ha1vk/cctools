@@ -433,11 +433,14 @@ public class CodeEditor extends EditText {
 	    		mSyntax = new LuaSyntax();
 	    	} else if (ext.contentEquals(".java")) {
 	    		mSyntax = new JavaSyntax();
-	    	} else if (ext.contentEquals(".f") || ext.contentEquals(".f90") || ext.contentEquals(".f95")) {
+	    	} else if (ext.contentEquals(".f") || ext.contentEquals(".f90") ||
+	    			   ext.contentEquals(".f95") || ext.contentEquals(".f03")) {
 	    		mSyntax = new FortranSyntax();
-	    	} else if (ext.contentEquals(".s") || ext.contentEquals(".S") || ext.contentEquals(".asm")) {
+	    	} else if (ext.contentEquals(".s") || ext.contentEquals(".S") ||
+	    			   ext.contentEquals(".asm")) {
 	    		mSyntax = new AsmSyntax();
-	    	} else if (ext.contentEquals(".c") || ext.contentEquals(".cpp") || ext.contentEquals(".c++") ||
+	    	} else if (ext.contentEquals(".c") || ext.contentEquals(".cpp") ||
+	    			   ext.contentEquals(".c++") ||
 				ext.contentEquals(".h") || ext.contentEquals(".hpp") || ext.contentEquals(".h++")) {
 				mSyntax = new CSyntax();
 	    	}
