@@ -129,8 +129,9 @@ public class BuildActivity extends Activity {
             		if (forceBuild) {
             			cmdline += " " + mPrefs.getString("force_cxxopts", "");
             		}
-            	} else if ((new File(cctoolsDir + "/bin/f77")).exists() &&
-        				(ext.contentEquals(".f") || ext.contentEquals(".f90") || ext.contentEquals(".f95"))) {
+            	} else if ((ext.contentEquals(".f") || ext.contentEquals(".f90") ||
+            				ext.contentEquals(".f95") || ext.contentEquals(".f03")) &&
+            			(new File(cctoolsDir + "/bin/f77")).exists()) {
             		cmdline = "f77 " + infile;
             		if (forceBuild) {
             			cmdline += " " + mPrefs.getString("force_ccopts", "");
