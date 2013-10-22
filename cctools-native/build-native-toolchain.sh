@@ -23,7 +23,7 @@ if [ "x$SYSROOT_DIR" = "x" ]; then
 fi
 
 if [ "x$MAKEARGS" = "x" ]; then
-    MAKEARGS=-j4
+    MAKEARGS=-j9
 fi
 
 TOPDIR="$PWD"
