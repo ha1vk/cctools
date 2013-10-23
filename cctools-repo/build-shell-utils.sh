@@ -9,6 +9,7 @@ cloog_version="0.18.0"
 isl_version="0.11.1"
 ppl_version="1.0"
 
+make_version="3.82"
 ncurses_version=5.9
 nano_version=2.2.6
 busybox_version=1.21.1
@@ -26,6 +27,8 @@ WORK_DIR="$3"
 
 SYSROOT="$4"
 
+NDK_DIR="$5"
+
 if [ "x$SRC_PREFIX" = "x" ]; then
     echo "No source dir"
     exit 1
@@ -42,8 +45,12 @@ else
     work_dir="$WORK_DIR"
 fi
 
+if [ "x$NDK_DIR" = "x" ]; then
+    NDK_DIR=/opt/android-ndk
+fi
+
 if [ "x$MAKEARGS" = "x" ]; then
-    MAKEARGS=-j4
+    MAKEARGS=-j9
 fi
 
 TOPDIR="$PWD"
@@ -1254,6 +1261,64 @@ build_git() {
     s_tag $PKG
 }
 
+build_binutils() {
+    PKG=binutils
+    PKG_VERSION=$binutils_version
+    PKG_DESC="GNU assembler, linker and binary utilities"
+    O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
+    S_DIR=$src_dir/${PKG}-${PKG_VERSION}
+    B_DIR=$build_dir/binutils
+
+    c_tag $PKG && return
+
+    echo "build $PKG"
+
+    pushd .
+
+    copysrc $O_DIR $S_DIR
+
+    cd $S_DIR
+    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
+
+    mkdir -p $B_DIR
+    cd $B_DIR
+
+    $S_DIR/configure \
+	--target=$TARGET_ARCH \
+	--host=$TARGET_ARCH \
+	--prefix=$TARGET_DIR \
+	--with-sysroot=$SYSROOT \
+	--disable-werror || error "configure"
+
+
+    $MAKE $MAKEARGS || error "make $MAKEARGS"
+
+    $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
+
+    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/bin/*
+
+    ln -sf ld ${TMPINST_DIR}/${PKG}/cctools/bin/ld.bfd
+    #cd ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/bin
+    #for f in * ; do
+    #	ln -sf ../../bin/$f $f
+    #done
+
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/bin
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/include
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/share
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/libbfd.*a
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/libiberty.a
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/libopcodes.*a
+
+    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    cd ${TMPINST_DIR}/${PKG}
+    zip -r9y ../$filename cctools pkgdesc
+
+    popd
+    s_tag $PKG
+}
+
 build_binutils_avr_host() {
     PKG=binutils
     PKG_VERSION=$binutils_version
@@ -1268,10 +1333,10 @@ build_binutils_avr_host() {
 
     pushd .
 
-    copysrc $O_DIR $S_DIR
+#    copysrc $O_DIR $S_DIR
 
-    cd $S_DIR
-    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
+#    cd $S_DIR
+#    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
 
     mkdir -p $B_DIR
     cd $B_DIR
@@ -1789,6 +1854,193 @@ build_cloog() {
     s_tag $PKG
 }
 
+build_gcc() {
+    PKG=gcc
+    PKG_VERSION=$gcc_version
+    PKG_DESC="The GNU C compiler"
+    O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
+    S_DIR=$src_dir/${PKG}-${PKG_VERSION}
+    B_DIR=$build_dir/${PKG}
+
+    c_tag $PKG && return
+
+    echo "build $PKG"
+
+    pushd .
+
+    copysrc $O_DIR $S_DIR
+
+    cd $S_DIR
+    patch -p1 < $patch_dir/gcc-$gcc_version.patch || error "patch"
+
+    mkdir -p $B_DIR
+    cd $B_DIR
+
+    local EXTRA_CONF=
+    case $TARGET_ARCH in
+    mips*)
+	EXTRA_CONF="--with-arch=mips32 --disable-threads --disable-fixed-point"
+	;;
+    arm*)
+	EXTRA_CONF="--with-arch=armv5te --with-float=soft --with-fpu=vfp"
+	;;
+    *)
+	;;
+    esac
+
+#    ac_cv_func_getc_unlocked=no \
+#    ac_cv_func_getchar_unlocked=no \
+#    ac_cv_func_putc_unlocked=no \
+#    ac_cv_func_putchar_unlocked=no \
+#    ac_cv_func_getc_unlocked=no \
+#    ac_cv_func_getchar_unlocked=no \
+#    ac_cv_func_putc_unlocked=no \
+#    ac_cv_func_putchar_unlocked=no
+
+    $S_DIR/configure \
+	--target=$TARGET_ARCH \
+	--host=$TARGET_ARCH \
+	--prefix=$TARGET_DIR \
+	--build=x86_64-linux-gnu \
+	--with-gnu-as \
+	--with-gnu-ld \
+	--enable-languages=c,c++ \
+	--with-gmp=$TMPINST_DIR \
+	--with-mpfr=$TMPINST_DIR \
+	--with-mpc=$TMPINST_DIR \
+	--with-cloog=$TMPINST_DIR \
+	--with-isl=$TMPINST_DIR \
+	--with-ppl=$TMPINST_DIR \
+	--disable-ppl-version-check \
+	--disable-cloog-version-check \
+	--disable-isl-version-check \
+	--enable-cloog-backend=isl \
+	--with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
+	--disable-libssp \
+	--enable-threads \
+	--disable-nls \
+	--disable-libmudflap \
+	--disable-libgomp \
+	--disable-libstdc__-v3 \
+	--disable-sjlj-exceptions \
+	--disable-shared \
+	--disable-tls \
+	--disable-libitm \
+	--enable-initfini-array \
+	--disable-nls \
+	--prefix=$TARGET_DIR \
+	--with-binutils-version=$binutils_version \
+	--with-mpfr-version=$mpfr_version \
+	--with-mpc-version=$mpc_version \
+	--with-gmp-version=$gmp_version \
+	--with-gcc-version=$gcc_version \
+	--disable-bootstrap \
+	--disable-libquadmath \
+	--enable-plugins \
+	--enable-libgomp \
+	--disable-libsanitizer \
+	--enable-graphite=yes \
+	--with-cloog-version=$cloog_version \
+	--with-isl-version=$isl_version \
+	--with-sysroot=$SYSROOT \
+	$EXTRA_CONF \
+	|| error "configure"
+
+#	--with-gdb-version=6.6
+
+    $MAKE $MAKEARGS || error "make $MAKEARGS"
+
+    $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
+
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gcc-ar
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gcc-nm
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gcc-ranlib
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-c++
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-g++
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gcc
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gcc-$gcc_version
+
+    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/bin/*
+    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/cc1
+    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/cc1plus
+    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/collect2
+    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/lto-wrapper
+    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/lto1
+    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/install-tools/fixincl
+    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/liblto_plugin.so.0.0.0
+    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/plugin/gengtype
+
+    ln -sf g++ ${TMPINST_DIR}/${PKG}/cctools/bin/c++
+    ln -sf gcc ${TMPINST_DIR}/${PKG}/cctools/bin/cc
+
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/info
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/man
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/share
+
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/libiberty.a
+
+    local filename="${PKG}-avr_${PKG_VERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-avr $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    cd ${TMPINST_DIR}/${PKG}
+    zip -r9y ../$filename cctools pkgdesc
+
+    popd
+    s_tag $PKG
+}
+
+build_cxxstl() {
+    PKG=cxxstl
+    PKG_VERSION=$gcc_version
+    PKG_DESC="GNU libstdc++-v3 C++ Standard Template Library implementation"
+
+    c_tag $PKG && return
+
+    local src_dir="${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/$gcc_version"
+    local inc_dir="${TMPINST_DIR}/${PKG}/cctools/include/c++/$gcc_version"
+
+    copysrc $src_dir/include $inc_dir
+    case $TARGET_ARCH in
+    mips*)
+	copysrc $src_dir/libs/mips/include/bits $inc_dir/$TARGET_ARCH/bits
+	$INSTALL -D -m 644 $src_dir/libs/mips/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libgnustl_shared.so
+	$INSTALL -D -m 644 $src_dir/libs/mips/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libstdc++.a
+	$INSTALL -D -m 644 $src_dir/libs/mips/libsupc++.a         ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libsupc++.a
+	;;
+    arm*)
+	copysrc $src_dir/libs/armeabi/include/bits $inc_dir/$TARGET_ARCH/bits
+	$INSTALL -D -m 644 $src_dir/libs/armeabi/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libgnustl_shared.so
+	$INSTALL -D -m 644 $src_dir/libs/armeabi/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libstdc++.a
+	$INSTALL -D -m 644 $src_dir/libs/armeabi/libsupc++.a         ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libsupc++.a
+
+	copysrc $src_dir/libs/armeabi/include/bits $inc_dir/$TARGET_ARCH/thumb/bits
+	$INSTALL -D -m 644 $src_dir/libs/armeabi/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/thumb/libgnustl_shared.so
+	$INSTALL -D -m 644 $src_dir/libs/armeabi/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/thumb/libstdc++.a
+	$INSTALL -D -m 644 $src_dir/libs/armeabi/libsupc++.a         ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/thumb/libsupc++.a
+
+	copysrc $src_dir/libs/armeabi-v7a/include/bits $inc_dir/$TARGET_ARCH/armv7-a/bits
+	$INSTALL -D -m 644 $src_dir/libs/armeabi-v7a/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/armv7-a/libgnustl_shared.so
+	$INSTALL -D -m 644 $src_dir/libs/armeabi-v7a/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/armv7-a/libstdc++.a
+	$INSTALL -D -m 644 $src_dir/libs/armeabi-v7a/libsupc++.a         ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/armv7-a/libsupc++.a
+	;;
+    i*86*)
+	copysrc $src_dir/libs/x86/include/bits $inc_dir/$TARGET_ARCH/bits
+	$INSTALL -D -m 644 $src_dir/libs/x86/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libgnustl_shared.so
+	$INSTALL -D -m 644 $src_dir/libs/x86/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libstdc++.a
+	$INSTALL -D -m 644 $src_dir/libs/x86/libsupc++.a         ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libsupc++.a
+	;;
+    *)
+	error "unknown arch!"
+	;;
+    esac
+
+    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    cd ${TMPINST_DIR}/${PKG}
+    zip -r9y ../$filename cctools pkgdesc
+
+    s_tag $PKG
+}
+
 build_gcc_avr_host() {
     PKG=gcc
     PKG_VERSION=$gcc_version
@@ -1803,10 +2055,10 @@ build_gcc_avr_host() {
 
     pushd .
 
-    copysrc $O_DIR $S_DIR
+#    copysrc $O_DIR $S_DIR
 
-    cd $S_DIR
-    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
+#    cd $S_DIR
+#    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
 
     mkdir -p $B_DIR
     cd $B_DIR
@@ -2067,7 +2319,7 @@ build_fortran() {
     PKG_DESC="The GNU fortran compiler"
     O_DIR=$SRC_PREFIX/gcc/gcc-${PKG_VERSION}
     S_DIR=$src_dir/gcc-${PKG_VERSION}
-    B_DIR=$build_dir/$PKG
+    B_DIR=$build_dir/${PKG}
 
     c_tag ${PKG} && return
 
@@ -2213,6 +2465,46 @@ build_fortran_examples() {
     s_tag ${PKG}
 }
 
+build_make() {
+    PKG=make
+    PKG_URL="http://ftp.gnu.org/gnu/make/make-$make_version.tar.bz2"
+    PKG_DESC="An utility for Directing compilation."
+    O_FILE=$SRC_PREFIX/make/make-$make_version.tar.bz2
+    S_DIR=$src_dir/make-$make_version
+    B_DIR=$build_dir/make
+
+    c_tag $PKG && return
+
+    echo "build $PKG"
+
+    pushd .
+    mkdir -p $SRC_PREFIX/make
+    test -e $O_FILE || wget $PKG_URL -O $O_FILE || error "download $PKG_URL"
+
+    tar jxf $O_FILE -C $src_dir || error "tar jxf $O_FILE"
+
+    mkdir -p $B_DIR
+    cd $B_DIR
+
+    CFLAGS="-g -O2 -DNO_ARCHIVES" $S_DIR/configure --target=$TARGET_ARCH --host=$TARGET_ARCH --prefix=$TARGET_DIR --disable-werror || error "configure"
+
+    $MAKE $MAKEARGS || error "make $MAKEARGS"
+
+    $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
+
+    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/bin/*
+
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/share
+
+    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    cd ${TMPINST_DIR}/${PKG}
+    zip -r9y ../$filename cctools pkgdesc
+
+    popd
+    s_tag $PKG
+}
+
 build_netcat_gnu() {
     PKG=netcat
     PKG_VERSION=0.7.1
@@ -2277,6 +2569,27 @@ build_netcat() {
 }
 
 makedirs
+
+build_gmp_host
+build_gmp
+build_mpfr_host
+build_mpfr
+build_mpc_host
+build_mpc
+build_isl_host
+build_isl
+build_ppl_host
+build_ppl
+build_cloog_host
+build_cloog
+
+# CCTools native tools moved from bundle
+build_binutils
+build_gcc
+build_cxxstl
+build_make
+
+#
 build_ncurses
 build_busybox
 build_htop
@@ -2297,18 +2610,6 @@ build_dropbear
 #build_emacs
 build_binutils_avr_host
 build_binutils_avr
-build_gmp_host
-build_gmp
-build_mpfr_host
-build_mpfr
-build_mpc_host
-build_mpc
-build_isl_host
-build_isl
-build_ppl_host
-build_ppl
-build_cloog_host
-build_cloog
 build_gcc_avr_host
 build_gcc_avr
 build_avr_libc

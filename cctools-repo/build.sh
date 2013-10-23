@@ -1,7 +1,7 @@
 #!/bin/bash
 
 WRKDIR=$PWD/tmp
-NDKDIR=/home/opt/android-ndk-r9
+NDKDIR=/opt/android-ndk
 NDKSRC=/home/sash/Work/android/ndk-source
 
 for d in binutils gcc gmp mpc mpfr cloog isl ppl; do
