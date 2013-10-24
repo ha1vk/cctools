@@ -8,10 +8,6 @@ for d in binutils gcc gmp mpc mpfr cloog isl ppl llvm-3.3; do
     ln -sf ${NDKSRC}/${d} src/
 done
 
-for f in ../cctools-native/patches/*; do
-    ln -sf ../${f} patches/
-done
-
 export PATH=${WRKDIR}/arm-android/bin:${WRKDIR}/mips-android/bin:${WRKDIR}/x86-android/bin:/opt/CodeSourcery/bin:$PATH
 
 ${NDKDIR}/build/tools/make-standalone-toolchain.sh --arch=arm --install-dir=${WRKDIR}/arm-android --toolchain=arm-linux-androideabi-4.8
