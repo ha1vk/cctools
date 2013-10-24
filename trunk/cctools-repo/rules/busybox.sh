@@ -7,7 +7,9 @@ build_busybox() {
     S_DIR=$src_dir/busybox-$busybox_version
     B_DIR=$build_dir/busybox
     c_tag $PKG && return
-    echo "build $PKG"
+
+    banner "Build $PKG"
+
     pushd .
     mkdir -p $SRC_PREFIX/busybox
     test -e $O_FILE || wget $PKG_URL -O $O_FILE || error "download $PKG_URL"

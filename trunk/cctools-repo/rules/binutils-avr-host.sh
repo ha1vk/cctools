@@ -1,6 +1,6 @@
 build_binutils_avr_host() {
     PKG=binutils
-    PKG_VERSION=$binutils_version
+    PKG_VERSION=$binutils_avr_version
     PKG_DESC="Binary utilities supporting Atmel's AVR targets"
     O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
@@ -8,9 +8,11 @@ build_binutils_avr_host() {
 
     c_tag ${PKG}-host-avr && return
 
-    echo "build $PKG"
+    banner "Build $PKG avr host"
 
     pushd .
+
+    preparesrc $O_DIR $S_DIR
 
 #    copysrc $O_DIR $S_DIR
 

@@ -1,6 +1,6 @@
 build_gcc_avr() {
     PKG=gcc-avr
-    PKG_VERSION=$gcc_version
+    PKG_VERSION=$gcc_avr_version
     PKG_DESC="The GNU C compiler (cross compiler for avr)"
     O_DIR=$SRC_PREFIX/gcc/gcc-${PKG_VERSION}
     S_DIR=$src_dir/gcc-${PKG_VERSION}
@@ -8,7 +8,7 @@ build_gcc_avr() {
 
     c_tag ${PKG} && return
 
-    echo "build $PKG"
+    banner "Build $PKG"
 
     pushd .
 

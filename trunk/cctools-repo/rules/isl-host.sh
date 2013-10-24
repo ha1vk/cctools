@@ -8,7 +8,7 @@ build_isl_host() {
 
     c_tag ${PKG}-host && return
 
-    echo "build $PKG"
+    banner "Build $PKG host"
 
     pushd .
 

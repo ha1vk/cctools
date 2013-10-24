@@ -4,6 +4,8 @@ build_fortran_examples() {
     PKG_DESC="Few fortran examples"
     c_tag ${PKG} && return
 
+    banner "Build fortran examples"
+
     mkdir -p ${TMPINST_DIR}/${PKG}/cctools/Examples
     cp -a ${TOPDIR}/examples/fortran ${TMPINST_DIR}/${PKG}/cctools/Examples
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/Examples/$PKG/.svn

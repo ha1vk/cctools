@@ -5,6 +5,8 @@ build_cxxstl() {
 
     c_tag $PKG && return
 
+    banner "Build cxxstl"
+
     local src_dir="${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/$gcc_version"
     local inc_dir="${TMPINST_DIR}/${PKG}/cctools/include/c++/$gcc_version"
 

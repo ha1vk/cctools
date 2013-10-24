@@ -8,7 +8,7 @@ build_binutils() {
 
     c_tag $PKG && return
 
-    echo "build $PKG"
+    banner "Build $PKG"
 
     pushd .
 
