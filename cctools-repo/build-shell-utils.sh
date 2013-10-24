@@ -2591,11 +2591,10 @@ build_gcc
 build_cxxstl
 build_make
 
-#
+# Clang
 build_llvm
-exit 0
 
-#
+# Addons
 build_ncurses
 build_busybox
 build_htop
