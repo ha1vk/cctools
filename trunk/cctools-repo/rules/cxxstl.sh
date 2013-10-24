@@ -1,0 +1,52 @@
+build_cxxstl() {
+    PKG=cxxstl
+    PKG_VERSION=$gcc_version
+    PKG_DESC="GNU libstdc++-v3 C++ Standard Template Library implementation"
+
+    c_tag $PKG && return
+
+    local src_dir="${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/$gcc_version"
+    local inc_dir="${TMPINST_DIR}/${PKG}/cctools/include/c++/$gcc_version"
+
+    copysrc $src_dir/include $inc_dir
+    case $TARGET_ARCH in
+    mips*)
+	copysrc $src_dir/libs/mips/include/bits $inc_dir/$TARGET_ARCH/bits
+	$INSTALL -D -m 644 $src_dir/libs/mips/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libgnustl_shared.so
+	$INSTALL -D -m 644 $src_dir/libs/mips/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libstdc++.a
+	$INSTALL -D -m 644 $src_dir/libs/mips/libsupc++.a         ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libsupc++.a
+	;;
+    arm*)
+	copysrc $src_dir/libs/armeabi/include/bits $inc_dir/$TARGET_ARCH/bits
+	$INSTALL -D -m 644 $src_dir/libs/armeabi/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libgnustl_shared.so
+	$INSTALL -D -m 644 $src_dir/libs/armeabi/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libstdc++.a
+	$INSTALL -D -m 644 $src_dir/libs/armeabi/libsupc++.a         ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libsupc++.a
+
+	copysrc $src_dir/libs/armeabi/include/bits $inc_dir/$TARGET_ARCH/thumb/bits
+	$INSTALL -D -m 644 $src_dir/libs/armeabi/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/thumb/libgnustl_shared.so
+	$INSTALL -D -m 644 $src_dir/libs/armeabi/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/thumb/libstdc++.a
+	$INSTALL -D -m 644 $src_dir/libs/armeabi/libsupc++.a         ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/thumb/libsupc++.a
+
+	copysrc $src_dir/libs/armeabi-v7a/include/bits $inc_dir/$TARGET_ARCH/armv7-a/bits
+	$INSTALL -D -m 644 $src_dir/libs/armeabi-v7a/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/armv7-a/libgnustl_shared.so
+	$INSTALL -D -m 644 $src_dir/libs/armeabi-v7a/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/armv7-a/libstdc++.a
+	$INSTALL -D -m 644 $src_dir/libs/armeabi-v7a/libsupc++.a         ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/armv7-a/libsupc++.a
+	;;
+    i*86*)
+	copysrc $src_dir/libs/x86/include/bits $inc_dir/$TARGET_ARCH/bits
+	$INSTALL -D -m 644 $src_dir/libs/x86/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libgnustl_shared.so
+	$INSTALL -D -m 644 $src_dir/libs/x86/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libstdc++.a
+	$INSTALL -D -m 644 $src_dir/libs/x86/libsupc++.a         ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libsupc++.a
+	;;
+    *)
+	error "unknown arch!"
+	;;
+    esac
+
+    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    cd ${TMPINST_DIR}/${PKG}
+    zip -r9y ../$filename cctools pkgdesc
+
+    s_tag $PKG
+}
