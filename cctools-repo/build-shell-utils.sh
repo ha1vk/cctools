@@ -2568,6 +2568,8 @@ build_netcat() {
     s_tag ${PKG}
 }
 
+. rules/llvm.sh
+
 makedirs
 
 build_gmp_host
@@ -2588,6 +2590,10 @@ build_binutils
 build_gcc
 build_cxxstl
 build_make
+
+#
+build_llvm
+exit 0
 
 #
 build_ncurses

@@ -4,7 +4,7 @@ WRKDIR=$PWD/tmp
 NDKDIR=/opt/android-ndk
 NDKSRC=/home/sash/Work/android/ndk-source
 
-for d in binutils gcc gmp mpc mpfr cloog isl ppl; do
+for d in binutils gcc gmp mpc mpfr cloog isl ppl llvm-3.3; do
     ln -sf ${NDKSRC}/${d} src/
 done
 
