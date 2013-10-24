@@ -8,7 +8,7 @@ build_make() {
 
     c_tag $PKG && return
 
-    echo "build $PKG"
+    banner "Build $PKG"
 
     pushd .
     mkdir -p $SRC_PREFIX/make

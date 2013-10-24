@@ -4,6 +4,8 @@ build_netcat() {
     PKG_DESC="Netcat is a featured networking utility which reads and writes data across network connections, using the TCP/IP protocol."
     c_tag ${PKG} && return
 
+    banner "Build $PKG"
+
     mkdir -p ${TMPINST_DIR}/${PKG}/cctools/bin
 
     ${TARGET_ARCH}-gcc ${SRC_PREFIX}/nc/netcat.c -s -o ${TMPINST_DIR}/${PKG}/cctools/bin/netcat || error "compilation"

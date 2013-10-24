@@ -8,7 +8,7 @@ build_fortran_host() {
 
     c_tag ${PKG}-host-fortran && return
 
-    echo "build $PKG"
+    banner "Build $PKG host"
 
     pushd .
 

@@ -8,7 +8,9 @@ build_dropbear() {
     S_DIR=$src_dir/dropbear-$dropbear_version
     B_DIR=$build_dir/dropbear
     c_tag $PKG && return
-    echo "build $PKG"
+
+    banner "Build $PKG"
+
     pushd .
     mkdir -p $SRC_PREFIX/dropbear
     test -e $O_FILE || wget $PKG_URL -O $O_FILE || error "download $PKG_URL"

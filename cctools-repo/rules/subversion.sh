@@ -7,7 +7,9 @@ build_subversion() {
     S_DIR=$src_dir/$PKG-$PKG_VERSION
     B_DIR=$build_dir/$PKG
     c_tag $PKG && return
-    echo "build $PKG"
+
+    banner "Build $PKG"
+
     pushd .
     mkdir -p $SRC_PREFIX/$PKG
     test -e $O_FILE || wget $PKG_URL -O $O_FILE || error "download $PKG_URL"

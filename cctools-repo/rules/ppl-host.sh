@@ -8,7 +8,7 @@ build_ppl_host() {
 
     c_tag ${PKG}-host && return
 
-    echo "build $PKG"
+    banner "Build $PKG host"
 
     pushd .
 

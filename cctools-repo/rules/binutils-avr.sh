@@ -1,6 +1,6 @@
 build_binutils_avr() {
     PKG=binutils-avr
-    PKG_VERSION=$binutils_version
+    PKG_VERSION=$binutils_avr_version
     PKG_DESC="Binary utilities supporting Atmel's AVR targets"
     O_DIR=$SRC_PREFIX/binutils/binutils-${PKG_VERSION}
     S_DIR=$src_dir/binutils-${PKG_VERSION}
@@ -8,7 +8,7 @@ build_binutils_avr() {
 
     c_tag ${PKG} && return
 
-    echo "build $PKG"
+    banner "Build $PKG"
 
     pushd .
 

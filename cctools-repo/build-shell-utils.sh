@@ -10,10 +10,13 @@ isl_version="0.11.1"
 ppl_version="1.0"
 
 make_version="3.82"
-ncurses_version=5.9
-nano_version=2.2.6
-busybox_version=1.21.1
-emacs_version=24.2
+ncurses_version="5.9"
+nano_version="2.2.6"
+busybox_version="1.21.1"
+emacs_version="24.2"
+
+binutils_avr_version="2.22"
+gcc_avr_version="4.8"
 
 TARGET_INST_DIR="/data/data/com.pdaxrom.cctools/root/cctools"
 #TARGET_INST_DIR="/data/data/com.pdaxrom.cctools/cache/cctools"
@@ -105,8 +108,23 @@ echo "Target arch: $TARGET_ARCH"
 echo "Host   arch: $HOST_ARCH"
 echo "Build  arch: $BUILD_ARCH"
 
+banner() {
+    echo
+    echo "*********************************************************************************"
+    echo "$1"
+    echo
+    if [ "$TERM" = "xterm-color" -o "$TERM" = "xterm" ]; then
+	echo -ne "\033]0;${1}\007"
+    fi
+}
+
+trap "banner ''" 2
+
 error() {
+    echo
+    echo "*********************************************************************************"
     echo "Error: $@"
+    echo
     exit 1
 }
 
@@ -126,6 +144,16 @@ c_tag() {
 copysrc() {
     mkdir -p $2
     tar -C "$1" -c . | tar -C $2 -xv || error "copysrc $1 $2"
+}
+
+preparesrc() {
+    if [ ! -d $2 ]; then
+	pushd .
+	copysrc $1 $2
+	cd $2
+	patch -p1 < $patch_dir/`basename $2`.patch
+	popd
+    fi
 }
 
 #

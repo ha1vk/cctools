@@ -1,6 +1,6 @@
 build_gcc_avr_host() {
     PKG=gcc
-    PKG_VERSION=$gcc_version
+    PKG_VERSION=$gcc_avr_version
     PKG_DESC="The GNU C compiler (cross compiler for avr)"
     O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
@@ -8,9 +8,11 @@ build_gcc_avr_host() {
 
     c_tag ${PKG}-avr-host && return
 
-    echo "build $PKG"
+    banner "Build $PKG avr host"
 
     pushd .
+
+    preparesrc $O_DIR $S_DIR
 
 #    copysrc $O_DIR $S_DIR
 
