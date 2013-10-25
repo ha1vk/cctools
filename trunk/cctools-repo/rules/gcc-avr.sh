@@ -61,6 +61,8 @@ build_gcc_avr() {
     $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/avr/${PKG_VERSION}/*
     $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/avr/${PKG_VERSION}/install-tools/*
 
+    find ${TMPINST_DIR}/${PKG}/cctools/lib -type f -name "*.a" -exec avr-strip --strip-debug '{}' \;
+
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
