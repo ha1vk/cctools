@@ -39,6 +39,11 @@ build_llvm() {
 	;;
     esac
 
+    #
+    # enable all android architectures
+    #
+    CLANG_TARGET="arm,mips,x86"
+
     EXTRA_CONFIG_FLAGS=
 
     ac_cv_func_mmap_fixed_mapped=yes \
@@ -97,6 +102,28 @@ build_llvm() {
 #!/system/bin/sh
 
 ln -s ${TARGET_ARCH} \${CCTOOLSDIR}/sysroot
+
+if [ ! -f \${CCTOOLSDIR}/bin/cc ]; then
+    echo "#!/system/bin/sh" > \${CCTOOLSDIR}/bin/cc
+    echo "exec \${CCTOOLSDIR}/bin/clang -integrated-as \\\$@" >> \${CCTOOLSDIR}/bin/cc
+
+    chmod 755 \${CCTOOLSDIR}/bin/cc
+fi
+
+if [ ! -f \${CCTOOLSDIR}/bin/c++ ]; then
+    echo "#!/system/bin/sh" > \${CCTOOLSDIR}/bin/c++
+    echo "exec \${CCTOOLSDIR}/bin/clang++ -integrated-as \\\$@" >> \${CCTOOLSDIR}/bin/c++
+
+    chmod 755 \${CCTOOLSDIR}/bin/c++
+fi
+
+if [ ! -f \${CCTOOLSDIR}/bin/gcc ]; then
+    ln -s cc \${CCTOOLSDIR}/bin/gcc
+fi
+
+if [ ! -f \${CCTOOLSDIR}/bin/g++ ]; then
+    ln -s c++ \${CCTOOLSDIR}/bin/g++
+fi
 
 EOF
 
