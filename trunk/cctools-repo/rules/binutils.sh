@@ -30,7 +30,9 @@ build_binutils() {
 	--disable-nls \
 	--disable-static \
 	--enable-shared \
-	--disable-werror || error "configure"
+	--disable-werror \
+	LDFLAGS="-Wl,-rpath-link,${SYSROOT}/usr/lib" \
+	|| error "configure"
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
