@@ -24,6 +24,7 @@ build_binutils_avr() {
 	--target=avr \
 	--host=$TARGET_ARCH \
 	--prefix=$TARGET_DIR \
+	--disable-nls \
 	--disable-werror || error "configure"
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
