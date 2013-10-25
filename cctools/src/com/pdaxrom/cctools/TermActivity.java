@@ -138,6 +138,7 @@ public class TermActivity extends Activity {
 				"ANDROID_ROOT=/system",
 				"BOOTCLASSPATH=/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar",
 				"TERM=xterm",
+				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
 				"CCTOOLSDIR=" + cctoolsDir,
 				"CCTOOLSRES=" + getPackageResourcePath()
 				};
