@@ -17,7 +17,7 @@ nano_version="2.2.6"
 busybox_version="1.21.1"
 emacs_version="24.2"
 
-binutils_avr_version="2.22"
+binutils_avr_version="2.23"
 gcc_avr_version="4.8"
 
 TARGET_INST_DIR="/data/data/com.pdaxrom.cctools/root/cctools"
