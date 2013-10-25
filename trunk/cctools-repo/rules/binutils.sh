@@ -25,7 +25,11 @@ build_binutils() {
 	--prefix=$TARGET_DIR \
 	--target=$TARGET_ARCH \
 	--with-sysroot=$SYSROOT \
+	--enable-targets=arm-linux-androideabi,mipsel-linux-android,i686-linux-android \
+	--enable-multilib \
 	--disable-nls \
+	--disable-static \
+	--enable-shared \
 	--disable-werror || error "configure"
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
@@ -33,6 +37,7 @@ build_binutils() {
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 
     $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/bin/*
+    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/lib/*.so
 
     ln -sf ld ${TMPINST_DIR}/${PKG}/cctools/bin/ld.bfd
 
