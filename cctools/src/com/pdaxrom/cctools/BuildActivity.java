@@ -361,6 +361,7 @@ public class BuildActivity extends Activity {
     					"BOOTCLASSPATH=/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar",
     					"CCTOOLSDIR=" + getCacheDir().getParentFile().getAbsolutePath() + "/root" + "/cctools",
     					"CCTOOLSRES=" + getPackageResourcePath(),
+    					"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
     					"TMPEXEDIR=" + tmpExeDir,
     					"PS1=''"
     					};
@@ -396,6 +397,8 @@ public class BuildActivity extends Activity {
         					String errstr = null;
         					try {
         						errstr = procout.readLine();
+        						// remove escape sequence
+        						errstr = errstr.replaceAll("\u001b\\[([0-9]|;)*m", "");
         						// remove clearing new line
         						Matcher m = patClearNewLine.matcher(errstr);
         						if (m.find()) {
