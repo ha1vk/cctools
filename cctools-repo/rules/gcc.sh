@@ -134,7 +134,7 @@ build_gcc() {
     s_tag $PKG
 
     PKG=libgcc-standalone
-    PKG_DESC="The libgcc and support files. Normally you don't need this for gcc package, but required for alternative compilers such as clang."
+    PKG_DESC="The libgcc and support files to use without gcc package. Normally you don't need it, but required for alternative compilers such as clang."
 
     copysrc ${OLDPKGPATH}/lib/gcc ${TMPINST_DIR}/${PKG}/cctools/lib/gcc
 
