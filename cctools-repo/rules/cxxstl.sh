@@ -8,7 +8,7 @@ build_cxxstl() {
     banner "Build cxxstl"
 
     local src_dir="${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/$gcc_version"
-    local inc_dir="${TMPINST_DIR}/${PKG}/cctools/include/c++/$gcc_version"
+    local inc_dir="${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/$gcc_version"
 
     copysrc $src_dir/include $inc_dir
     case $TARGET_ARCH in
@@ -24,15 +24,22 @@ build_cxxstl() {
 	$INSTALL -D -m 644 $src_dir/libs/armeabi/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libstdc++.a
 	$INSTALL -D -m 644 $src_dir/libs/armeabi/libsupc++.a         ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libsupc++.a
 
-	copysrc $src_dir/libs/armeabi/include/bits $inc_dir/$TARGET_ARCH/thumb/bits
-	$INSTALL -D -m 644 $src_dir/libs/armeabi/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/thumb/libgnustl_shared.so
-	$INSTALL -D -m 644 $src_dir/libs/armeabi/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/thumb/libstdc++.a
-	$INSTALL -D -m 644 $src_dir/libs/armeabi/libsupc++.a         ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/thumb/libsupc++.a
+	mkdir -p $inc_dir/$TARGET_ARCH/thumb
+	ln -sf ../bits $inc_dir/$TARGET_ARCH/thumb/bits
+	$INSTALL -D -m 644 $src_dir/libs/armeabi/thumb/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/thumb/libgnustl_shared.so
+	$INSTALL -D -m 644 $src_dir/libs/armeabi/thumb/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/thumb/libstdc++.a
+	$INSTALL -D -m 644 $src_dir/libs/armeabi/thumb/libsupc++.a         ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/thumb/libsupc++.a
 
 	copysrc $src_dir/libs/armeabi-v7a/include/bits $inc_dir/$TARGET_ARCH/armv7-a/bits
 	$INSTALL -D -m 644 $src_dir/libs/armeabi-v7a/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/armv7-a/libgnustl_shared.so
 	$INSTALL -D -m 644 $src_dir/libs/armeabi-v7a/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/armv7-a/libstdc++.a
 	$INSTALL -D -m 644 $src_dir/libs/armeabi-v7a/libsupc++.a         ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/armv7-a/libsupc++.a
+
+	mkdir -p $inc_dir/$TARGET_ARCH/armv7-a/thumb
+	ln -sf ../bits $inc_dir/$TARGET_ARCH/armv7-a/thumb/bits
+	$INSTALL -D -m 644 $src_dir/libs/armeabi-v7a/thumb/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/armv7-a/thumb/libgnustl_shared.so
+	$INSTALL -D -m 644 $src_dir/libs/armeabi-v7a/thumb/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/armv7-a/thumb/libstdc++.a
+	$INSTALL -D -m 644 $src_dir/libs/armeabi-v7a/thumb/libsupc++.a         ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/armv7-a/thumb/libsupc++.a
 	;;
     i*86*)
 	copysrc $src_dir/libs/x86/include/bits $inc_dir/$TARGET_ARCH/bits
