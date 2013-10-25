@@ -128,6 +128,24 @@ build_gcc() {
     cd ${TMPINST_DIR}/${PKG}
     zip -r9y ../$filename cctools pkgdesc
 
+    local OLDPKGPATH=${TMPINST_DIR}/${PKG}/cctools/
+
     popd
     s_tag $PKG
+
+    PKG=libgcc-standalone
+    PKG_DESC="The libgcc and support files. Normally you don't need this for gcc package, but required for alternative compilers such as clang."
+
+    copysrc ${OLDPKGPATH}/lib/gcc ${TMPINST_DIR}/${PKG}/cctools/lib/gcc
+
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/finclude
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/include
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/include-fixed
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/install-tools
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/plugin
+
+    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    cd ${TMPINST_DIR}/${PKG}
+    zip -r9y ../$filename cctools pkgdesc
 }
