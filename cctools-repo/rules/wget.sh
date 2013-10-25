@@ -59,13 +59,6 @@ build_wget() {
     ./configure --host=$TARGET_ARCH --prefix=$TARGET_INST_DIR \
 	--with-ssl=openssl --with-libssl-prefix=${TMPINST_DIR} || error "configure"
 
-    case $TARGET_ARCH in
-    i*86*|x86*)
-	s_tag $PKG
-	return
-	;;
-    esac
-
     $MAKE $MAKEARGS || error "make"
 
     #$MAKE install || error "make install"
