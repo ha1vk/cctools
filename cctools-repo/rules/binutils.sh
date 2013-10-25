@@ -21,12 +21,12 @@ build_binutils() {
     cd $B_DIR
 
     $S_DIR/configure \
-	--target=$TARGET_ARCH \
 	--host=$TARGET_ARCH \
 	--prefix=$TARGET_DIR \
+	--target=$TARGET_ARCH \
 	--with-sysroot=$SYSROOT \
+	--disable-nls \
 	--disable-werror || error "configure"
-
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
@@ -35,10 +35,6 @@ build_binutils() {
     $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/bin/*
 
     ln -sf ld ${TMPINST_DIR}/${PKG}/cctools/bin/ld.bfd
-    #cd ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/bin
-    #for f in * ; do
-    #	ln -sf ../../bin/$f $f
-    #done
 
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/bin
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/include

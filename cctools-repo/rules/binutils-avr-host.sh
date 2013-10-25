@@ -25,6 +25,7 @@ build_binutils_avr_host() {
     $S_DIR/configure \
 	--target=avr \
 	--prefix=${TARGET_DIR}-host \
+	--disable-nls \
 	--disable-werror || error "configure"
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
