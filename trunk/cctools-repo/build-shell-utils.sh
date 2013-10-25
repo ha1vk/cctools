@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ndk_version="r9"
+
 binutils_version="2.23"
 gcc_version="4.8"
 gmp_version="5.0.5"
@@ -166,12 +168,14 @@ build_package_desc() {
     local vers=$4
     local arch=$5
     local desc=$6
+    local unpacked_size=`du -sb ${1}/cctools | cut -f1`
 cat >$1/pkgdesc << EOF
     <package>
 	<name>$name</name>
 	<version>$vers</version>
 	<arch>$arch</arch>
 	<description>$desc</description>
+	<unpackedsize>$unpacked_size</unpackedsize>
 	<size>@SIZE@</size>
 	<file>$filename</file>
     </package>
@@ -219,6 +223,8 @@ build_binutils
 build_gcc
 build_cxxstl
 build_make
+build_ndk_misc
+build_ndk_sysroot
 
 # Clang
 build_llvm
