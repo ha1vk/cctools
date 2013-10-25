@@ -90,14 +90,13 @@ build_llvm() {
     ln -sf clang ${TMPINST_DIR}/${PKG}/cctools/bin/clang++
     cp -Rf ${LLVMROOTDIR}/lib/clang ${TMPINST_DIR}/${PKG}/cctools/lib/
 
+    cp -f ${LLVMROOTDIR}/lib/libprofile_rt.a  ${TMPINST_DIR}/${PKG}/cctools/lib/
+    cp -f ${LLVMROOTDIR}/lib/libprofile_rt.so ${TMPINST_DIR}/${PKG}/cctools/lib/
+
     cat >> ${TMPINST_DIR}/${PKG}/postinst << EOF
 #!/system/bin/sh
 
-mkdir -p \${CCTOOLSDIR}/sysroot
-mkdir -p \${CCTOOLSDIR}/sysroot/usr
-ln -s    ../${TARGET_ARCH}/lib     \${CCTOOLSDIR}/sysroot/lib
-ln -s ../../${TARGET_ARCH}/lib     \${CCTOOLSDIR}/sysroot/usr/lib
-ln -s ../../${TARGET_ARCH}/include \${CCTOOLSDIR}/sysroot/usr/include
+ln -s ${TARGET_ARCH} \${CCTOOLSDIR}/sysroot
 
 EOF
 
