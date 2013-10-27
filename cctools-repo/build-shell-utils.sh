@@ -133,6 +133,7 @@ error() {
 makedirs() {
     mkdir -p $src_dir
     mkdir -p $work_dir/tags
+    mkdir -p ${TMPINST_DIR}/libso
 }
 
 s_tag() {
@@ -158,6 +159,102 @@ preparesrc() {
     fi
 }
 
+download() {
+    if [ ! -e $2 ]; then
+	mkdir -p `dirname $2`
+	echo "Downloading..."
+	wget $1 -O $2 || error "download $PKG_URL"
+    fi
+}
+
+unpack() {
+    local cmd=
+
+    echo "Unpacking..."
+
+    case $2 in
+    *.tar.gz|*.tgz)
+	cmd="tar zxf $2 -C $1"
+	;;
+    *.tar.bz2| *.tbz)
+	cmd="tar jxf $2 -C $1"
+	;;
+    *.tar.xz)
+	cmd="tar Jxf $2 -C $1"
+	;;
+    *)
+	error "Unknown archive type."
+	;;
+    esac
+
+    $cmd || error "Corrupted archive $2."
+}
+
+patchsrc() {
+    if [ -f $patch_dir/${2}-${3}.patch ]; then
+	pushd .
+	cd $1
+	patch -p1 < $patch_dir/${2}-${3}.patch || error "Correpted patch file."
+	popd
+    fi
+}
+
+#
+# find deps
+#
+
+get_pkg_libso_list() {
+    local f
+    find $1 -type f -name "*.so" -o -name "*.so.*" | while read f; do
+	if readelf -h $f 2>/dev/null | grep -q "DYN"; then
+	    echo -n "`basename ${f}` "
+	fi
+    done
+}
+
+get_pkg_exec_list() {
+    local f
+    find $1 -type f -executable | while read f; do
+	if readelf -h $f 2>/dev/null | grep -q "EXEC"; then
+	    echo $f
+	fi
+    done
+}
+
+get_libso_list() {
+    strings $1 | grep "^lib.*so*"
+}
+
+get_pkg_external_libso() {
+    local exes=`get_pkg_exec_list $1`
+    ( for f in $exes; do
+	get_libso_list $f
+    done ) | sort | uniq
+}
+
+get_dep_packages() {
+    #echo "Package $1"
+    local f
+    for f in `get_pkg_external_libso $2`; do
+	local d
+	for d in ${TMPINST_DIR}/libso/*.txt; do
+	    if grep -q $f $d; then
+		local p=`cat $d | cut -f1 -d:`
+		if [ "$p" != "$1" ]; then
+		    echo $p
+		fi
+	    fi
+	done
+    done
+}
+
+get_pkg_deps() {
+    local list=`get_pkg_libso_list $2 | sort`
+    echo "$1: $list" > ${TMPINST_DIR}/libso/$1.txt
+    local pkgs=`get_dep_packages $1 $2 | sort | uniq`
+    echo $pkgs
+}
+
 #
 # build_package_desc <path> <filename> <name> <version> <arch> <description>
 #
@@ -168,16 +265,24 @@ build_package_desc() {
     local vers=$4
     local arch=$5
     local desc=$6
+
     local unpacked_size=`du -sb ${1}/cctools | cut -f1`
+
+    local deps="`get_pkg_deps $name $1`"
+    if [ "x$7" != "x" ]; then
+	deps="$deps $7"
+    fi
+
 cat >$1/pkgdesc << EOF
     <package>
 	<name>$name</name>
 	<version>$vers</version>
 	<arch>$arch</arch>
 	<description>$desc</description>
-	<unpackedsize>$unpacked_size</unpackedsize>
-	<size>@SIZE@</size>
+	<depends>$deps</depends>
+	<size>$unpacked_size</size>
 	<file>$filename</file>
+	<filesize>@SIZE@</filesize>
     </package>
 EOF
 
@@ -205,6 +310,7 @@ done
 
 makedirs
 
+# Toolchain support libs
 build_gmp_host
 build_gmp
 build_mpfr_host
@@ -231,6 +337,13 @@ build_llvm
 
 # Addons
 build_ncurses
+build_libiconv
+#build_libffi
+#build_gettext
+build_glib_host
+build_glib
+#build_slang
+build_mc
 build_busybox
 build_htop
 build_luajit
