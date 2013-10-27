@@ -333,6 +333,7 @@ build_cxxstl
 build_make
 build_ndk_misc
 build_ndk_sysroot
+build_cctools_examples
 
 # Clang
 build_llvm
