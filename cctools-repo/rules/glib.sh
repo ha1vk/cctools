@@ -35,6 +35,24 @@ build_glib() {
 	ac_cv_func_posix_getpwuid_r=no
 	ac_cv_func_posix_getgrgid_r=no"
 	;;
+    mips*)
+	CONF_ARGS="
+        glib_cv_stack_grows=no
+	glib_cv_uscore=no
+	ac_cv_func_nonposix_getpwuid_r=no
+	ac_cv_func_nonposix_getgrgid_r=no
+	ac_cv_func_posix_getpwuid_r=no
+	ac_cv_func_posix_getgrgid_r=no"
+	;;
+    i*86*)
+	CONF_ARGS="
+        glib_cv_stack_grows=no
+	glib_cv_uscore=no
+	ac_cv_func_nonposix_getpwuid_r=no
+	ac_cv_func_nonposix_getgrgid_r=no
+	ac_cv_func_posix_getpwuid_r=no
+	ac_cv_func_posix_getgrgid_r=no"
+	;;
     esac
 
     eval $CONF_ARGS \
