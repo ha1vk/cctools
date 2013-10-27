@@ -237,12 +237,15 @@ get_dep_packages() {
     local f
     for f in `get_pkg_external_libso $2`; do
 	local d
-	for d in ${TMPINST_DIR}/libso/*.txt; do
+	for d in ${TMPINST_DIR}/libso/${1}.txt ${TMPINST_DIR}/libso/*.txt; do
 	    if grep -q $f $d; then
 		local p=`cat $d | cut -f1 -d:`
-		if [ "$p" != "$1" ]; then
+		if [ "$p" = "$1" ]; then
+		    break
+		else
 		    if [[ ! "$p" =~ ^ndk-sysroot ]]; then
 			echo $p
+			break
 		    fi
 		fi
 	    fi
@@ -272,7 +275,11 @@ build_package_desc() {
 
     local deps="`get_pkg_deps $name $1`"
     if [ "x$7" != "x" ]; then
-	deps="$deps $7"
+	if [ "x$deps" = "x" ]; then
+	    deps="$7"
+	else
+	    deps="$deps $7"
+	fi
     fi
 
 cat >$1/pkgdesc << EOF
@@ -373,3 +380,10 @@ build_fortran_host
 build_fortran
 build_fortran_examples
 build_netcat
+
+# presets
+
+build_build_essential_clang
+build_build_essential_gcc
+build_build_essential_fortran
+build_build_essential_gcc_avr
