@@ -1,7 +1,7 @@
 build_ndk_sysroot() {
     PKG=ndk-sysroot
     PKG_VERSION=$ndk_version
-    PKG_DESC="NDK sysroot files"
+    PKG_DESC="NDK sysroot libraries and headers"
 
     c_tag $PKG && return
 
