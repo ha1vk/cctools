@@ -47,12 +47,12 @@ build_ndk_sysroot() {
 	    if [ -d $a/usr/lib ]; then
 		banner "Build ndk sysroot $arch $vers"
 
-		mkdir ${TMPINST_DIR}/${PKG}-${y}-${vers}/cctools/$x
+		mkdir -p ${TMPINST_DIR}/${PKG}-${y}-${vers}/cctools/$x
 		copysrc $PWD/$a/usr/include ${TMPINST_DIR}/${PKG}-${y}-${vers}/cctools/$x/include
 		copysrc $PWD/$a/usr/lib     ${TMPINST_DIR}/${PKG}-${y}-${vers}/cctools/$x/lib
 		rm -f ${TMPINST_DIR}/${PKG}-${y}-${vers}/cctools/$x/lib/libstdc++*
 
-		mkdir ${TMPINST_DIR}/${PKG}-${y}-${vers}/cctools/$x/usr
+		mkdir -p ${TMPINST_DIR}/${PKG}-${y}-${vers}/cctools/$x/usr
 		ln -sf ../include ${TMPINST_DIR}/${PKG}-${y}-${vers}/cctools/$x/usr/include
 		ln -sf ../lib     ${TMPINST_DIR}/${PKG}-${y}-${vers}/cctools/$x/usr/lib
 		pushd .
