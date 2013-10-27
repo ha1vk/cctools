@@ -123,20 +123,20 @@ build_gcc() {
 
     rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/libiberty.a
 
+    copysrc ${TMPINST_DIR}/${PKG}/cctools/lib/gcc ${TMPINST_DIR}/libgcc-dev/cctools/lib/gcc
+    find ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/ -name "*.o"  -exec rm -f {} \;
+    find ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/ -name "*.a"  -exec rm -f {} \;
+
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "libgcc-dev"
     cd ${TMPINST_DIR}/${PKG}
     zip -r9y ../$filename cctools pkgdesc
-
-    local OLDPKGPATH=${TMPINST_DIR}/${PKG}/cctools/
 
     popd
     s_tag $PKG
 
-    PKG=libgcc-standalone
-    PKG_DESC="The libgcc and support files to use without gcc package. Normally you don't need it, but required for alternative compilers such as clang."
-
-    copysrc ${OLDPKGPATH}/lib/gcc ${TMPINST_DIR}/${PKG}/cctools/lib/gcc
+    PKG=libgcc-dev
+    PKG_DESC="GCC support library (development files)"
 
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/finclude
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/include
