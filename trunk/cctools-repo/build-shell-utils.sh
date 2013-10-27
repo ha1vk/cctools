@@ -206,7 +206,7 @@ patchsrc() {
 get_pkg_libso_list() {
     local f
     find $1 -type f -name "*.so" -o -name "*.so.*" | while read f; do
-	if readelf -h $f 2>/dev/null | grep -q "DYN"; then
+	if ${TARGET_ARCH}-readelf -h $f 2>/dev/null | grep -q "DYN"; then
 	    echo -n "`basename ${f}` "
 	fi
     done
@@ -215,7 +215,7 @@ get_pkg_libso_list() {
 get_pkg_exec_list() {
     local f
     find $1 -type f -executable | while read f; do
-	if readelf -h $f 2>/dev/null | grep -q "EXEC"; then
+	if ${TARGET_ARCH}-readelf -h $f &>/dev/null; then
 	    echo $f
 	fi
     done
