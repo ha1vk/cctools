@@ -222,7 +222,7 @@ get_pkg_exec_list() {
 }
 
 get_libso_list() {
-    strings $1 | grep "^lib.*so*"
+    ${TARGET_ARCH}-objdump -x $1 | awk '/NEEDED/ { print $2 }'
 }
 
 get_pkg_external_libso() {
@@ -241,7 +241,9 @@ get_dep_packages() {
 	    if grep -q $f $d; then
 		local p=`cat $d | cut -f1 -d:`
 		if [ "$p" != "$1" ]; then
-		    echo $p
+		    if [[ ! "$p" =~ ^ndk-sysroot ]]; then
+			echo $p
+		    fi
 		fi
 	    fi
 	done
