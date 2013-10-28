@@ -20,10 +20,13 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -31,7 +34,7 @@ import android.widget.TextView;
 
 public class PkgMgrActivity extends ListActivity {
 	private static final String TAG = "PkgMgrActivity";
-	private static final String URL = "http://cctools.info/repo-4.8/" + Build.CPU_ABI;
+	private static final String URL = "http://cctools.info/repo-4.8-1/" + Build.CPU_ABI;
 	private Context context = this;
 	private static final String PKGS_LISTS_DIR = "/installed/";
 	
@@ -44,19 +47,29 @@ public class PkgMgrActivity extends ListActivity {
     static final String KEY_NAME		= "name";
     static final String KEY_VERSION		= "version";
     static final String KEY_DESC		= "description";
+    static final String KEY_DEPENDS		= "depends";
     static final String KEY_SIZE		= "size";
     static final String KEY_FILE		= "file";
+    static final String KEY_FILESIZE	= "filesize";
     static final String KEY_STATUS		= "status";
+    
+    // Last list position
+    private int lastPosition = 0;
+    
+    private ListView lv;
+    private EditText inputSearch;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pkgmgr_main);
 
+        inputSearch = (EditText) findViewById(R.id.inputSearch);
+        
         (new DownloadXmlTask()).execute(URL);
          
         // selecting single ListView item
-        ListView lv = getListView();
+        lv = getListView();
         // listening to single listitem click
         lv.setOnItemClickListener(new OnItemClickListener() { 
             public void onItemClick(AdapterView<?> parent, View view,
@@ -114,6 +127,37 @@ public class PkgMgrActivity extends ListActivity {
             	dialog.show();    	                
             }
         });
+        
+        //
+        // text filter
+        //
+        lv.setTextFilterEnabled(true);
+        
+        inputSearch.addTextChangedListener(new TextWatcher() {
+			public void afterTextChanged(Editable s) {				
+				// TODO Auto-generated method stub
+				
+			}
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
+				// TODO Auto-generated method stub
+				
+			}
+			public void onTextChanged(CharSequence s, int start, int before,
+					int count) {
+				if (start > 0) {
+					lv.setFilterText(s.toString());									
+				} else {
+					lv.clearTextFilter();
+				}
+			}
+        });
+    }
+
+    protected void onPause() {
+    	super.onPause();
+    	lastPosition = this.getListView().getFirstVisiblePosition();
+    	Log.i(TAG, "Position " + lastPosition);
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -141,6 +185,8 @@ public class PkgMgrActivity extends ListActivity {
             map.put(KEY_NAME, parser.getValue(e, KEY_NAME));
             map.put(KEY_VERSION, parser.getValue(e, KEY_VERSION));
             map.put(KEY_DESC, parser.getValue(e, KEY_DESC));
+            map.put(KEY_DEPENDS, parser.getValue(e, KEY_DEPENDS));
+            map.put(KEY_FILESIZE, parser.getValue(e, KEY_FILESIZE));
             map.put(KEY_SIZE, parser.getValue(e, KEY_SIZE));
             map.put(KEY_FILE, parser.getValue(e, KEY_FILE));
 
@@ -160,10 +206,29 @@ public class PkgMgrActivity extends ListActivity {
         // Adding menuItems to ListView
         ListAdapter adapter = new SimpleAdapter(this, menuItems,
         										R.layout.pkgmgr_list_package,
-        										new String[] { KEY_NAME, KEY_VERSION, KEY_DESC, KEY_FILE, KEY_SIZE, KEY_STATUS },
-        										new int[] {	R.id.pkg_name, R.id.pkg_version, R.id.pkg_desciption, R.id.pkg_file, R.id.pkg_size, R.id.pkg_status });
+        										new String[] { KEY_NAME,
+        														KEY_VERSION,
+        														KEY_DESC,
+        														KEY_DEPENDS,
+        														KEY_FILE,
+        														KEY_FILESIZE,
+        														KEY_SIZE,
+        														KEY_STATUS },
+        										new int[] {	R.id.pkg_name,
+        													R.id.pkg_version,
+        													R.id.pkg_desciption,
+        													R.id.pkg_deps,
+        													R.id.pkg_file,
+        													R.id.pkg_filesize,
+        													R.id.pkg_size,
+        													R.id.pkg_status });
  
-        setListAdapter(adapter);    	
+        setListAdapter(adapter);
+        
+        if (lastPosition > 0 && lastPosition < nl.getLength()) {
+        	this.getListView().setSelection(lastPosition);
+        }
+        
     }
     
     private class DownloadXmlTask extends AsyncTask<String, Void, String> {

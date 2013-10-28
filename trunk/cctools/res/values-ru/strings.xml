@@ -128,8 +128,10 @@
     <string name="pkg_name">Имя</string>
     <string name="pkg_version">Версия:\u0020</string>
     <string name="pkg_description">Описание</string>
+    <string name="pkg_deps">Зависимости:\u0020</string>
     <string name="pkg_file">Файл:\u0020</string>
-    <string name="pkg_size">Размер:\u0020</string>
+    <string name="pkg_filesize">Размер файла:\u0020</string>
+    <string name="pkg_size">Размер установленного:\u0020</string>
     <string name="pkg_selected">Выбрано\u0020</string>
     <string name="pkg_install">Установить</string>
     <string name="pkg_reinstall">Переустановить</string>
@@ -137,4 +139,5 @@
     <string name="pkg_status">Состояние: \u0020</string>
     <string name="pkg_installed">Установлено</string>
     <string name="pkg_notinstalled">Не установлено</string>
+    <string name="pkg_searchHint">Поиск</string>
 </resources>

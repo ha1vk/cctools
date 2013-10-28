@@ -175,7 +175,8 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
         		newTitle(fileName);
         	}
         } else {
-        	updateBasePackages();
+//FIXME New installer need        	
+//        	updateBasePackages();
 			newTitle(getString(R.string.new_file));
 			fileName = "";
         }
