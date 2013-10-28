@@ -317,6 +317,8 @@ for f in rules/*.sh; do
     . $f
 done
 
+export PATH=${TARGET_DIR}-host/bin:$PATH
+
 makedirs
 
 # Toolchain support libs
@@ -380,6 +382,8 @@ build_fortran_host
 build_fortran
 build_fortran_examples
 build_netcat
+build_file_host
+build_file
 
 # presets
 
