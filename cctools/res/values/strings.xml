@@ -128,8 +128,10 @@
     <string name="pkg_name">Name</string>
     <string name="pkg_version">Version:\u0020</string>
     <string name="pkg_description">Description</string>
+    <string name="pkg_deps">Depends:\u0020</string>
     <string name="pkg_file">File:\u0020</string>
-    <string name="pkg_size"> Size:\u0020</string>
+    <string name="pkg_filesize"> File size:\u0020</string>
+    <string name="pkg_size"> Installed size:\u0020</string>
     <string name="pkg_selected">Selected\u0020</string>
     <string name="pkg_install">Install</string>
     <string name="pkg_reinstall">Reinstall</string>
@@ -137,4 +139,5 @@
     <string name="pkg_status">Status: \u0020</string>
     <string name="pkg_installed">Installed</string>
     <string name="pkg_notinstalled">Not installed</string>
+    <string name="pkg_searchHint">Search package</string>
 </resources>
