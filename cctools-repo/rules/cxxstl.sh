@@ -57,5 +57,9 @@ build_cxxstl() {
     cd ${TMPINST_DIR}/${PKG}
     zip -r9y ../$filename cctools pkgdesc
 
+    local filename="${PKG}-${PKG_ARCH}_${PKG_VERSION}_all.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} $PKG_VERSION all "$PKG_DESC"
+    zip -r9y ../$filename cctools pkgdesc
+
     s_tag $PKG
 }
