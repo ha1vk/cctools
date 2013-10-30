@@ -103,6 +103,13 @@ build_llvm() {
 
 ln -s ${TARGET_ARCH} \${CCTOOLSDIR}/sysroot
 
+if [ ! -f \${CCTOOLSDIR}/bin/cpp ]; then
+    echo "#!/system/bin/sh" > \${CCTOOLSDIR}/bin/cpp
+    echo "exec \${CCTOOLSDIR}/bin/clang -E \\\$@" >> \${CCTOOLSDIR}/bin/cpp
+
+    chmod 755 \${CCTOOLSDIR}/bin/cpp
+fi
+
 if [ ! -f \${CCTOOLSDIR}/bin/cc ]; then
     echo "#!/system/bin/sh" > \${CCTOOLSDIR}/bin/cc
     echo "exec \${CCTOOLSDIR}/bin/clang -integrated-as \\\$@" >> \${CCTOOLSDIR}/bin/cc
