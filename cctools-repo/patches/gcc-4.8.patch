@@ -1,6 +1,30 @@
-diff -Nur /home/sash/Work/android/ndk-source/gcc/gcc-4.8/gcc/system.h gcc-4.8/gcc/system.h
---- /home/sash/Work/android/ndk-source/gcc/gcc-4.8/gcc/system.h	2013-08-13 16:44:18.000000000 +0300
-+++ gcc-4.8/gcc/system.h	2013-08-14 13:47:52.258219947 +0300
+diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/configure gcc-4.8/gcc/configure
+--- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/configure	2013-10-22 15:37:35.000711459 +0700
++++ gcc-4.8/gcc/configure	2013-10-22 15:37:34.000000000 +0700
+@@ -3314,7 +3314,7 @@
+     if test x$host != x$target; then
+        libstdcxx_incdir="$target_alias/$libstdcxx_incdir"
+     fi
+-    gcc_gxx_include_dir="\$(libsubdir)/\$(libsubdir_to_prefix)$libstdcxx_incdir"
++    gcc_gxx_include_dir="\$(libsubdir)/\$(libsubdir_to_prefix)\$(target_noncanonical)/$libstdcxx_incdir"
+   fi
+ fi
+ 
+diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/configure.ac gcc-4.8/gcc/configure.ac
+--- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/configure.ac	2013-10-22 15:37:35.000711459 +0700
++++ gcc-4.8/gcc/configure.ac	2013-10-22 15:37:34.000000000 +0700
+@@ -140,7 +140,7 @@
+     if test x$host != x$target; then
+        libstdcxx_incdir="$target_alias/$libstdcxx_incdir"
+     fi
+-    gcc_gxx_include_dir="\$(libsubdir)/\$(libsubdir_to_prefix)$libstdcxx_incdir"
++    gcc_gxx_include_dir="\$(libsubdir)/\$(libsubdir_to_prefix)\$(target_noncanonical)/$libstdcxx_incdir"
+   fi
+ fi
+ 
+diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/system.h gcc-4.8/gcc/system.h
+--- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/system.h	2013-10-22 15:37:36.500711521 +0700
++++ gcc-4.8/gcc/system.h	2013-10-30 21:02:24.479241982 +0700
 @@ -70,7 +70,7 @@
     extensions and need to be prototyped by hand (since we do not
     define _GNU_SOURCE).  */
@@ -10,9 +34,9 @@ diff -Nur /home/sash/Work/android/ndk-source/gcc/gcc-4.8/gcc/system.h gcc-4.8/gc
  
  # ifdef HAVE_PUTC_UNLOCKED
  #  undef putc
-diff -Nur /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libcpp/charset.c gcc-4.8/libcpp/charset.c
---- /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libcpp/charset.c	2013-08-13 16:44:30.000000000 +0300
-+++ gcc-4.8/libcpp/charset.c	2013-08-14 13:08:59.842157487 +0300
+diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/charset.c gcc-4.8/libcpp/charset.c
+--- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/charset.c	2013-10-22 15:37:40.812711700 +0700
++++ gcc-4.8/libcpp/charset.c	2013-10-30 21:02:24.479241982 +0700
 @@ -1696,7 +1696,7 @@
  uchar * 
  _cpp_convert_input (cpp_reader *pfile, const char *input_charset,
@@ -22,9 +46,9 @@ diff -Nur /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libcpp/charset.c gcc-4.
  {
    struct cset_converter input_cset;
    struct _cpp_strbuf to;
-diff -Nur /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libcpp/internal.h gcc-4.8/libcpp/internal.h
---- /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libcpp/internal.h	2013-08-13 16:44:30.000000000 +0300
-+++ gcc-4.8/libcpp/internal.h	2013-08-14 13:08:59.846157487 +0300
+diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/internal.h gcc-4.8/libcpp/internal.h
+--- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/internal.h	2013-10-22 15:37:40.816711700 +0700
++++ gcc-4.8/libcpp/internal.h	2013-10-30 21:02:24.483241983 +0700
 @@ -732,7 +732,7 @@
  extern void _cpp_destroy_iconv (cpp_reader *);
  extern unsigned char *_cpp_convert_input (cpp_reader *, const char *,
@@ -34,9 +58,9 @@ diff -Nur /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libcpp/internal.h gcc-4
  extern const char *_cpp_default_encoding (void);
  extern cpp_hashnode * _cpp_interpret_identifier (cpp_reader *pfile,
  						 const unsigned char *id,
-diff -Nur /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libcpp/macro.c gcc-4.8/libcpp/macro.c
---- /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libcpp/macro.c	2013-08-13 16:44:30.000000000 +0300
-+++ gcc-4.8/libcpp/macro.c	2013-08-14 13:08:59.866157487 +0300
+diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/macro.c gcc-4.8/libcpp/macro.c
+--- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/macro.c	2013-10-22 15:37:40.820711700 +0700
++++ gcc-4.8/libcpp/macro.c	2013-10-30 21:02:24.483241983 +0700
 @@ -246,7 +246,7 @@
  		struct tm *tb = NULL;
  		struct stat *st = _cpp_get_file_stat (file);
@@ -46,9 +70,9 @@ diff -Nur /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libcpp/macro.c gcc-4.8/
  		if (tb)
  		  {
  		    char *str = asctime (tb);
-diff -Nur /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libiberty/getpagesize.c gcc-4.8/libiberty/getpagesize.c
---- /home/sash/Work/android/ndk-source/gcc/gcc-4.8/libiberty/getpagesize.c	2013-08-13 16:44:32.000000000 +0300
-+++ gcc-4.8/libiberty/getpagesize.c	2013-08-14 13:08:59.870157487 +0300
+diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libiberty/getpagesize.c gcc-4.8/libiberty/getpagesize.c
+--- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libiberty/getpagesize.c	2013-10-22 15:37:45.368711889 +0700
++++ gcc-4.8/libiberty/getpagesize.c	2013-10-30 21:02:24.483241983 +0700
 @@ -60,11 +60,13 @@
  # endif /* PAGESIZE */
  #endif /* GNU_OUR_PAGESIZE */
