@@ -544,7 +544,7 @@ diff -Nur dropbear-0.52-orig/svr-chansession.c dropbear-0.52/svr-chansession.c
 +      addnewvar("ANDROID_ROOT", "/system");
 +      addnewvar("BOOTCLASSPATH", "/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar");
 +      addnewvar("EXTERNAL_STORAGE", (getenv("EXTERNAL_STORAGE"))?getenv("EXTERNAL_STORAGE"):"/sdcard");
-+      addnewvar("LD_LIBRARY_PATH", "/vendor/lib:/system/lib");
++      addnewvar("LD_LIBRARY_PATH", "/data/data/com.pdaxrom.cctools/root/cctools/lib:/vendor/lib:/system/lib");
 +      addnewvar("CCTOOLSDIR", "/data/data/com.pdaxrom.cctools/root/cctools");
 +   } else
 +      addnewvar("PATH", DEFAULT_PATH);
