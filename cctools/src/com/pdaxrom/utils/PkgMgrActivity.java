@@ -618,6 +618,11 @@ public class PkgMgrActivity extends ListActivity {
     private boolean installPackages(String packages) {
     	List<String> postinstList = new ArrayList<String>();
     	for (String name: replaceMacro(packages).split("\\s+")) {
+    		if ((new File(toolchainDir + "/" + PKGS_LISTS_DIR + "/" + name + ".pkgdesc")).exists()) {
+        		//TODO: check packaged version for update
+    			Log.i(TAG, "Package " + name + " already installed.");
+    			continue;
+    		}
     		String file = getPackageFile(name);
     		Log.i(TAG, "Install " + name + " -> " + file);
 			if (!downloadAndUnpack(file, URL, toolchainDir, toolchainDir + PKGS_LISTS_DIR + name + ".list")) {
