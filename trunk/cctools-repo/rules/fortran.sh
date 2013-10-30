@@ -124,7 +124,7 @@ build_fortran() {
     ln -sf gfortran ${TMPINST_DIR}/${PKG}/cctools/bin/f77
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "gcc"
     cd ${TMPINST_DIR}/${PKG}
     zip -r9y ../$filename cctools pkgdesc
 
