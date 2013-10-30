@@ -114,8 +114,10 @@ build_gcc() {
     $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/liblto_plugin.so.0.0.0
     $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/plugin/gengtype
 
-    ln -sf g++ ${TMPINST_DIR}/${PKG}/cctools/bin/c++
-    ln -sf gcc ${TMPINST_DIR}/${PKG}/cctools/bin/cc
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/c++
+    for f in cpp g++ gcc gcc-ar gcc-nm gcc-ranlib gcov; do
+	mv ${TMPINST_DIR}/${PKG}/cctools/bin/$f ${TMPINST_DIR}/${PKG}/cctools/bin/${f}-${gcc_version}
+    done
 
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/info
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/man
@@ -127,10 +129,24 @@ build_gcc() {
     find ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/ -name "*.o"  -exec rm -f {} \;
     find ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/ -name "*.a"  -exec rm -f {} \;
 
+    cat >> ${TMPINST_DIR}/${PKG}/postinst << EOF
+#!/system/bin/sh
+
+ln -sf gcc-${gcc_version}  \${CCTOOLSDIR}/bin/gcc
+ln -sf g++-${gcc_version}  \${CCTOOLSDIR}/bin/g++
+ln -sf cpp-${gcc_version}  \${CCTOOLSDIR}/bin/cpp
+ln -sf gcov-${gcc_version} \${CCTOOLSDIR}/bin/gcov
+
+ln -sf gcc-${gcc_version}  \${CCTOOLSDIR}/bin/cc
+ln -sf g++-${gcc_version}  \${CCTOOLSDIR}/bin/c++
+
+EOF
+    chmod 755 ${TMPINST_DIR}/${PKG}/postinst
+
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "libgcc-dev"
     cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ../$filename cctools pkgdesc
+    zip -r9y ../$filename cctools pkgdesc postinst
 
     popd
     s_tag $PKG
