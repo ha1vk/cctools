@@ -45,9 +45,7 @@ if [ "x$TARGET_ARCH" = "x" ]; then
 fi
 
 if [ "x$WORK_DIR" = "x" ]; then
-    work_dir="/tmp/native-ndk-$TARGET_ARCH-$USER"
-else
-    work_dir="$WORK_DIR"
+    WORK_DIR="/tmp/native-ndk-${TARGET_ARCH}-${USER}"
 fi
 
 if [ "x$NDK_DIR" = "x" ]; then
@@ -60,12 +58,12 @@ fi
 
 TOPDIR="$PWD"
 
-build_dir="$work_dir/build"
-src_dir="$work_dir/src"
-patch_dir="$TOPDIR/patches"
+build_dir="${WORK_DIR}/build"
+src_dir="${WORK_DIR}/src"
+patch_dir="${TOPDIR}/patches"
 
-TARGET_DIR="$work_dir/cctools"
-TMPINST_DIR="$build_dir/tmpinst"
+TARGET_DIR="${WORK_DIR}/cctools"
+TMPINST_DIR="${build_dir}/tmpinst"
 
 MAKE=make
 INSTALL=install
@@ -132,16 +130,20 @@ error() {
 
 makedirs() {
     mkdir -p $src_dir
-    mkdir -p $work_dir/tags
+    mkdir -p ${WORK_DIR}/tags
     mkdir -p ${TMPINST_DIR}/libso
+
+    mkdir -p ${WORK_DIR}/../repo/armeabi
+    mkdir -p ${WORK_DIR}/../repo/mips
+    mkdir -p ${WORK_DIR}/../repo/x86
 }
 
 s_tag() {
-    touch $work_dir/tags/$1
+    touch ${WORK_DIR}/tags/$1
 }
 
 c_tag() {
-    test -e $work_dir/tags/$1
+    test -e ${WORK_DIR}/tags/$1
 }
 
 copysrc() {
@@ -154,7 +156,7 @@ preparesrc() {
 	pushd .
 	copysrc $1 $2
 	cd $2
-	patch -p1 < $patch_dir/`basename $2`.patch
+	patch -p1 < ${patch_dir}/`basename $2`.patch
 	popd
     fi
 }
@@ -191,10 +193,10 @@ unpack() {
 }
 
 patchsrc() {
-    if [ -f $patch_dir/${2}-${3}.patch ]; then
+    if [ -f ${patch_dir}/${2}-${3}.patch ]; then
 	pushd .
 	cd $1
-	patch -p1 < $patch_dir/${2}-${3}.patch || error "Correpted patch file."
+	patch -p1 < ${patch_dir}/${2}-${3}.patch || error "Correpted patch file."
 	popd
     fi
 }
@@ -300,12 +302,15 @@ EOF
 case $TARGET_ARCH in
 arm*)
     PKG_ARCH="armel"
+    REPO_DIR="${WORK_DIR}/../repo/armeabi"
     ;;
 mips*)
     PKG_ARCH="mipsel"
+    REPO_DIR="${WORK_DIR}/../repo/mips"
     ;;
 i*86*)
     PKG_ARCH="i686"
+    REPO_DIR="${WORK_DIR}/../repo/x86"
     ;;
 *)
     error "Can't set PKG_ARCH from $TARGET_ARCH"
