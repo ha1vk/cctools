@@ -40,7 +40,7 @@ build_avr_libc() {
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ../$filename cctools pkgdesc
+    zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     popd
     s_tag $PKG

@@ -12,7 +12,7 @@ build_build_essential_gcc_avr() {
     local filename="${PKG}_${PKG_VERSION}_all.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "$PKG_DEPS"
     cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ../$filename cctools pkgdesc
+    zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     s_tag ${PKG}
 }

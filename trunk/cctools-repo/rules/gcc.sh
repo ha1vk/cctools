@@ -166,7 +166,7 @@ EOF
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "libgcc-dev"
     cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ../$filename *
+    zip -r9y ${REPO_DIR}/$filename *
 
     popd
     s_tag $PKG
@@ -183,9 +183,27 @@ EOF
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ../$filename cctools pkgdesc
+    zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
+    # Cross package
     local filename="${PKG}-${PKG_ARCH}_${PKG_VERSION}_all.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} $PKG_VERSION all "$PKG_DESC"
-    zip -r9y ../$filename cctools pkgdesc
+    zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+
+    if [ "$PKG_ARCH" = "armel" ]; then
+	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../mips/
+	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
+    fi
+
+    if [ "$PKG_ARCH" = "mips" ]; then
+	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../armeabi/
+	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
+    fi
+
+    if [ "$PKG_ARCH" = "i686" ]; then
+	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../armeabi/
+	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../mips/
+    fi
+
+    rm -f ${REPO_DIR}/$filename
 }
