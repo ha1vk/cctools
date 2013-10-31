@@ -129,24 +129,44 @@ build_gcc() {
     find ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/ -name "*.o"  -exec rm -f {} \;
     find ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/ -name "*.a"  -exec rm -f {} \;
 
-    cat >> ${TMPINST_DIR}/${PKG}/postinst << EOF
+    cat >> ${TMPINST_DIR}/${PKG}/cctools/bin/set-default-compiler-gcc << EOF
 #!/system/bin/sh
 
 ln -sf gcc-${gcc_version}  \${CCTOOLSDIR}/bin/gcc
+ln -sf gcc-${gcc_version}  \${CCTOOLSDIR}/bin/cc
 ln -sf g++-${gcc_version}  \${CCTOOLSDIR}/bin/g++
+ln -sf g++-${gcc_version}  \${CCTOOLSDIR}/bin/c++
 ln -sf cpp-${gcc_version}  \${CCTOOLSDIR}/bin/cpp
 ln -sf gcov-${gcc_version} \${CCTOOLSDIR}/bin/gcov
+EOF
+    chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/set-default-compiler-gcc
 
-ln -sf gcc-${gcc_version}  \${CCTOOLSDIR}/bin/cc
-ln -sf g++-${gcc_version}  \${CCTOOLSDIR}/bin/c++
+    cat >> ${TMPINST_DIR}/${PKG}/postinst << EOF
+#!/system/bin/sh
 
+set-default-compiler-gcc
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/postinst
+
+    cat >> ${TMPINST_DIR}/${PKG}/prerm << EOF
+#!/system/bin/sh
+
+test `readlink \${CCTOOLSDIR}/bin/gcc`  = "gcc-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/gcc
+test `readlink \${CCTOOLSDIR}/bin/cc`   = "gcc-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/cc
+test `readlink \${CCTOOLSDIR}/bin/g++`  = "g++-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/g++
+test `readlink \${CCTOOLSDIR}/bin/c++`  = "g++-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/c++
+test `readlink \${CCTOOLSDIR}/bin/cpp`  = "cpp-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/cpp
+test `readlink \${CCTOOLSDIR}/bin/gcov` = "gcov-${gcc_version}" && rm -f \${CCTOOLSDIR}/bin/gcov
+
+which set-default-compiler-clang && set-default-compiler-clang
+EOF
+
+    chmod 755 ${TMPINST_DIR}/${PKG}/prerm
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "libgcc-dev"
     cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ../$filename cctools pkgdesc postinst
+    zip -r9y ../$filename *
 
     popd
     s_tag $PKG

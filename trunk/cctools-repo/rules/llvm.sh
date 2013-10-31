@@ -98,43 +98,61 @@ build_llvm() {
     cp -f ${LLVMROOTDIR}/lib/libprofile_rt.a  ${TMPINST_DIR}/${PKG}/cctools/lib/
     cp -f ${LLVMROOTDIR}/lib/libprofile_rt.so ${TMPINST_DIR}/${PKG}/cctools/lib/
 
+    cat >> ${TMPINST_DIR}/${PKG}/cctools/bin/cpp-clang << EOF
+#!/system/bin/sh
+
+exec \${CCTOOLSDIR}/bin/clang -E $@
+EOF
+    chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/cpp-clang
+
+    cat >> ${TMPINST_DIR}/${PKG}/cctools/bin/cc-clang << EOF
+#!/system/bin/sh
+
+exec \${CCTOOLSDIR}/bin/clang -integrated-as $@
+EOF
+    chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/cc-clang
+
+    cat >> ${TMPINST_DIR}/${PKG}/cctools/bin/c++-clang << EOF
+#!/system/bin/sh
+
+exec \${CCTOOLSDIR}/bin/clang++ -integrated-as $@
+EOF
+    chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/c++-clang
+
+    cat >> ${TMPINST_DIR}/${PKG}/cctools/bin/set-default-compiler-clang << EOF
+#!/system/bin/sh
+
+ln -sf cpp-clang \${CCTOOLSDIR}/bin/cpp
+ln -sf cc-clang  \${CCTOOLSDIR}/bin/gcc
+ln -sf cc-clang  \${CCTOOLSDIR}/bin/cc
+ln -sf c++-clang \${CCTOOLSDIR}/bin/g++
+ln -sf c++-clang \${CCTOOLSDIR}/bin/c++
+EOF
+
+    chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/set-default-compiler-clang
+
     cat >> ${TMPINST_DIR}/${PKG}/postinst << EOF
 #!/system/bin/sh
 
-ln -s ${TARGET_ARCH} \${CCTOOLSDIR}/sysroot
-
-if [ ! -f \${CCTOOLSDIR}/bin/cpp ]; then
-    echo "#!/system/bin/sh" > \${CCTOOLSDIR}/bin/cpp
-    echo "exec \${CCTOOLSDIR}/bin/clang -E \\\$@" >> \${CCTOOLSDIR}/bin/cpp
-
-    chmod 755 \${CCTOOLSDIR}/bin/cpp
-fi
-
-if [ ! -f \${CCTOOLSDIR}/bin/cc ]; then
-    echo "#!/system/bin/sh" > \${CCTOOLSDIR}/bin/cc
-    echo "exec \${CCTOOLSDIR}/bin/clang -integrated-as \\\$@" >> \${CCTOOLSDIR}/bin/cc
-
-    chmod 755 \${CCTOOLSDIR}/bin/cc
-fi
-
-if [ ! -f \${CCTOOLSDIR}/bin/c++ ]; then
-    echo "#!/system/bin/sh" > \${CCTOOLSDIR}/bin/c++
-    echo "exec \${CCTOOLSDIR}/bin/clang++ -integrated-as \\\$@" >> \${CCTOOLSDIR}/bin/c++
-
-    chmod 755 \${CCTOOLSDIR}/bin/c++
-fi
-
-if [ ! -f \${CCTOOLSDIR}/bin/gcc ]; then
-    ln -s cc \${CCTOOLSDIR}/bin/gcc
-fi
-
-if [ ! -f \${CCTOOLSDIR}/bin/g++ ]; then
-    ln -s c++ \${CCTOOLSDIR}/bin/g++
-fi
-
+ln -sf ${TARGET_ARCH} \${CCTOOLSDIR}/sysroot
+set-default-compiler-clang
 EOF
 
     chmod 755 ${TMPINST_DIR}/${PKG}/postinst
+
+    cat >> ${TMPINST_DIR}/${PKG}/prerm << EOF
+#!/system/bin/sh
+
+test `readlink \${CCTOOLSDIR}/bin/cpp` = "cpp-clang" && rm -f \${CCTOOLSDIR}/bin/cpp
+test `readlink \${CCTOOLSDIR}/bin/gcc` = "cc-clang"  && rm -f \${CCTOOLSDIR}/bin/gcc
+test `readlink \${CCTOOLSDIR}/bin/cc`  = "cc-clang"  && rm -f \${CCTOOLSDIR}/bin/cc
+test `readlink \${CCTOOLSDIR}/bin/g++` = "c++-clang" && rm -f \${CCTOOLSDIR}/bin/g++
+test `readlink \${CCTOOLSDIR}/bin/c++` = "c++-clang" && rm -f \${CCTOOLSDIR}/bin/c++
+
+which set-default-compiler-gcc && set-default-compiler-gcc
+EOF
+
+    chmod 755 ${TMPINST_DIR}/${PKG}/prerm
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC" "libgcc-dev"
