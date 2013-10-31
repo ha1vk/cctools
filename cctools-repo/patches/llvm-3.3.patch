@@ -1,17 +1,28 @@
-diff -Nur /home/sash/Work/android/ndk-source/llvm-3.3/llvm/utils/unittest/Makefile llvm-3.3/utils/unittest/Makefile
---- /home/sash/Work/android/ndk-source/llvm-3.3/llvm/utils/unittest/Makefile	2013-10-22 15:38:25.896713569 +0700
-+++ llvm-3.3/llvm/utils/unittest/Makefile	2013-10-24 02:19:21.777097229 +0700
-@@ -8,6 +8,6 @@
- ##===----------------------------------------------------------------------===##
+diff -Nur /home/sash/Work/android/ndk-source/llvm-3.3/clang/lib/Driver/ToolChains.cpp llvm-3.3/clang/lib/Driver/ToolChains.cpp
+--- /home/sash/Work/android/ndk-source/llvm-3.3/clang/lib/Driver/ToolChains.cpp	2013-10-22 15:38:12.796713026 +0700
++++ llvm-3.3/clang/lib/Driver/ToolChains.cpp	2013-10-31 21:00:05.044128117 +0700
+@@ -2465,10 +2465,17 @@
+   if (!getDriver().SysRoot.empty())
+     return getDriver().SysRoot;
  
- LEVEL = ../..
--PARALLEL_DIRS = googletest UnitTestMain
-+PARALLEL_DIRS =
++  std::string Path =
++    (GCCInstallation.getParentLibPath() +
++     "/../" + GCCInstallation.getTriple().str()).str();
++
++  if (llvm::sys::fs::exists(Path))
++    return Path;
++
+   if (!GCCInstallation.isValid() || !isMipsArch(getTriple().getArch()))
+     return std::string();
  
- include $(LEVEL)/Makefile.common
+-  std::string Path =
++  Path =
+     (GCCInstallation.getInstallPath() +
+      "/../../../../" + GCCInstallation.getTriple().str() + "/libc").str();
+   appendMipsTargetSuffix(Path, getTriple().getArch(), Args);
 diff -Nur /home/sash/Work/android/ndk-source/llvm-3.3/clang/Makefile llvm-3.3/clang/Makefile
 --- /home/sash/Work/android/ndk-source/llvm-3.3/clang/Makefile	2013-10-22 15:38:12.580713017 +0700
-+++ llvm-3.3/clang/Makefile	2013-10-24 13:01:58.299475757 +0700
++++ llvm-3.3/clang/Makefile	2013-10-31 19:35:24.007917469 +0700
 @@ -14,7 +14,7 @@
  
  IS_TOP_LEVEL := 1
@@ -23,7 +34,7 @@ diff -Nur /home/sash/Work/android/ndk-source/llvm-3.3/clang/Makefile llvm-3.3/cl
  
 diff -Nur /home/sash/Work/android/ndk-source/llvm-3.3/clang/tools/libclang/CIndexer.cpp llvm-3.3/clang/tools/libclang/CIndexer.cpp
 --- /home/sash/Work/android/ndk-source/llvm-3.3/clang/tools/libclang/CIndexer.cpp	2013-10-22 15:38:15.332713131 +0700
-+++ llvm-3.3/clang/tools/libclang/CIndexer.cpp	2013-10-24 12:44:04.043520934 +0700
++++ llvm-3.3/clang/tools/libclang/CIndexer.cpp	2013-10-31 19:35:24.007917469 +0700
 @@ -69,6 +69,7 @@
    llvm::sys::Path LibClangPath(path);
    LibClangPath.eraseComponent();
@@ -49,3 +60,14 @@ diff -Nur /home/sash/Work/android/ndk-source/llvm-3.3/clang/tools/libclang/CInde
  #endif
    
    LibClangPath.appendComponent("clang");
+diff -Nur /home/sash/Work/android/ndk-source/llvm-3.3/llvm/utils/unittest/Makefile llvm-3.3/llvm/utils/unittest/Makefile
+--- /home/sash/Work/android/ndk-source/llvm-3.3/llvm/utils/unittest/Makefile	2013-10-22 15:38:25.896713569 +0700
++++ llvm-3.3/llvm/utils/unittest/Makefile	2013-10-31 19:35:24.007917469 +0700
+@@ -8,6 +8,6 @@
+ ##===----------------------------------------------------------------------===##
+ 
+ LEVEL = ../..
+-PARALLEL_DIRS = googletest UnitTestMain
++PARALLEL_DIRS =
+ 
+ include $(LEVEL)/Makefile.common
