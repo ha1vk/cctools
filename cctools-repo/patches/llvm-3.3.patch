@@ -20,6 +20,28 @@ diff -Nur /home/sash/Work/android/ndk-source/llvm-3.3/clang/lib/Driver/ToolChain
      (GCCInstallation.getInstallPath() +
       "/../../../../" + GCCInstallation.getTriple().str() + "/libc").str();
    appendMipsTargetSuffix(Path, getTriple().getArch(), Args);
+diff -Nur /home/sash/Work/android/ndk-source/llvm-3.3/clang/lib/Driver/Tools.cpp llvm-3.3/clang/lib/Driver/Tools.cpp
+--- /home/sash/Work/android/ndk-source/llvm-3.3/clang/lib/Driver/Tools.cpp	2013-10-22 15:38:12.800713026 +0700
++++ llvm-3.3/clang/lib/Driver/Tools.cpp	2013-10-31 22:04:45.008288971 +0700
+@@ -6281,13 +6281,15 @@
+ 
+         // FIXME: Exclude this for platforms whith libgomp that doesn't require
+         // librt. Most modern Linux platfroms require it, but some may not.
+-        CmdArgs.push_back("-lrt");
++        if (!isAndroid)
++          CmdArgs.push_back("-lrt");
+       }
+ 
+       AddLibgcc(ToolChain.getTriple(), D, CmdArgs, Args);
+ 
+-      if (Args.hasArg(options::OPT_pthread) ||
+-          Args.hasArg(options::OPT_pthreads) || OpenMP)
++      if ((Args.hasArg(options::OPT_pthread) ||
++          Args.hasArg(options::OPT_pthreads) || OpenMP) &&
++          !isAndroid)
+         CmdArgs.push_back("-lpthread");
+ 
+       CmdArgs.push_back("-lc");
 diff -Nur /home/sash/Work/android/ndk-source/llvm-3.3/clang/Makefile llvm-3.3/clang/Makefile
 --- /home/sash/Work/android/ndk-source/llvm-3.3/clang/Makefile	2013-10-22 15:38:12.580713017 +0700
 +++ llvm-3.3/clang/Makefile	2013-10-31 19:35:24.007917469 +0700
