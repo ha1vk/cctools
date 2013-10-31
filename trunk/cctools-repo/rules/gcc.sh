@@ -12,10 +12,12 @@ build_gcc() {
 
     pushd .
 
-    copysrc $O_DIR $S_DIR
+    preparesrc $O_DIR $S_DIR
 
-    cd $S_DIR
-    patch -p1 < $patch_dir/gcc-$gcc_version.patch || error "patch"
+    #copysrc $O_DIR $S_DIR
+
+    #cd $S_DIR
+    #patch -p1 < $patch_dir/gcc-$gcc_version.patch || error "patch"
 
     mkdir -p $B_DIR
     cd $B_DIR
@@ -124,10 +126,17 @@ build_gcc() {
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/share
 
     rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/libiberty.a
+    find ${TMPINST_DIR}/${PKG}/cctools/ -name "*.la"  -exec rm -f {} \;
 
     copysrc ${TMPINST_DIR}/${PKG}/cctools/lib/gcc ${TMPINST_DIR}/libgcc-dev/cctools/lib/gcc
+    cd ${TMPINST_DIR}/${PKG}/cctools/lib
+    find . -name "libatomic.*" -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgcc-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/{} \; -exec rm -f {} \;
+    find . -name "libgomp.*"   -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgcc-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/{} \; -exec rm -f {} \;
     find ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/ -name "*.o"  -exec rm -f {} \;
     find ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/ -name "*.a"  -exec rm -f {} \;
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/thumb
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/armv7-a
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/mips-r2
 
     cat >> ${TMPINST_DIR}/${PKG}/cctools/bin/set-default-compiler-gcc << EOF
 #!/system/bin/sh
@@ -151,12 +160,12 @@ EOF
     cat >> ${TMPINST_DIR}/${PKG}/prerm << EOF
 #!/system/bin/sh
 
-test `readlink \${CCTOOLSDIR}/bin/gcc`  = "gcc-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/gcc
-test `readlink \${CCTOOLSDIR}/bin/cc`   = "gcc-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/cc
-test `readlink \${CCTOOLSDIR}/bin/g++`  = "g++-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/g++
-test `readlink \${CCTOOLSDIR}/bin/c++`  = "g++-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/c++
-test `readlink \${CCTOOLSDIR}/bin/cpp`  = "cpp-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/cpp
-test `readlink \${CCTOOLSDIR}/bin/gcov` = "gcov-${gcc_version}" && rm -f \${CCTOOLSDIR}/bin/gcov
+test \`readlink \${CCTOOLSDIR}/bin/gcc\`  = "gcc-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/gcc
+test \`readlink \${CCTOOLSDIR}/bin/cc\`   = "gcc-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/cc
+test \`readlink \${CCTOOLSDIR}/bin/g++\`  = "g++-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/g++
+test \`readlink \${CCTOOLSDIR}/bin/c++\`  = "g++-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/c++
+test \`readlink \${CCTOOLSDIR}/bin/cpp\`  = "cpp-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/cpp
+test \`readlink \${CCTOOLSDIR}/bin/gcov\` = "gcov-${gcc_version}" && rm -f \${CCTOOLSDIR}/bin/gcov
 
 which set-default-compiler-clang && set-default-compiler-clang
 EOF
@@ -166,7 +175,7 @@ EOF
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "libgcc-dev"
     cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ${REPO_DIR}/$filename *
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
     popd
     s_tag $PKG
@@ -183,12 +192,12 @@ EOF
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     # Cross package
     local filename="${PKG}-${PKG_ARCH}_${PKG_VERSION}_all.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} $PKG_VERSION all "$PKG_DESC"
-    zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     if [ "$PKG_ARCH" = "armel" ]; then
 	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../mips/
