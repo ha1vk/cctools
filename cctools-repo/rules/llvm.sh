@@ -13,10 +13,12 @@ build_llvm() {
 
     pushd .
 
-    copysrc $O_DIR $S_DIR
+    preparesrc $O_DIR $S_DIR
 
-    cd $S_DIR
-    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch || error "patch"
+    #copysrc $O_DIR $S_DIR
+
+    #cd $S_DIR
+    #patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch || error "patch"
 
     mkdir -p $B_DIR
     cd $B_DIR
@@ -56,6 +58,8 @@ build_llvm() {
     --enable-optimized \
     --with-binutils-include=$SRC_PREFIX/binutils/binutils-$binutils_version/include \
     --enable-keep-symbols \
+    CFLAGS="-I${TMPINST_DIR}/include" \
+    LDFLAGS="-L${TMPINST_DIR}/lib" \
     $EXTRA_CONFIG_FLAGS
 
 #    --enable-shared
@@ -77,7 +81,7 @@ build_llvm() {
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     local LLVMROOTDIR=${TMPINST_DIR}/${PKG}/cctools
 
@@ -101,21 +105,21 @@ build_llvm() {
     cat >> ${TMPINST_DIR}/${PKG}/cctools/bin/cpp-clang << EOF
 #!/system/bin/sh
 
-exec \${CCTOOLSDIR}/bin/clang -E $@
+exec \${CCTOOLSDIR}/bin/clang -E \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/cpp-clang
 
     cat >> ${TMPINST_DIR}/${PKG}/cctools/bin/cc-clang << EOF
 #!/system/bin/sh
 
-exec \${CCTOOLSDIR}/bin/clang -integrated-as $@
+exec \${CCTOOLSDIR}/bin/clang -integrated-as \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/cc-clang
 
     cat >> ${TMPINST_DIR}/${PKG}/cctools/bin/c++-clang << EOF
 #!/system/bin/sh
 
-exec \${CCTOOLSDIR}/bin/clang++ -integrated-as $@
+exec \${CCTOOLSDIR}/bin/clang++ -integrated-as \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/c++-clang
 
@@ -134,7 +138,6 @@ EOF
     cat >> ${TMPINST_DIR}/${PKG}/postinst << EOF
 #!/system/bin/sh
 
-ln -sf ${TARGET_ARCH} \${CCTOOLSDIR}/sysroot
 set-default-compiler-clang
 EOF
 
@@ -143,11 +146,11 @@ EOF
     cat >> ${TMPINST_DIR}/${PKG}/prerm << EOF
 #!/system/bin/sh
 
-test `readlink \${CCTOOLSDIR}/bin/cpp` = "cpp-clang" && rm -f \${CCTOOLSDIR}/bin/cpp
-test `readlink \${CCTOOLSDIR}/bin/gcc` = "cc-clang"  && rm -f \${CCTOOLSDIR}/bin/gcc
-test `readlink \${CCTOOLSDIR}/bin/cc`  = "cc-clang"  && rm -f \${CCTOOLSDIR}/bin/cc
-test `readlink \${CCTOOLSDIR}/bin/g++` = "c++-clang" && rm -f \${CCTOOLSDIR}/bin/g++
-test `readlink \${CCTOOLSDIR}/bin/c++` = "c++-clang" && rm -f \${CCTOOLSDIR}/bin/c++
+test \`readlink \${CCTOOLSDIR}/bin/cpp\` = "cpp-clang" && rm -f \${CCTOOLSDIR}/bin/cpp
+test \`readlink \${CCTOOLSDIR}/bin/gcc\` = "cc-clang"  && rm -f \${CCTOOLSDIR}/bin/gcc
+test \`readlink \${CCTOOLSDIR}/bin/cc\`  = "cc-clang"  && rm -f \${CCTOOLSDIR}/bin/cc
+test \`readlink \${CCTOOLSDIR}/bin/g++\` = "c++-clang" && rm -f \${CCTOOLSDIR}/bin/g++
+test \`readlink \${CCTOOLSDIR}/bin/c++\` = "c++-clang" && rm -f \${CCTOOLSDIR}/bin/c++
 
 which set-default-compiler-gcc && set-default-compiler-gcc
 EOF
@@ -157,7 +160,7 @@ EOF
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC" "libgcc-dev"
     cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ${REPO_DIR}/$filename *
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
     PKG=libclang
     PKG_DESC="clang library"
@@ -168,7 +171,7 @@ EOF
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     PKG=clang-utils
     PKG_DESC="clang utilities"
@@ -181,7 +184,7 @@ EOF
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     popd
 }
