@@ -2,7 +2,8 @@ build_cloog_host() {
     PKG=cloog
     PKG_VERSION=$cloog_version
     PKG_DESC="Chunky Loop Generator"
-    O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.gz
+    O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
+#    O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.gz
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
     B_DIR=$build_dir/host-${PKG}
 
@@ -12,7 +13,9 @@ build_cloog_host() {
 
     pushd .
 
-    tar zxf $O_FILE -C $src_dir || error "tar zxf $O_FILE"
+    preparesrc $O_DIR $S_DIR
+
+    #tar zxf $O_FILE -C $src_dir || error "tar zxf $O_FILE"
 
 #    cd $S_DIR
 #    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
