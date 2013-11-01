@@ -60,7 +60,7 @@ build_ndk_sysroot() {
 		local filename="${PKG}-${y}-${vers}_${PKG_VERSION}_all.zip"
 		build_package_desc ${TMPINST_DIR}/${PKG}-${y}-${vers} $filename ${PKG}-${y}-${vers} $PKG_VERSION all "$PKG_DESC for $y."
 		cd ${TMPINST_DIR}/${PKG}-${y}-${vers}
-		zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+		rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
 		popd
 	    fi
