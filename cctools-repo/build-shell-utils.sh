@@ -370,7 +370,6 @@ build_make
 
 # Addons
 build_ncurses
-exit 0
 build_libiconv
 #build_libffi
 #build_gettext
