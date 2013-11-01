@@ -276,7 +276,7 @@ EOF
 	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
     fi
 
-    if [ "$PKG_ARCH" = "mips" ]; then
+    if [ "$PKG_ARCH" = "mipsel" ]; then
 	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../armeabi/
 	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
     fi
@@ -306,7 +306,7 @@ EOF
 	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
     fi
 
-    if [ "$PKG_ARCH" = "mips" ]; then
+    if [ "$PKG_ARCH" = "mipsel" ]; then
 	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../armeabi/
 	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
     fi
@@ -336,7 +336,7 @@ EOF
 	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
     fi
 
-    if [ "$PKG_ARCH" = "mips" ]; then
+    if [ "$PKG_ARCH" = "mipsel" ]; then
 	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../armeabi/
 	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
     fi
