@@ -155,8 +155,10 @@ preparesrc() {
     if [ ! -d $2 ]; then
 	pushd .
 	copysrc $1 $2
-	cd $2
-	patch -p1 < ${patch_dir}/`basename $2`.patch
+	if [ -f ${patch_dir}/`basename $2`.patch ]; then
+	    cd $2
+	    patch -p1 < ${patch_dir}/`basename $2`.patch
+	fi
 	popd
     fi
 }
@@ -342,18 +344,33 @@ build_cloog
 
 # CCTools native tools moved from bundle
 build_binutils
+build_gcc_host
 build_gcc
+
 build_cxxstl
-build_make
 build_ndk_misc
 build_ndk_sysroot
 build_cctools_examples
+build_fortran_examples
 
 # Clang
 build_llvm
 
+# presets
+build_build_essential_clang
+build_build_essential_gcc
+build_build_essential_fortran
+build_build_essential_gcc_avr
+build_build_essential_gcc_objc
+build_build_essential_gcc_objc_fortran
+
+# utils
+build_busybox
+build_make
+
 # Addons
 build_ncurses
+exit 0
 build_libiconv
 #build_libffi
 #build_gettext
@@ -361,7 +378,6 @@ build_glib_host
 build_glib
 #build_slang
 build_mc
-build_busybox
 build_htop
 build_luajit
 build_openssl
@@ -383,16 +399,6 @@ build_binutils_avr
 build_gcc_avr_host
 build_gcc_avr
 build_avr_libc
-build_fortran_host
-build_fortran
-build_fortran_examples
 build_netcat
 build_file_host
 build_file
-
-# presets
-
-build_build_essential_clang
-build_build_essential_gcc
-build_build_essential_fortran
-build_build_essential_gcc_avr
