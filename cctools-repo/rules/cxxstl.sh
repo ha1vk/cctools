@@ -52,15 +52,15 @@ build_cxxstl() {
 	;;
     esac
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    local filename="${PKG}-dev_${PKG_VERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-dev $PKG_VERSION $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     # Cross package
-    local filename="${PKG}-${PKG_ARCH}_${PKG_VERSION}_all.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} $PKG_VERSION all "$PKG_DESC"
-    zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+    local filename="${PKG}-dev-${PKG_ARCH}_${PKG_VERSION}_all.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-dev-${PKG_ARCH} $PKG_VERSION all "$PKG_DESC"
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     if [ "$PKG_ARCH" = "armel" ]; then
 	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../mips/
