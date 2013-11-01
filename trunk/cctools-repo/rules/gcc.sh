@@ -30,7 +30,8 @@ build_gcc() {
     arm*)
 	EXTRA_CONF="--with-arch=armv5te --with-float=soft --with-fpu=vfp"
 	;;
-    *)
+    *86*)
+	EXTRA_CONF="--disable-libquadmath-support"
 	;;
     esac
 
