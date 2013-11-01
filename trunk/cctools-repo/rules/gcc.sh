@@ -69,9 +69,7 @@ build_gcc() {
 	--with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
 	--disable-libssp \
 	--enable-threads \
-	--disable-nls \
 	--disable-libmudflap \
-	--disable-libgomp \
 	--disable-libstdc__-v3 \
 	--disable-sjlj-exceptions \
 	--disable-shared \
@@ -79,23 +77,24 @@ build_gcc() {
 	--disable-libitm \
 	--enable-initfini-array \
 	--disable-nls \
-	--prefix=$TARGET_DIR \
 	--with-binutils-version=$binutils_version \
 	--with-mpfr-version=$mpfr_version \
 	--with-mpc-version=$mpc_version \
 	--with-gmp-version=$gmp_version \
 	--with-gcc-version=$gcc_version \
+	--with-cloog-version=$cloog_version \
+	--with-isl-version=$isl_version \
 	--disable-bootstrap \
 	--disable-libquadmath \
 	--enable-plugins \
 	--enable-libgomp \
 	--disable-libsanitizer \
 	--enable-graphite=yes \
-	--with-cloog-version=$cloog_version \
-	--with-isl-version=$isl_version \
 	--with-sysroot=$SYSROOT \
 	--program-suffix=-${gcc_version} \
 	--enable-objc-gc \
+	--enable-eh-frame-hdr-for-static \
+	--enable-target-optspace \
 	$EXTRA_CONF \
 	|| error "configure"
 
