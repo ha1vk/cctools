@@ -1,11 +1,11 @@
-build_build_essential_clang() {
-    PKG=build-essential-clang
+build_build_essential_gcc_objc() {
+    PKG=build-essential-gcc-objc
     PKG_VERSION=1.0
-    PKG_DESC="Informational list of clang build-essential packages"
-    PKG_DEPS="busybox binutils clang libgcc-dev cxxstl-dev make ndk-misc ndk-sysroot-\${HOSTNDKARCH}-\${HOSTNDKVERSION} cctools-examples"
+    PKG_DESC="Informational list of gcc objc build-essential packages"
+    PKG_DEPS="busybox binutils gobjc make ndk-misc ndk-sysroot-\${HOSTNDKARCH}-\${HOSTNDKVERSION} cctools-examples"
     c_tag ${PKG} && return
 
-    banner "Build clang build essential"
+    banner "Build gcc build essential"
 
     mkdir -p ${TMPINST_DIR}/${PKG}/cctools
 
