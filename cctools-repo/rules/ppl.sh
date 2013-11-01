@@ -1,7 +1,7 @@
 build_ppl() {
     PKG=ppl
     PKG_VERSION=$ppl_version
-    PKG_DESC="Parma Polyhedra library"
+    PKG_DESC="Parma Polyhedra library."
     O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.gz
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
     B_DIR=$build_dir/$PKG
@@ -20,7 +20,16 @@ build_ppl() {
     mkdir -p $B_DIR
     cd $B_DIR
 
-    $S_DIR/configure --target=$TARGET_ARCH --host=$TARGET_ARCH --prefix=$TMPINST_DIR --with-gmp=$TMPINST_DIR --disable-werror --enable-static --disable-shared || error "configure"
+    $S_DIR/configure \
+	--target=$TARGET_ARCH \
+	--host=$TARGET_ARCH \
+	--prefix=$TMPINST_DIR \
+	--with-gmp=$TMPINST_DIR \
+	--disable-werror \
+	--disable-static \
+	--enable-shared || error "configure"
+
+    patch -p0 < ${patch_dir}/libtool-gmp.patch
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
@@ -29,12 +38,27 @@ build_ppl() {
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/share
-    rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/*.la
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/bin
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/*.py
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/pkgconfig
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/*.*a
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    ${TARGET_ARCH}-strip ${TMPINST_DIR}/${PKG}/cctools/lib/*.so*
+
+    rm -rf   ${TMPINST_DIR}/${PKG}-dev/cctools/${TARGET_ARCH}
+    mkdir -p ${TMPINST_DIR}/${PKG}-dev/cctools/${TARGET_ARCH}
+    mv ${TMPINST_DIR}/${PKG}/cctools/include ${TMPINST_DIR}/${PKG}-dev/cctools/${TARGET_ARCH}/
+
+    local filename="lib${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename lib${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
-    zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+
+    PKG_DESC="Parma Polyhedra library (development files)."
+    local filename="lib${PKG}-dev_${PKG_VERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG}-dev $filename lib${PKG}-dev $PKG_VERSION $PKG_ARCH "$PKG_DESC" "lib${PKG}"
+    cd ${TMPINST_DIR}/${PKG}-dev
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     popd
     s_tag $PKG
