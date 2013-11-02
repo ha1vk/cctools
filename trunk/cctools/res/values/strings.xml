@@ -125,6 +125,16 @@
     <string name="pkgmgrButton">Add-ons</string>
     <string name="pkgmgr_name">Add-ons manager</string>
     <string name="pkginstaller_name">Add/Remove add-on</string>
+    
+    <string name="pkg_repoupdatetask">Remote repository</string>
+	<string name="pkg_repodownloading">Downloading list of packages...</string>
+	<string name="pkg_prepareinstalltask">Package list processing</string>
+	<string name="pkg_prepareinstall">Checking the package dependencies...</string>
+	<string name="pkg_installpackagetask">Installing package</string>
+	<string name="pkg_installpackage">Installing package</string>
+	<string name="pkg_uninstallpackagetask">Uninstalling package</string>
+	<string name="pkg_uninstallpackage">Uninstalling package</string>
+			    
     <string name="pkg_name">Name</string>
     <string name="pkg_version">Version:\u0020</string>
     <string name="pkg_description">Description</string>
@@ -132,7 +142,12 @@
     <string name="pkg_file">File:\u0020</string>
     <string name="pkg_filesize"> File size:\u0020</string>
     <string name="pkg_size"> Installed size:\u0020</string>
+    
     <string name="pkg_selected">Selected\u0020</string>
+    <string name="pkg_selected1">Packages to install:\u0020</string>
+    <string name="pkg_selected2">Download size:\u0020</string>
+    <string name="pkg_selected3">Installed size:\u0020</string>
+    <string name="pkg_alreadyinstalled">This package already installed</string>
     <string name="pkg_install">Install</string>
     <string name="pkg_reinstall">Reinstall</string>
     <string name="pkg_uninstall">Uninstall</string>
