@@ -11,7 +11,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -19,7 +18,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import com.pdaxrom.cctools.CCToolsActivity;
 import com.pdaxrom.cctools.R;
 
 import android.app.AlertDialog;
@@ -58,17 +56,6 @@ public class PkgMgrActivity extends ListActivity {
 	
 	private static final int ACTIVITY_PKGCTL = 1;
 	
-    // XML node keys
-    static final String KEY_PACKAGE		= "package"; // parent node
-    static final String KEY_NAME		= "name";
-    static final String KEY_VERSION		= "version";
-    static final String KEY_DESC		= "description";
-    static final String KEY_DEPENDS		= "depends";
-    static final String KEY_SIZE		= "size";
-    static final String KEY_FILE		= "file";
-    static final String KEY_FILESIZE	= "filesize";
-    static final String KEY_STATUS		= "status";
-    
     // Last list position
     private int lastPosition = 0;
     
@@ -86,15 +73,15 @@ public class PkgMgrActivity extends ListActivity {
     
 	final int sdk2ndk_arm[] = {
 			/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  */
-			-1, -1, -1,  3,  4,  5,  5,  5,  8,  9,  9,  9,  9,  9, 14, 14, 14, 14, 18, 18, 18, 18, 18, -1
+			-1, -1, -1,  3,  4,  5,  5,  5,  8,  9,  9,  9,  9, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, -1
 	};
 	final int sdk2ndk_mips[] = {
 			/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 */
-			-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, -1, 14, 14, 14, 14, 18, 18, 18, 18, 18, -1
+			-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, -1
 	};
 	final int sdk2ndk_x86[] = {
 			/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 */
-			-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, -1, 14, 14, 14, 14, 18, 18, 18, 18, 18, -1
+			-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, -1
 	};
 
 	private int ndkVersion;
@@ -121,61 +108,31 @@ public class PkgMgrActivity extends ListActivity {
                     int position, long id) {
                 // getting values from selected ListItem
                 final String name = ((TextView) view.findViewById(R.id.pkg_name)).getText().toString();
-                //final String version = ((TextView) view.findViewById(R.id.pkg_version)).getText().toString();
-                //String description = ((TextView) view.findViewById(R.id.pkg_desciption)).getText().toString();
-                //final String file = ((TextView) view.findViewById(R.id.pkg_file)).getText().toString();
-                //String size = ((TextView) view.findViewById(R.id.pkg_size)).getText().toString();
-
-            	Builder dialog = new AlertDialog.Builder(context)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle(getString(R.string.pkgmgr_name))
-                .setMessage(getString(R.string.pkg_selected) + name)
-                .setNeutralButton(getString(R.string.cancel), null);
 
             	String toolchainDir = getCacheDir().getParentFile().getAbsolutePath() + "/root";
             	String logFile = toolchainDir + PKGS_LISTS_DIR + name + ".list";
             	
             	if ((new File(logFile)).exists()) {
+                	Builder dialog = new AlertDialog.Builder(context)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle(getString(R.string.pkg_selected) + name)
+                    .setMessage(getString(R.string.pkg_alreadyinstalled))
+                    .setNeutralButton(getString(R.string.cancel), null);
 /*            		
                 	dialog.setPositiveButton(getString(R.string.pkg_reinstall), new DialogInterface.OnClickListener() {
                     	public void onClick(DialogInterface dialog, int which) {
-                    		//Intent intent = new Intent(getApplicationContext(), CCToolsActivity.class);
-                    		//intent.putExtra("installPackage", name);
-                    		//intent.putExtra("installPackageVersion", version);
-                    		//intent.putExtra("installPackageFile", file);
-                    		//intent.putExtra("installPackageUrl", URL);
-                    		//startActivityForResult(intent, ACTIVITY_PKGCTL);
                     	}
                     });
  */
                 	dialog.setNegativeButton(getString(R.string.pkg_uninstall), new DialogInterface.OnClickListener() {
                     	public void onClick(DialogInterface dialog, int which) {
-                    		//Intent intent = new Intent(getApplicationContext(), CCToolsActivity.class);
-                    		//intent.putExtra("uninstallPackage", name);
-                    		//intent.putExtra("uninstallPackageVers", version);
-                    		//intent.putExtra("uninstallPackageFile", file);
-                    		//intent.putExtra("uninstallPackageUrl", URL);
-                    		//startActivityForResult(intent, ACTIVITY_PKGCTL);
                     		(new UninstallPackagesTask()).execute(name);
                     	}
                     });
+                	dialog.show();    	                
             	} else {
-                	dialog.setPositiveButton(getString(R.string.pkg_install), new DialogInterface.OnClickListener() {
-                    	public void onClick(DialogInterface dialog, int which) {
-                    		//Intent intent = new Intent(getApplicationContext(), CCToolsActivity.class);
-                    		//intent.putExtra("installPackage", name);
-                    		//intent.putExtra("installPackageVersion", version);
-                    		//intent.putExtra("installPackageFile", file);
-                    		//intent.putExtra("installPackageUrl", URL);
-                    		//startActivityForResult(intent, ACTIVITY_PKGCTL);
-                    		String packages = getPackageDepends(name);
-                    		Log.i(TAG, "Get install packages = " + packages);
-                    		(new InstallPackagesTask()).execute(packages);
-                    	}
-                    });
+            		(new PrepareToInstallTask()).execute(name);
             	}
-
-            	dialog.show();    	                
             }
         });
         
@@ -278,79 +235,36 @@ public class PkgMgrActivity extends ListActivity {
     	str = str.replaceAll("\\$\\{HOSTNDKVERSION\\}", String.valueOf(ndkVersion));
     	return str;
     }
-    
-    private void getDepends(List<String> list, String pkg) {
-    	if (list.contains(pkg)) {
-    		return;
-    	}
-		list.add(pkg);
-		Log.i(TAG, "added pkg = " + pkg);
 
-		XMLParser parser = new XMLParser();
-        Document doc = parser.getDomElement(xmlRepo); // getting DOM element
-        NodeList nl = doc.getElementsByTagName(KEY_PACKAGE);
-
-    	for (int i = 0; i < nl.getLength(); i++) {
-    		Element e = (Element) nl.item(i);    		
-    		String name = parser.getValue(e, KEY_NAME);
-    		if (pkg.contentEquals(name)) {
-    			String deps = parser.getValue(e, KEY_DEPENDS);
-    			Log.i(TAG, "pkg deps = " + deps);
-    			if (deps != null && !deps.contentEquals("")) {
-    				deps = deps.replaceAll("\\s+", " ");
-    				for (String dep: deps.split("\\s+")) {
-    					Log.i(TAG, "check package = " + dep);
-    					getDepends(list, dep);
-    				}
-    			}
-    			break;
-    		}
-    	}
-    	return;
-    }
-    
-    private String getPackageDepends(String pkg) {
-    	List<String> list = new ArrayList<String>();
-
-    	getDepends(list, pkg);
-    	
-    	String ret = "";
-    	
-    	for (String p: list) {
-    		ret += p + " ";
-    	}
-    	
-    	return ret;
-    }
-    
     void showPackages(String xml) {
         ArrayList<HashMap<String, String>> menuItems = new ArrayList<HashMap<String, String>>();
 		XMLParser parser = new XMLParser();
 
         Document doc = parser.getDomElement(xml); // getting DOM element
         
-        NodeList nl = doc.getElementsByTagName(KEY_PACKAGE);
+        NodeList nl = doc.getElementsByTagName(InstallPackageInfo.KEY_PACKAGE);
         // looping through all item nodes <item>
         for (int i = 0; i < nl.getLength(); i++) {
             // creating new HashMap
             HashMap<String, String> map = new HashMap<String, String>();
             Element e = (Element) nl.item(i);
             // adding each child node to HashMap key => value
-            map.put(KEY_NAME, parser.getValue(e, KEY_NAME));
-            map.put(KEY_VERSION, parser.getValue(e, KEY_VERSION));
-            map.put(KEY_DESC, parser.getValue(e, KEY_DESC));
-            map.put(KEY_DEPENDS, replaceMacro(parser.getValue(e, KEY_DEPENDS)));
-            map.put(KEY_FILESIZE, parser.getValue(e, KEY_FILESIZE));
-            map.put(KEY_SIZE, parser.getValue(e, KEY_SIZE));
-            map.put(KEY_FILE, parser.getValue(e, KEY_FILE));
+            map.put(InstallPackageInfo.KEY_NAME, parser.getValue(e, InstallPackageInfo.KEY_NAME));
+            map.put(InstallPackageInfo.KEY_VERSION, parser.getValue(e, InstallPackageInfo.KEY_VERSION));
+            map.put(InstallPackageInfo.KEY_DESC, parser.getValue(e, InstallPackageInfo.KEY_DESC));
+            map.put(InstallPackageInfo.KEY_DEPENDS, parser.getValue(e, InstallPackageInfo.KEY_DEPENDS));
+            map.put(InstallPackageInfo.KEY_FILESIZE, parser.getValue(e, InstallPackageInfo.KEY_FILESIZE));
+            map.put(InstallPackageInfo.KEY_SIZE, parser.getValue(e, InstallPackageInfo.KEY_SIZE));
+            map.put(InstallPackageInfo.KEY_FILE, parser.getValue(e, InstallPackageInfo.KEY_FILE));
 
             String toolchainDir = getCacheDir().getParentFile().getAbsolutePath() + "/root";
-        	String logFile = toolchainDir + PKGS_LISTS_DIR + parser.getValue(e, KEY_NAME) + ".list";
+        	String logFile = toolchainDir + PKGS_LISTS_DIR
+        			+ parser.getValue(e, InstallPackageInfo.KEY_NAME) + ".list";
         	
         	if ((new File(logFile)).exists()) {
-        		map.put(KEY_STATUS, getString(R.string.pkg_installed));
+        		map.put(InstallPackageInfo.KEY_STATUS, getString(R.string.pkg_installed));
         	}else {
-        		map.put(KEY_STATUS, getString(R.string.pkg_notinstalled));        		
+        		map.put(InstallPackageInfo.KEY_STATUS, getString(R.string.pkg_notinstalled));        		
         	}
 
             // adding HashList to ArrayList
@@ -358,24 +272,26 @@ public class PkgMgrActivity extends ListActivity {
         }
  
         // Adding menuItems to ListView
-        ListAdapter adapter = new SimpleAdapter(this, menuItems,
-        										R.layout.pkgmgr_list_package,
-        										new String[] { KEY_NAME,
-        														KEY_VERSION,
-        														KEY_DESC,
-        														KEY_DEPENDS,
-        														KEY_FILE,
-        														KEY_FILESIZE,
-        														KEY_SIZE,
-        														KEY_STATUS },
-        										new int[] {	R.id.pkg_name,
-        													R.id.pkg_version,
-        													R.id.pkg_desciption,
-        													R.id.pkg_deps,
-        													R.id.pkg_file,
-        													R.id.pkg_filesize,
-        													R.id.pkg_size,
-        													R.id.pkg_status });
+        ListAdapter adapter = new SimpleAdapter(
+        		this, 
+        		menuItems,
+        		R.layout.pkgmgr_list_package,
+        		new String[] {	InstallPackageInfo.KEY_NAME,
+        		InstallPackageInfo.KEY_VERSION,
+        		InstallPackageInfo.KEY_DESC,
+        		InstallPackageInfo.KEY_DEPENDS,
+        		InstallPackageInfo.KEY_FILE,
+        		InstallPackageInfo.KEY_FILESIZE,
+        		InstallPackageInfo.KEY_SIZE,
+        		InstallPackageInfo.KEY_STATUS },
+        	new int[] {	R.id.pkg_name,
+        		R.id.pkg_version,
+        		R.id.pkg_desciption,
+        		R.id.pkg_deps,
+        		R.id.pkg_file,
+        		R.id.pkg_filesize,
+        		R.id.pkg_size,
+        		R.id.pkg_status });
  
         setListAdapter(adapter);
         
@@ -388,14 +304,15 @@ public class PkgMgrActivity extends ListActivity {
     private class DownloadXmlTask extends AsyncTask<String, Void, String> {
     	protected void onPreExecute() {
         	super.onPreExecute();
-        	showProgress();
+        	showProgress(getString(R.string.pkg_repoupdatetask), 
+        			getString(R.string.pkg_repodownloading));
         }
 
 		protected String doInBackground(String... arg0) {
 	        Log.i(TAG, "Repo URL: " + arg0[0] + "/Packages");
 			XMLParser parser = new XMLParser();
 			String xml = parser.getXmlFromUrl(arg0[0] + "/Packages");
-			return xml;
+			return replaceMacro(xml);
 		}
 		
 		protected void onPostExecute(String result) {
@@ -410,14 +327,50 @@ public class PkgMgrActivity extends ListActivity {
 
     }
     
-    private class InstallPackagesTask extends AsyncTask<String, Void, Boolean> {
+    private class PrepareToInstallTask extends AsyncTask<String, Void, InstallPackageInfo> {
+    	protected void onPreExecute() {
+        	super.onPreExecute();
+        	showProgress(getString(R.string.pkg_prepareinstalltask),
+        			getString(R.string.pkg_prepareinstall));
+        }
+
+		@Override
+		protected InstallPackageInfo doInBackground(String... params) {
+    		return new InstallPackageInfo(xmlRepo, params[0]);
+		}
+    	
+		protected void onPostExecute(final InstallPackageInfo info) {
+			hideProgress();
+        	Builder dialog = new AlertDialog.Builder(context)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setTitle(getString(R.string.pkg_selected) + info.getName())
+            .setMessage(getString(R.string.pkg_selected1) + info.getPackagesStrings()
+            		+ "\n\n"
+            		+ getString(R.string.pkg_selected2) 
+            		+ Utils.humanReadableByteCount(info.getDownloadSize(), false)
+            		+ "\u0020"
+            		+ getString(R.string.pkg_selected3)
+            		+ Utils.humanReadableByteCount(info.getInstallSize(), false))
+            .setNeutralButton(getString(R.string.cancel), null)
+        	.setPositiveButton(getString(R.string.pkg_install), new DialogInterface.OnClickListener() {
+            	public void onClick(DialogInterface dialog, int which) {
+            		Log.i(TAG, "Get install packages = " + info.getPackagesStrings());
+            		(new InstallPackagesTask()).execute(info);
+            	}
+            });
+        	dialog.show();
+		}
+    }
+    
+    private class InstallPackagesTask extends AsyncTask<InstallPackageInfo, Void, Boolean> {
     	protected void onPreExecute() {
     		super.onPreExecute();
-    		showProgress();
+    		showProgress(getString(R.string.pkg_installpackagetask),
+    				getString(R.string.pkg_installpackage));
     	}
     	
-		protected Boolean doInBackground(String... params) {
-			return installPackages(params[0]);
+		protected Boolean doInBackground(InstallPackageInfo... params) {
+			return installPackage(params[0]);
 		}
     	
 		protected void onPostExecute(Boolean result) {
@@ -431,7 +384,8 @@ public class PkgMgrActivity extends ListActivity {
     private class UninstallPackagesTask extends AsyncTask<String, Void, Boolean> {
     	protected void onPreExecute() {
     		super.onPreExecute();
-    		showProgress();
+    		showProgress(getString(R.string.pkg_uninstallpackagetask),
+    				getString(R.string.pkg_uninstallpackage));
     	}
     	
 		protected Boolean doInBackground(String... params) {
@@ -545,15 +499,8 @@ public class PkgMgrActivity extends ListActivity {
 		return true;
 	}
 
-	private void showProgress() {
-//		handler.post(new Runnable() {
-//			public void run() {
-				pd = ProgressDialog.show(context, getString(R.string.updating_caption) + "...",
-						getString(R.string.establishing_handshake_message) + "...",
-						true);
-
-//			}
-//		});
+	private void showProgress(String title, String message) {
+		pd = ProgressDialog.show(context, title, message, true);
 	}
 	
 	private void updateProgress(final String out) {
@@ -573,11 +520,7 @@ public class PkgMgrActivity extends ListActivity {
 	}
 
 	private void hideProgress() {
-//		handler.post(new Runnable() {
-//			public void run() {
-				pd.dismiss();
-//			}
-//		});
+		pd.dismiss();
 	}
 	
     private void show_error(final String message) {
@@ -599,33 +542,20 @@ public class PkgMgrActivity extends ListActivity {
     	handler.post(proc);
     }
 
-    private String getPackageFile(String pkg) {
-		XMLParser parser = new XMLParser();
-        Document doc = parser.getDomElement(xmlRepo); // getting DOM element
-        NodeList nl = doc.getElementsByTagName(KEY_PACKAGE);
-    	for (int i = 0; i < nl.getLength(); i++) {
-            Element e = (Element) nl.item(i);
-    		String name = parser.getValue(e, KEY_NAME);
-    		//Log.i(TAG, ">>>[" + name + "][" + pkg + "]");
-    		if (pkg.contentEquals(name)) {
-        		//Log.i(TAG, ">>>[" + name + "][" + pkg + "]");
-    			return parser.getValue(e, KEY_FILE);
-    		}
-    	}
-    	return "";
-    }
-    
-    private boolean installPackages(String packages) {
+    private boolean installPackage(InstallPackageInfo info) {
     	List<String> postinstList = new ArrayList<String>();
-    	for (String name: replaceMacro(packages).split("\\s+")) {
-    		if ((new File(toolchainDir + "/" + PKGS_LISTS_DIR + "/" + name + ".pkgdesc")).exists()) {
-        		//TODO: check packaged version for update
-    			Log.i(TAG, "Package " + name + " already installed.");
+    	for (PackageInfo packageInfo: info.getPackagesList()) {
+    		if ((new File(toolchainDir + "/" + PKGS_LISTS_DIR + "/" 
+    				+ packageInfo.getName() + ".pkgdesc")).exists()) {
+        		//TODO: check package version for update
+    			Log.i(TAG, "Package " + packageInfo.getName() + " already installed.");
     			continue;
     		}
-    		String file = getPackageFile(name);
-    		Log.i(TAG, "Install " + name + " -> " + file);
-			if (!downloadAndUnpack(file, URL, toolchainDir, toolchainDir + PKGS_LISTS_DIR + name + ".list")) {
+    		updateProgressTitle(getString(R.string.pkg_installpackagetask) + " " + packageInfo.getName());
+    		String file = packageInfo.getFile();
+    		Log.i(TAG, "Install " + packageInfo.getName() + " -> " + packageInfo.getFile());
+			if (!downloadAndUnpack(file, URL, toolchainDir, 
+					toolchainDir + "/" + PKGS_LISTS_DIR + "/" + packageInfo.getName() + ".list")) {
 				return false;
 			}
 			updateProgress(getString(R.string.wait_message));
@@ -633,13 +563,14 @@ public class PkgMgrActivity extends ListActivity {
 			String[] infoFiles = {"pkgdesc", "postinst", "prerm"};
 			for (String infoFile: infoFiles) {
 				if ((new File(toolchainDir + "/" + infoFile)).exists()) {
-					String infoFilePath = toolchainDir + "/" + PKGS_LISTS_DIR  + "/" + name + "." + infoFile;
+					String infoFilePath = toolchainDir + "/" + PKGS_LISTS_DIR  + "/" 
+							+ packageInfo.getName() + "." + infoFile;
 					Log.i(TAG, "Copy file to " + infoFilePath);
 					try {
 						Utils.copyDirectory(new File(toolchainDir + "/" + infoFile),
 											new File(infoFilePath));
 						if (infoFile.contentEquals("postinst")) {
-							postinstList.add(name);
+							postinstList.add(packageInfo.getName());
 						}
 					} catch (IOException e) {
 						Log.e(TAG, "Copy " + infoFile + " file failed " + e);

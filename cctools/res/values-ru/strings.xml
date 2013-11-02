@@ -121,23 +121,29 @@
     <string name="newDirectory">Новая папка</string>
     <string name="create_new">Создать:</string>
     <string name="cannot_create">Невозможно создать!</string>
+
+	<string name="pkgmgrButton">Дополнения</string>
+    <string name="pkgmgr_name">Управление пакетами дополнений</string>
+    <string name="pkginstaller_name">Установка/Удаление дополнений</string>
     
-    <string name="pkgmgrButton">Дополнения</string>
-    <string name="pkgmgr_name">Управление дополнениями</string>
-    <string name="pkginstaller_name">Добавить/Удалить дополнение</string>
-    <string name="pkg_name">Имя</string>
+    <string name="pkg_name">Название</string>
     <string name="pkg_version">Версия:\u0020</string>
     <string name="pkg_description">Описание</string>
     <string name="pkg_deps">Зависимости:\u0020</string>
     <string name="pkg_file">Файл:\u0020</string>
     <string name="pkg_filesize">Размер файла:\u0020</string>
-    <string name="pkg_size">Размер установленного:\u0020</string>
-    <string name="pkg_selected">Выбрано\u0020</string>
+    <string name="pkg_size">Установленный размер:\u0020</string>
+    
+    <string name="pkg_selected">Выбран\u0020</string>
+    <string name="pkg_selected1">Пакеты для установки:\u0020</string>
+    <string name="pkg_selected2">Будет загружено:\u0020</string>
+    <string name="pkg_selected3">Займет после установки:\u0020</string>
+    <string name="pkg_alreadyinstalled">Этот пакет уже установлен</string>
     <string name="pkg_install">Установить</string>
     <string name="pkg_reinstall">Переустановить</string>
     <string name="pkg_uninstall">Удалить</string>
     <string name="pkg_status">Состояние: \u0020</string>
-    <string name="pkg_installed">Установлено</string>
-    <string name="pkg_notinstalled">Не установлено</string>
-    <string name="pkg_searchHint">Поиск</string>
+    <string name="pkg_installed">Установлен</string>
+    <string name="pkg_notinstalled">Не установлен</string>
+    <string name="pkg_searchHint">Поиск пакета</string>
 </resources>
