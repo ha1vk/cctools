@@ -12,10 +12,12 @@ build_binutils() {
 
     pushd .
 
-    copysrc $O_DIR $S_DIR
+    preparesrc $O_DIR $S_DIR
 
-    cd $S_DIR
-    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
+#    copysrc $O_DIR $S_DIR
+
+#    cd $S_DIR
+#    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
 
     mkdir -p $B_DIR
     cd $B_DIR
