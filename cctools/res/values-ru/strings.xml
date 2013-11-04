@@ -125,6 +125,15 @@
 	<string name="pkgmgrButton">Дополнения</string>
     <string name="pkgmgr_name">Управление пакетами дополнений</string>
     <string name="pkginstaller_name">Установка/Удаление дополнений</string>
+
+	<string name="pkg_repoupdatetask">Хранилище пакетов</string>
+	<string name="pkg_repodownloading">Загружается список пакетов...</string>
+	<string name="pkg_prepareinstalltask">Обработка списка пакетов</string>
+	<string name="pkg_prepareinstall">Проверка зависимостей пакета...</string>
+	<string name="pkg_installpackagetask">Установка пакета</string>
+	<string name="pkg_installpackage">Устанавливается пакет</string>
+	<string name="pkg_uninstallpackagetask">Удаление пакета</string>
+	<string name="pkg_uninstallpackage">Удаляется пакет</string>
     
     <string name="pkg_name">Название</string>
     <string name="pkg_version">Версия:\u0020</string>

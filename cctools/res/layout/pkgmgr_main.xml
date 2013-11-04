@@ -6,6 +6,11 @@
 	<!-- Main ListView 
 		 Always give id value as list(@android:id/list)
 	-->
+	<LinearLayout 
+  		android:focusable="true"
+  		android:focusableInTouchMode="true" 
+  		android:layout_width="0px"
+  		android:layout_height="0px" />
 <!-- Editext for Search -->
     <EditText android:id="@+id/inputSearch"
         android:layout_width="fill_parent"
