@@ -14,10 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
 import com.pdaxrom.cctools.R;
 
 import android.app.AlertDialog;
@@ -52,7 +48,7 @@ public class PkgMgrActivity extends ListActivity {
 	private Context context = this;
 	private static final String PKGS_LISTS_DIR = "/installed/";
 	
-	private String xmlRepo;
+	private List<PackageInfo> remoteRepo = null;
 	
 	private static final int ACTIVITY_PKGCTL = 1;
 	
@@ -98,7 +94,7 @@ public class PkgMgrActivity extends ListActivity {
         setupDirs();
         setupVersion();
         
-        (new DownloadXmlTask()).execute(URL);
+        (new DownloadRepoTask()).execute(URL);
          
         // selecting single ListView item
         lv = getListView();
@@ -171,8 +167,8 @@ public class PkgMgrActivity extends ListActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     	if (requestCode == ACTIVITY_PKGCTL) {
     		Log.i(TAG, "install/uninstall finished");
-    		if (xmlRepo != null) {
-    			showPackages(xmlRepo);
+    		if (remoteRepo != null) {
+    			showPackages(remoteRepo);
     		}
     	}
     }
@@ -227,44 +223,34 @@ public class PkgMgrActivity extends ListActivity {
         		ndkVersion = sdk2ndk_x86[sdk2ndk_x86.length -1];
         	}
         }
+        
+        RepoUtils.setVersion(ndkArch, ndkVersion);
     }
     
-    private String replaceMacro(String str) {
-    	str = str.replaceAll("\\$\\{HOSTARCH\\}", ndkArch);
-    	str = str.replaceAll("\\$\\{HOSTNDKARCH\\}", ndkArch);
-    	str = str.replaceAll("\\$\\{HOSTNDKVERSION\\}", String.valueOf(ndkVersion));
-    	return str;
-    }
-
-    void showPackages(String xml) {
+    void showPackages(List<PackageInfo> repo) {
         ArrayList<HashMap<String, String>> menuItems = new ArrayList<HashMap<String, String>>();
-		XMLParser parser = new XMLParser();
 
-        Document doc = parser.getDomElement(xml); // getting DOM element
-        
-        NodeList nl = doc.getElementsByTagName(InstallPackageInfo.KEY_PACKAGE);
-        // looping through all item nodes <item>
-        for (int i = 0; i < nl.getLength(); i++) {
+        for (PackageInfo info: repo) {
             // creating new HashMap
             HashMap<String, String> map = new HashMap<String, String>();
-            Element e = (Element) nl.item(i);
+
             // adding each child node to HashMap key => value
-            map.put(InstallPackageInfo.KEY_NAME, parser.getValue(e, InstallPackageInfo.KEY_NAME));
-            map.put(InstallPackageInfo.KEY_VERSION, parser.getValue(e, InstallPackageInfo.KEY_VERSION));
-            map.put(InstallPackageInfo.KEY_DESC, parser.getValue(e, InstallPackageInfo.KEY_DESC));
-            map.put(InstallPackageInfo.KEY_DEPENDS, parser.getValue(e, InstallPackageInfo.KEY_DEPENDS));
-            map.put(InstallPackageInfo.KEY_FILESIZE, parser.getValue(e, InstallPackageInfo.KEY_FILESIZE));
-            map.put(InstallPackageInfo.KEY_SIZE, parser.getValue(e, InstallPackageInfo.KEY_SIZE));
-            map.put(InstallPackageInfo.KEY_FILE, parser.getValue(e, InstallPackageInfo.KEY_FILE));
+            map.put(RepoUtils.KEY_NAME,		info.getName());
+            map.put(RepoUtils.KEY_VERSION,	info.getVersion());
+            map.put(RepoUtils.KEY_DESC,		info.getDescription());
+            map.put(RepoUtils.KEY_DEPENDS,	info.getDepends());
+            map.put(RepoUtils.KEY_FILESIZE,	String.valueOf(info.getFileSize()));
+            map.put(RepoUtils.KEY_SIZE,		String.valueOf(info.getSize()));
+            map.put(RepoUtils.KEY_FILE,		info.getFile());
 
             String toolchainDir = getCacheDir().getParentFile().getAbsolutePath() + "/root";
-        	String logFile = toolchainDir + PKGS_LISTS_DIR
-        			+ parser.getValue(e, InstallPackageInfo.KEY_NAME) + ".list";
+        	String logFile = toolchainDir + "/" + PKGS_LISTS_DIR + "/"
+        			+ info.getName() + ".list";
         	
         	if ((new File(logFile)).exists()) {
-        		map.put(InstallPackageInfo.KEY_STATUS, getString(R.string.pkg_installed));
+        		map.put(RepoUtils.KEY_STATUS, getString(R.string.pkg_installed));
         	}else {
-        		map.put(InstallPackageInfo.KEY_STATUS, getString(R.string.pkg_notinstalled));        		
+        		map.put(RepoUtils.KEY_STATUS, getString(R.string.pkg_notinstalled));        		
         	}
 
             // adding HashList to ArrayList
@@ -276,55 +262,54 @@ public class PkgMgrActivity extends ListActivity {
         		this, 
         		menuItems,
         		R.layout.pkgmgr_list_package,
-        		new String[] {	InstallPackageInfo.KEY_NAME,
-        		InstallPackageInfo.KEY_VERSION,
-        		InstallPackageInfo.KEY_DESC,
-        		InstallPackageInfo.KEY_DEPENDS,
-        		InstallPackageInfo.KEY_FILE,
-        		InstallPackageInfo.KEY_FILESIZE,
-        		InstallPackageInfo.KEY_SIZE,
-        		InstallPackageInfo.KEY_STATUS },
-        	new int[] {	R.id.pkg_name,
-        		R.id.pkg_version,
-        		R.id.pkg_desciption,
-        		R.id.pkg_deps,
-        		R.id.pkg_file,
-        		R.id.pkg_filesize,
-        		R.id.pkg_size,
-        		R.id.pkg_status });
+        		new String[] {
+        				RepoUtils.KEY_NAME,
+        				RepoUtils.KEY_VERSION,
+        				RepoUtils.KEY_DESC,
+        				RepoUtils.KEY_DEPENDS,
+        				RepoUtils.KEY_FILE,
+        				RepoUtils.KEY_FILESIZE,
+        				RepoUtils.KEY_SIZE,
+        				RepoUtils.KEY_STATUS },
+        		new int[] {
+        				R.id.pkg_name,
+        				R.id.pkg_version,
+        				R.id.pkg_desciption,
+        				R.id.pkg_deps,
+        				R.id.pkg_file,
+        				R.id.pkg_filesize,
+        				R.id.pkg_size,
+        				R.id.pkg_status });
  
         setListAdapter(adapter);
         
-        if (lastPosition > 0 && lastPosition < nl.getLength()) {
+        if (lastPosition > 0 && lastPosition < repo.size()) {
         	this.getListView().setSelection(lastPosition);
         }
         
     }
     
-    private class DownloadXmlTask extends AsyncTask<String, Void, String> {
+    private class DownloadRepoTask extends AsyncTask<String, Void, List<PackageInfo>> {
     	protected void onPreExecute() {
         	super.onPreExecute();
         	showProgress(getString(R.string.pkg_repoupdatetask), 
         			getString(R.string.pkg_repodownloading));
         }
 
-		protected String doInBackground(String... arg0) {
-	        Log.i(TAG, "Repo URL: " + arg0[0] + "/Packages");
-			XMLParser parser = new XMLParser();
-			String xml = parser.getXmlFromUrl(arg0[0] + "/Packages");
-			return replaceMacro(xml);
+		protected List<PackageInfo> doInBackground(String... params) {
+	        Log.i(TAG, "Repo URL: " + params[0] + "/Packages");
+			return RepoUtils.getRepoFromUrl(params[0] + "/Packages");
 		}
-		
-		protected void onPostExecute(String result) {
+
+		protected void onPostExecute(List<PackageInfo> result) {
 			super.onPostExecute(result);
-	        Log.i(TAG, "Downloaded: " + result);
+	        Log.i(TAG, "Downloaded repo with " + result.size() + " packages.");
 	        if (result != null) {
-	        	xmlRepo = result;
+	        	remoteRepo = result;
 	        	showPackages(result);
 	        }
 	        hideProgress();
 		}
-
     }
     
     private class PrepareToInstallTask extends AsyncTask<String, Void, InstallPackageInfo> {
@@ -336,7 +321,7 @@ public class PkgMgrActivity extends ListActivity {
 
 		@Override
 		protected InstallPackageInfo doInBackground(String... params) {
-    		return new InstallPackageInfo(xmlRepo, params[0]);
+    		return new InstallPackageInfo(remoteRepo, params[0]);
 		}
     	
 		protected void onPostExecute(final InstallPackageInfo info) {
@@ -376,7 +361,7 @@ public class PkgMgrActivity extends ListActivity {
 		protected void onPostExecute(Boolean result) {
 			super.onPostExecute(result);
 			lastPosition = lv.getFirstVisiblePosition();
-			showPackages(xmlRepo);
+			showPackages(remoteRepo);
 			hideProgress();
 		}
     }
@@ -395,7 +380,7 @@ public class PkgMgrActivity extends ListActivity {
 		protected void onPostExecute(Boolean result) {
 			super.onPostExecute(result);
 			lastPosition = lv.getFirstVisiblePosition();
-			showPackages(xmlRepo);
+			showPackages(remoteRepo);
 			hideProgress();
 		}
     }

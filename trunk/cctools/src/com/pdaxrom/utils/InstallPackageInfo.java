@@ -3,37 +3,20 @@ package com.pdaxrom.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
 import android.util.Log;
 
 public class InstallPackageInfo {
 	private static final String TAG = "InstallPackageInfo";
 
-    // XML node keys
-    static public final String KEY_PACKAGE	= "package"; // parent node
-    static public final String KEY_NAME		= "name";
-    static public final String KEY_VERSION	= "version";
-    static public final String KEY_DESC		= "description";
-    static public final String KEY_DEPENDS	= "depends";
-    static public final String KEY_SIZE		= "size";
-    static public final String KEY_FILE		= "file";
-    static public final String KEY_FILESIZE	= "filesize";
-    static public final String KEY_STATUS	= "status";
-
 	private String _pkg;
-	private String _xmlRepo;
 	private List<PackageInfo> _list;
 	private int installSize = 0;
 	private int downloadSize = 0;
 	
-	InstallPackageInfo(String xmlRepo, String pkg) {
+	InstallPackageInfo(List<PackageInfo> repo, String pkg) {
 		_pkg = pkg;
-		_xmlRepo = xmlRepo;
 		_list = new ArrayList<PackageInfo>();
-		getDepends(_pkg, _list);
+		getDepends(repo, _pkg, _list);
 		calculateSizes();
 	}
 	
@@ -76,44 +59,23 @@ public class InstallPackageInfo {
 		return packages;
 	}
 	
-    private boolean isContainsPackage(List<PackageInfo> list, String name) {
-    	for (PackageInfo packageInfo: list) {
-    		if (packageInfo.getName().contains(name)) {
-    			return true;
-    		}
-    	}
-    	return false;
-    }
-    
-    private void getDepends(String pkg ,List<PackageInfo> list) {
-    	if (isContainsPackage(list, pkg)) {
+    private void getDepends(List<PackageInfo> repo, String pkg ,List<PackageInfo> list) {
+    	if (RepoUtils.isContainsPackage(list, pkg)) {
     		return;
     	}
 
-		XMLParser parser = new XMLParser();
-        Document doc = parser.getDomElement(_xmlRepo); // getting DOM element
-        NodeList nl = doc.getElementsByTagName(KEY_PACKAGE);
-
-    	for (int i = 0; i < nl.getLength(); i++) {
-    		Element e = (Element) nl.item(i);    		
-    		String name = parser.getValue(e, KEY_NAME);
-    		if (pkg.contentEquals(name)) {
-    			String deps = parser.getValue(e, KEY_DEPENDS);
+    	for (PackageInfo info: repo) {
+    		if (pkg.contentEquals(info.getName())) {
+    			String deps = info.getDepends();
     			Log.i(TAG, "pkg deps = " + deps);
     			if (deps != null && !deps.contentEquals("")) {
     				deps = deps.replaceAll("\\s+", " ");
     				for (String dep: deps.split("\\s+")) {
     					Log.i(TAG, "check package = " + dep);
-    					getDepends(dep, list);
+    					getDepends(repo, dep, list);
     				}
     			}
-        		PackageInfo packageInfo = new PackageInfo(
-        				parser.getValue(e, KEY_NAME),
-        				parser.getValue(e, KEY_FILE),
-        				Integer.valueOf(parser.getValue(e, KEY_SIZE)),
-        				Integer.valueOf(parser.getValue(e, KEY_FILESIZE)),
-        				parser.getValue(e, KEY_VERSION));
-    			list.add(packageInfo);
+    			list.add(info);
     			Log.i(TAG, "added pkg = " + pkg);
     			break;
     		}
