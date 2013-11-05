@@ -24,15 +24,10 @@ TARGET_INST_DIR="/data/data/com.pdaxrom.cctools/root/cctools"
 #TARGET_INST_DIR="/data/data/com.pdaxrom.cctools/cache/cctools"
 
 SRC_PREFIX="$1"
-
 TARGET_ARCH="$2"
 HOST_ARCH="$2"
-
 WORK_DIR="$3"
-
-SYSROOT="$4"
-
-NDK_DIR="$5"
+NDK_DIR="$4"
 
 if [ "x$SRC_PREFIX" = "x" ]; then
     echo "No source dir"
@@ -64,6 +59,8 @@ patch_dir="${TOPDIR}/patches"
 
 TARGET_DIR="${WORK_DIR}/cctools"
 TMPINST_DIR="${build_dir}/tmpinst"
+
+SYSROOT="${TARGET_DIR}-host/sysroot"
 
 MAKE=make
 INSTALL=install
@@ -328,26 +325,32 @@ export PATH=${TARGET_DIR}-host/bin:$PATH
 
 makedirs
 
-# Toolchain support libs
+build_sysroot_host
+
 build_gmp_host
-build_gmp
 build_mpfr_host
-build_mpfr
 build_mpc_host
-build_mpc
 build_isl_host
-build_isl
 build_ppl_host
-build_ppl
 build_cloog_host
+
+build_binutils_host
+build_gcc_host
+
+# Toolchain support libs
+build_gmp
+build_mpfr
+build_mpc
+build_isl
+build_ppl
 build_cloog
 
 # CCTools native tools moved from bundle
 build_binutils
-build_gcc_host
 build_gcc
 
-build_cxxstl
+#build_cxxstl
+
 build_ndk_misc
 build_ndk_sysroot
 build_cctools_examples
@@ -401,3 +404,6 @@ build_avr_libc
 build_netcat
 build_file_host
 build_file
+
+# Bug fixes for firmware
+build_acer_a200_ics403_libc_fix
