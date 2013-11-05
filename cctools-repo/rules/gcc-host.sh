@@ -14,11 +14,6 @@ build_gcc_host() {
 
     preparesrc $O_DIR $S_DIR
 
-#    copysrc $O_DIR $S_DIR
-
-#    cd $S_DIR
-#    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
-
     mkdir -p $B_DIR
     cd $B_DIR
 
@@ -31,6 +26,7 @@ build_gcc_host() {
 	;;
     arm*)
 	EXTRA_CONF="--with-arch=armv5te --with-float=soft --with-fpu=vfp"
+	#EXTRA_CONF="--with-arch=armv7-a --with-float=softfp --with-fpu=vfpv3-d16"
 	;;
     *86*)
 	EXTRA_CONF="--disable-libquadmath-support"
@@ -43,7 +39,6 @@ build_gcc_host() {
 	--target=$TARGET_ARCH \
 	--host=x86_64-linux-gnu \
 	--prefix=${TARGET_DIR}-host \
-	--bindir=${TARGET_DIR}-host/xbin \
 	--build=x86_64-linux-gnu \
 	--with-gnu-as \
 	--with-gnu-ld \
@@ -58,11 +53,9 @@ build_gcc_host() {
 	--disable-cloog-version-check \
 	--disable-isl-version-check \
 	--enable-cloog-backend=isl \
-	--with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
 	--disable-libssp \
 	--enable-threads \
 	--disable-libmudflap \
-	--disable-libstdc__-v3 \
 	--disable-sjlj-exceptions \
 	--disable-shared \
 	--disable-tls \
@@ -83,24 +76,17 @@ build_gcc_host() {
 	--disable-libsanitizer \
 	--enable-graphite=yes \
 	--with-sysroot=$SYSROOT \
-	--with-gxx-include-dir=${SYSROOT}/../include/c++/${gcc_version} \
 	--enable-objc-gc \
 	--enable-eh-frame-hdr-for-static \
 	--enable-target-optspace \
+	--with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
+	--with-gxx-include-dir=${TARGET_DIR}-host/${TARGET_ARCH}/include/c++/${gcc_version} \
 	$EXTRA_CONF \
 	|| error "configure"
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
     $MAKE install || error "make install"
-
-    ln -sf ${SYSROOT}/../${TARGET_ARCH}/bin ${TARGET_DIR}-host/${TARGET_ARCH}/bin
-    ln -sf ${SYSROOT} ${TARGET_DIR}-host/sysroot
-
-    cd ${SYSROOT}/../${TARGET_ARCH}/lib
-    find . -type f -name "libstdc++.a" -exec install -D -m 644 {} ${TARGET_DIR}-host/${TARGET_ARCH}/lib/{} \;
-    find . -type f -name "libsupc++.a" -exec install -D -m 644 {} ${TARGET_DIR}-host/${TARGET_ARCH}/lib/{} \;
-    find . -type f -name "libgnustl_*" -exec install -D -m 644 {} ${TARGET_DIR}-host/${TARGET_ARCH}/lib/{} \;
 
     popd
     s_tag ${PKG}-host
