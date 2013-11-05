@@ -56,6 +56,9 @@ build_llvm() {
     --prefix=$TMPINST_DIR \
     --enable-targets=$CLANG_TARGET \
     --enable-optimized \
+    --disable-assertions \
+    --disable-debug-runtime\
+    --disable-expensive-checks \
     --with-binutils-include=$SRC_PREFIX/binutils/binutils-$binutils_version/include \
     --enable-keep-symbols \
     CFLAGS="-I${TMPINST_DIR}/include" \
@@ -158,7 +161,7 @@ EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/prerm
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC" "libgcc-dev cxxstl-dev"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC" "libgcc-dev libstdc++-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
