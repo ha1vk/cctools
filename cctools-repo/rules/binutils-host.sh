@@ -25,7 +25,6 @@ build_binutils_host() {
     $S_DIR/configure \
 	--target=${TARGET_ARCH} \
 	--prefix=${TARGET_DIR}-host \
-	--bindir=${TARGET_DIR}-host/xbin \
 	--with-sysroot=$SYSROOT \
 	--enable-multilib \
 	--disable-nls \
