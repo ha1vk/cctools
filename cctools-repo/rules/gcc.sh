@@ -35,10 +35,6 @@ build_gcc() {
 	;;
     esac
 
-    local OLDPATH=$PATH
-
-    export PATH=${TARGET_DIR}-host/xbin:$PATH
-
 #    ac_cv_func_getc_unlocked=no \
 #    ac_cv_func_getchar_unlocked=no \
 #    ac_cv_func_putc_unlocked=no \
@@ -66,11 +62,9 @@ build_gcc() {
 	--disable-cloog-version-check \
 	--disable-isl-version-check \
 	--enable-cloog-backend=isl \
-	--with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
 	--disable-libssp \
 	--enable-threads \
 	--disable-libmudflap \
-	--disable-libstdc__-v3 \
 	--disable-sjlj-exceptions \
 	--disable-shared \
 	--disable-tls \
@@ -95,6 +89,7 @@ build_gcc() {
 	--enable-objc-gc \
 	--enable-eh-frame-hdr-for-static \
 	--enable-target-optspace \
+	--with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
 	$EXTRA_CONF \
 	|| error "configure"
 
@@ -105,8 +100,6 @@ build_gcc() {
     rm -rf ${TMPINST_DIR}/gcc
 
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
-
-    export PATH=$OLDPATH
 
     rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gcc-ar-$gcc_version
     rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gcc-nm-$gcc_version
@@ -137,14 +130,19 @@ build_gcc() {
 
     rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/libiberty.a
     find ${TMPINST_DIR}/${PKG}/cctools/ -name "*.la"  -exec rm -f {} \;
+    find ${TMPINST_DIR}/${PKG}/cctools/ -name "*.py"  -exec rm -f {} \;
 
     rm -rf ${TMPINST_DIR}/gfortran
     rm -rf ${TMPINST_DIR}/gobjc
+    rm -rf ${TMPINST_DIR}/libstdc++-dev
     rm -rf ${TMPINST_DIR}/libgcc-dev
     rm -rf ${TMPINST_DIR}/libgfortran-dev
     rm -rf ${TMPINST_DIR}/libobjc-dev
 
     cd ${TMPINST_DIR}/${PKG}/cctools/lib
+    find . -name "libstdc++.*" -type f -exec install -D -m644 {} ${TMPINST_DIR}/libstdc++-dev/cctools/${TARGET_ARCH}/lib/{} \; -exec rm -f {} \;
+    find . -name "libsupc++.*" -type f -exec install -D -m644 {} ${TMPINST_DIR}/libstdc++-dev/cctools/${TARGET_ARCH}/lib/{} \; -exec rm -f {} \;
+
     find . -name "libatomic.*" -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgcc-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/{} \; -exec rm -f {} \;
     find . -name "libgomp.*"   -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgcc-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/{} \; -exec rm -f {} \;
 
@@ -160,6 +158,11 @@ build_gcc() {
 
     find . -name "libgfortranbegin.*" -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgfortran-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/{} \; -exec rm -f {} \;
     find . -name "libcaf_single.*"    -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgfortran-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/{} \; -exec rm -f {} \;
+
+    copysrc ${TMPINST_DIR}/${PKG}/cctools/include/c++ \
+		${TMPINST_DIR}/libstdc++-dev/cctools/${TARGET_ARCH}/include/c++
+
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/include/c++
 
     copysrc ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/include/objc \
 		${TMPINST_DIR}/libobjc-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/include/objc
@@ -220,7 +223,7 @@ EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/prerm
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "libgcc-dev cxxstl-dev"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "libgcc-dev libstdc++-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
@@ -260,6 +263,36 @@ EOF
 
     PKG="libgcc-dev"
     PKG_DESC="GCC support library (development files)"
+
+    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    cd ${TMPINST_DIR}/${PKG}
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+
+    # Cross package
+    local filename="${PKG}-${PKG_ARCH}_${PKG_VERSION}_all.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} $PKG_VERSION all "$PKG_DESC"
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+
+    if [ "$PKG_ARCH" = "armel" ]; then
+	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../mips/
+	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
+    fi
+
+    if [ "$PKG_ARCH" = "mipsel" ]; then
+	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../armeabi/
+	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
+    fi
+
+    if [ "$PKG_ARCH" = "i686" ]; then
+	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../armeabi/
+	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../mips/
+    fi
+
+    rm -f ${REPO_DIR}/$filename
+
+    PKG="libstdc++-dev"
+    PKG_DESC="GNU Standard C++ Library v3 (development files)"
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
