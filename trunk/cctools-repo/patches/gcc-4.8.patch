@@ -1,6 +1,6 @@
 diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/boehm-gc/include/bits/elfclass.h gcc-4.8/boehm-gc/include/bits/elfclass.h
 --- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/boehm-gc/include/bits/elfclass.h	1970-01-01 07:00:00.000000000 +0700
-+++ gcc-4.8/boehm-gc/include/bits/elfclass.h	2011-04-16 10:05:46.000000000 +0700
++++ gcc-4.8/boehm-gc/include/bits/elfclass.h	2013-11-05 23:54:53.895754662 +0700
 @@ -0,0 +1,14 @@
 +/* This file specifies the native word size of the machine, which indicates
 +   the ELF file class used for executables and shared objects on this
@@ -18,7 +18,7 @@ diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/boehm-gc/include/
 +typedef uint32_t Elf_Symndx;
 diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/boehm-gc/include/bits/link.h gcc-4.8/boehm-gc/include/bits/link.h
 --- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/boehm-gc/include/bits/link.h	1970-01-01 07:00:00.000000000 +0700
-+++ gcc-4.8/boehm-gc/include/bits/link.h	2011-04-16 10:05:46.000000000 +0700
++++ gcc-4.8/boehm-gc/include/bits/link.h	2013-11-05 23:54:53.895754662 +0700
 @@ -0,0 +1,66 @@
 +/* Copyright (C) 2005, 2009 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
@@ -88,7 +88,7 @@ diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/boehm-gc/include/
 +__END_DECLS
 diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/boehm-gc/include/bits/wordsize.h gcc-4.8/boehm-gc/include/bits/wordsize.h
 --- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/boehm-gc/include/bits/wordsize.h	1970-01-01 07:00:00.000000000 +0700
-+++ gcc-4.8/boehm-gc/include/bits/wordsize.h	2011-04-16 10:04:51.000000000 +0700
++++ gcc-4.8/boehm-gc/include/bits/wordsize.h	2013-11-05 23:54:53.895754662 +0700
 @@ -0,0 +1,19 @@
 +/* Copyright (C) 1999 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
@@ -111,7 +111,7 @@ diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/boehm-gc/include/
 +#define __WORDSIZE	32
 diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/boehm-gc/include/link.h gcc-4.8/boehm-gc/include/link.h
 --- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/boehm-gc/include/link.h	1970-01-01 07:00:00.000000000 +0700
-+++ gcc-4.8/boehm-gc/include/link.h	2011-04-16 10:05:46.000000000 +0700
++++ gcc-4.8/boehm-gc/include/link.h	2013-11-05 23:54:53.895754662 +0700
 @@ -0,0 +1,194 @@
 +/* Data structure for communication from the run-time dynamic linker for
 +   loaded ELF shared objects.
@@ -308,9 +308,9 @@ diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/boehm-gc/include/
 +
 +#endif /* link.h */
 diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/configure gcc-4.8/gcc/configure
---- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/configure	2013-10-22 15:37:35.000711459 +0700
-+++ gcc-4.8/gcc/configure	2013-11-01 05:16:31.073362975 +0700
-@@ -3314,7 +3314,7 @@
+--- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/configure	2013-11-01 15:09:59.742839227 +0700
++++ gcc-4.8/gcc/configure	2013-11-05 23:54:53.903754662 +0700
+@@ -3318,7 +3318,7 @@
      if test x$host != x$target; then
         libstdcxx_incdir="$target_alias/$libstdcxx_incdir"
      fi
@@ -320,8 +320,8 @@ diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/configure gcc
  fi
  
 diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/configure.ac gcc-4.8/gcc/configure.ac
---- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/configure.ac	2013-10-22 15:37:35.000711459 +0700
-+++ gcc-4.8/gcc/configure.ac	2013-11-01 05:16:31.073362975 +0700
+--- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/configure.ac	2013-11-01 15:09:59.746839227 +0700
++++ gcc-4.8/gcc/configure.ac	2013-11-05 23:54:53.907754662 +0700
 @@ -140,7 +140,7 @@
      if test x$host != x$target; then
         libstdcxx_incdir="$target_alias/$libstdcxx_incdir"
@@ -332,8 +332,8 @@ diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/configure.ac 
  fi
  
 diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/system.h gcc-4.8/gcc/system.h
---- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/system.h	2013-10-22 15:37:36.500711521 +0700
-+++ gcc-4.8/gcc/system.h	2013-11-01 05:16:31.077362975 +0700
+--- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/system.h	2013-11-01 15:10:00.498839258 +0700
++++ gcc-4.8/gcc/system.h	2013-11-05 23:54:53.907754662 +0700
 @@ -70,7 +70,7 @@
     extensions and need to be prototyped by hand (since we do not
     define _GNU_SOURCE).  */
@@ -344,8 +344,8 @@ diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/gcc/system.h gcc-
  # ifdef HAVE_PUTC_UNLOCKED
  #  undef putc
 diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/charset.c gcc-4.8/libcpp/charset.c
---- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/charset.c	2013-10-22 15:37:40.812711700 +0700
-+++ gcc-4.8/libcpp/charset.c	2013-11-01 05:16:31.077362975 +0700
+--- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/charset.c	2013-11-01 15:10:27.474840376 +0700
++++ gcc-4.8/libcpp/charset.c	2013-11-05 23:54:53.907754662 +0700
 @@ -1696,7 +1696,7 @@
  uchar * 
  _cpp_convert_input (cpp_reader *pfile, const char *input_charset,
@@ -356,8 +356,8 @@ diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/charset.c 
    struct cset_converter input_cset;
    struct _cpp_strbuf to;
 diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/internal.h gcc-4.8/libcpp/internal.h
---- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/internal.h	2013-10-22 15:37:40.816711700 +0700
-+++ gcc-4.8/libcpp/internal.h	2013-11-01 05:16:31.077362975 +0700
+--- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/internal.h	2013-11-01 15:10:27.494840377 +0700
++++ gcc-4.8/libcpp/internal.h	2013-11-05 23:54:53.911754663 +0700
 @@ -732,7 +732,7 @@
  extern void _cpp_destroy_iconv (cpp_reader *);
  extern unsigned char *_cpp_convert_input (cpp_reader *, const char *,
@@ -368,8 +368,8 @@ diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/internal.h
  extern cpp_hashnode * _cpp_interpret_identifier (cpp_reader *pfile,
  						 const unsigned char *id,
 diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/macro.c gcc-4.8/libcpp/macro.c
---- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/macro.c	2013-10-22 15:37:40.820711700 +0700
-+++ gcc-4.8/libcpp/macro.c	2013-11-01 05:16:31.077362975 +0700
+--- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/macro.c	2013-11-01 15:10:27.494840377 +0700
++++ gcc-4.8/libcpp/macro.c	2013-11-05 23:54:53.911754663 +0700
 @@ -246,7 +246,7 @@
  		struct tm *tb = NULL;
  		struct stat *st = _cpp_get_file_stat (file);
@@ -380,8 +380,8 @@ diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libcpp/macro.c gc
  		  {
  		    char *str = asctime (tb);
 diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libiberty/getpagesize.c gcc-4.8/libiberty/getpagesize.c
---- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libiberty/getpagesize.c	2013-10-22 15:37:45.368711889 +0700
-+++ gcc-4.8/libiberty/getpagesize.c	2013-11-01 05:16:31.077362975 +0700
+--- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libiberty/getpagesize.c	2013-11-01 15:10:29.154840446 +0700
++++ gcc-4.8/libiberty/getpagesize.c	2013-11-05 23:54:53.911754663 +0700
 @@ -60,11 +60,13 @@
  # endif /* PAGESIZE */
  #endif /* GNU_OUR_PAGESIZE */
@@ -396,3 +396,24 @@ diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libiberty/getpage
  
  #else /* VMS */
  
+diff -Nur /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libstdc++-v3/src/Makefile.in gcc-4.8/libstdc++-v3/src/Makefile.in
+--- /home/sash/Work/cctools/cctools-repo/src/gcc/gcc-4.8/libstdc++-v3/src/Makefile.in	2013-11-01 15:11:17.414842447 +0700
++++ gcc-4.8/libstdc++-v3/src/Makefile.in	2013-11-06 00:15:46.059806574 +0700
+@@ -336,7 +336,7 @@
+ SUBDIRS = c++98 c++11
+ 
+ # Cross compiler support.
+-toolexeclib_LTLIBRARIES = libgnustl_shared.la
++toolexeclib_LTLIBRARIES = libstdc++.la
+ @GLIBCXX_LDBL_COMPAT_FALSE@ldbl_compat_sources = 
+ @GLIBCXX_LDBL_COMPAT_TRUE@ldbl_compat_sources = compatibility-ldbl.cc
+ parallel_compat_sources = \
+@@ -544,7 +544,7 @@
+ libstdc++.la: $(libstdc___la_OBJECTS) $(libstdc___la_DEPENDENCIES) 
+ 	$(libstdc___la_LINK) -rpath $(toolexeclibdir) $(libstdc___la_OBJECTS) $(libstdc___la_LIBADD) $(LIBS)
+ 
+-libgnustl_shared.la: $(libstdc___la_OBJECTS) $(libstdc___la_DEPENDENCIES)
++libstdc++.la: $(libstdc___la_OBJECTS) $(libstdc___la_DEPENDENCIES)
+ 	$(libstdc___la_LINK) -rpath $(toolexeclibdir) $(libstdc___la_OBJECTS) $(libstdc___la_LIBADD) $(LIBS)
+ 
+ mostlyclean-compile:
