@@ -3,6 +3,14 @@ build_acer_a200_ics403_libc_fix() {
     PKG_VERSION=4.0.3
     PKG_DESC="ACER Iconia TAB A200 ICS 4.0.3 applications crash fix. Install this package only if you have this device and official firmware."
 
+    case $TARGET_ARCH in
+    arm*)
+	;;
+    *)
+	return
+	;;
+    esac
+
     c_tag $PKG && return
 
     banner "Build $PKG"
