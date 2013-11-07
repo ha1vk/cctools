@@ -1,5 +1,11 @@
 package com.pdaxrom.utils;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,34 +39,56 @@ public class RepoUtils {
 	}
 	
 	public static List<PackageInfo> getRepoFromUrl(String url) {
-		List<PackageInfo> list = new ArrayList<PackageInfo>();
-		
-		XMLParser parser = new XMLParser();
-        Document doc = parser.getDomElement(replaceMacro(getRepoXmlFromUrl(url))); // getting DOM element
-        NodeList nl = doc.getElementsByTagName(KEY_PACKAGE);
-
-    	for (int i = 0; i < nl.getLength(); i++) {
-    		Element e = (Element) nl.item(i);
-    		PackageInfo packageInfo = new PackageInfo(
-    				parser.getValue(e, KEY_NAME),
-    				parser.getValue(e, KEY_FILE),
-    				Integer.valueOf(parser.getValue(e, KEY_SIZE)),
-    				Integer.valueOf(parser.getValue(e, KEY_FILESIZE)),
-    				parser.getValue(e, KEY_VERSION),
-    				parser.getValue(e, KEY_DESC),
-    				parser.getValue(e, KEY_DEPENDS),
-    				parser.getValue(e, KEY_ARCH));
-			list.add(packageInfo);
-			Log.i(TAG, "added pkg = " + packageInfo.getName());
-    	}
-        
-		return list;
+        return parseRepoXml(getRepoXmlFromUrl(url)); // getting DOM element
+	}
+	
+	public static List<PackageInfo> getRepoFromDir(String path) {
+		return parseRepoXml(getRepoXmlFromDir(path));
 	}
 	
 	public static String getRepoXmlFromUrl(String url) {
 		XMLParser parser = new XMLParser();
 		String xml = parser.getXmlFromUrl(url + "/Packages");
 		return replaceMacro(xml);
+	}
+	
+	public static String getRepoXmlFromDir(String path) {
+		File dir = new File(path);
+		if (dir.isDirectory()) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("<repo>").append("\n");
+
+			FilenameFilter filter = new FilenameFilter() {
+				public boolean accept(File dir, String name) {
+					String lowercaseName = name.toLowerCase();
+					if (lowercaseName.endsWith(".pkgdesc")) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+			};
+
+			for (String filePath: dir.list(filter)) {
+				Log.i(TAG, "Read file " + filePath);
+				File f = new File(path + "/" + filePath);
+				try {
+					FileInputStream fin = new FileInputStream(f);
+					BufferedReader reader = new BufferedReader(new InputStreamReader(fin));
+					String line = null;
+					while((line = reader.readLine()) != null) {
+						sb.append(line).append("\n");
+					}
+					reader.close();
+				} catch (IOException e) {
+					Log.e(TAG, "getRepoXmlFromDir() IO error " + e);
+				}
+			}
+			sb.append("</repo>");
+			Log.i(TAG, "installed xml = " + replaceMacro(sb.toString()));
+			return replaceMacro(sb.toString());
+		}
+		return null;
 	}
 	
     public static boolean isContainsPackage(List<PackageInfo> repo, String pkg) {
@@ -72,6 +100,32 @@ public class RepoUtils {
     	return false;
     }
 
+    private static List<PackageInfo> parseRepoXml(String repo) {
+		List<PackageInfo> list = new ArrayList<PackageInfo>();
+		
+		if (repo != null) {
+			XMLParser parser = new XMLParser();
+	        Document doc = parser.getDomElement(repo); // getting DOM element
+	        NodeList nl = doc.getElementsByTagName(KEY_PACKAGE);
+
+	    	for (int i = 0; i < nl.getLength(); i++) {
+	    		Element e = (Element) nl.item(i);
+	    		PackageInfo packageInfo = new PackageInfo(
+	    				parser.getValue(e, KEY_NAME),
+	    				parser.getValue(e, KEY_FILE),
+	    				Integer.valueOf(parser.getValue(e, KEY_SIZE)),
+	    				Integer.valueOf(0 /*parser.getValue(e, KEY_FILESIZE)*/), //filesize is undefined in package info file
+	    				parser.getValue(e, KEY_VERSION),
+	    				parser.getValue(e, KEY_DESC),
+	    				parser.getValue(e, KEY_DEPENDS),
+	    				parser.getValue(e, KEY_ARCH));
+				list.add(packageInfo);
+				Log.i(TAG, "added pkg = " + packageInfo.getName());
+	    	}
+		}
+		return list;
+    }
+    
     private static String replaceMacro(String str) {
     	if (str != null) {
     		str = str.replaceAll("\\$\\{HOSTARCH\\}", _ndkArch);
@@ -81,4 +135,22 @@ public class RepoUtils {
     	return str;
     }
 
+    public static List<PackageInfo> checkingForUpdates(List<PackageInfo> repoList, List<PackageInfo> installedList) {
+    	List<PackageInfo> list = null;
+    	
+    	for (PackageInfo installedPkg: installedList) {
+    		for (PackageInfo pkg: repoList) {
+    			if (installedPkg.getName().contentEquals(pkg.getName())) {
+    				if (!installedPkg.getVersion().contentEquals(pkg.getVersion())) {
+    					if (list == null) {
+    						list = new ArrayList<PackageInfo>();
+    					}
+    					list.add(pkg);
+    				}
+    				break;
+    			}
+    		}
+    	}    	
+    	return list;
+    }
 }

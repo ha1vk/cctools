@@ -134,6 +134,7 @@
 	<string name="pkg_installpackage">Installing package</string>
 	<string name="pkg_uninstallpackagetask">Uninstalling package</string>
 	<string name="pkg_uninstallpackage">Uninstalling package</string>
+	<string name="pkg_checkupdates">Checking for updates...</string>
 			    
     <string name="pkg_name">Name</string>
     <string name="pkg_version">Version:\u0020</string>
