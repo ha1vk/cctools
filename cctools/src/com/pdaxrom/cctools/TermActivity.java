@@ -137,10 +137,11 @@ public class TermActivity extends Activity {
 				"ANDROID_PROPERTY_WORKSPACE=10,32768",
 				"ANDROID_ROOT=/system",
 				"BOOTCLASSPATH=/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar",
-				"TERM=xterm",
-				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
 				"CCTOOLSDIR=" + cctoolsDir,
-				"CCTOOLSRES=" + getPackageResourcePath()
+				"CCTOOLSRES=" + getPackageResourcePath(),
+				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
+				"HOME=" + cctoolsDir + "/home",
+				"TERM=xterm",
 				};
 		String[] argv = cmdline.split("\\s+");
 

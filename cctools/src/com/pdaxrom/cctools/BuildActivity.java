@@ -362,6 +362,7 @@ public class BuildActivity extends Activity {
     					"CCTOOLSDIR=" + getCacheDir().getParentFile().getAbsolutePath() + "/root" + "/cctools",
     					"CCTOOLSRES=" + getPackageResourcePath(),
     					"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
+    					"HOME=" + cctoolsDir + "/home",
     					"TMPEXEDIR=" + tmpExeDir,
     					"PS1=''"
     					};

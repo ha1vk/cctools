@@ -1265,12 +1265,12 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 					dialogServerSocket = new ServerSocket();
 					dialogServerSocket.setReuseAddress(true);
 					dialogServerSocket.bind(new InetSocketAddress(port));
-					Log.i(TAG, "Wait for incoming requests");
+					Log.i(TAG, "Waiting for incoming requests");
 					while (true) {
 						dialogServiceSocket = dialogServerSocket.accept();
 						Intent intent = new Intent(CCToolsActivity.this, DialogWindow.class);
 						startActivity(intent);
-						Log.i(TAG, "Wait for finish dialog activity");
+						Log.i(TAG, "Waiting for finish dialog activity");
 						while(!dialogServiceSocket.isClosed()) {
 							Thread.sleep(300);
 						}
