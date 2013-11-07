@@ -49,6 +49,7 @@ public class PkgMgrActivity extends ListActivity {
 	private static final String PKGS_LISTS_DIR = "/installed/";
 	
 	private List<PackageInfo> remoteRepo = null;
+	private static boolean fCheckedUpdatesAtStartup = false;
 	
 	private static final int ACTIVITY_PKGCTL = 1;
 	
@@ -63,6 +64,7 @@ public class PkgMgrActivity extends ListActivity {
 	private String tmpDir;
 	private String toolchainDir;
     private String serviceDir;
+    private String homeDir;
 
 	final Handler handler = new Handler();
     private ProgressDialog pd;    
@@ -179,6 +181,7 @@ public class PkgMgrActivity extends ListActivity {
     	tmpDir 		= sdCardDir + "/tmp";
     	toolchainDir= getCacheDir().getParentFile().getAbsolutePath() + "/root";
         serviceDir 	= toolchainDir + "/cctools/services";
+        homeDir		= toolchainDir + "/cctools/home";
 
         if (!(new File(sdCardDir)).exists()) {
         	(new File(sdCardDir)).mkdir();
@@ -194,6 +197,9 @@ public class PkgMgrActivity extends ListActivity {
         }
         if (!(new File(serviceDir)).exists()) {
         	(new File(serviceDir)).mkdir();
+        }
+        if (!(new File(homeDir)).exists()) {
+        	(new File(homeDir)).mkdir();
         }
     }
     
@@ -309,6 +315,12 @@ public class PkgMgrActivity extends ListActivity {
 	        	showPackages(result);
 	        }
 	        hideProgress();
+	        if (!fCheckedUpdatesAtStartup) {
+	        	if (remoteRepo != null) {
+	        		(new CheckingForUpdatesTask()).execute();
+	        		fCheckedUpdatesAtStartup = true;
+	        	}
+	        }
 		}
     }
     
@@ -385,6 +397,33 @@ public class PkgMgrActivity extends ListActivity {
 		}
     }
 
+    private class CheckingForUpdatesTask extends AsyncTask<Void, Void, List<PackageInfo>> {
+    	protected void onPreExecute() {
+    		super.onPreExecute();
+    		Log.i(TAG, "Checking for updates...");
+    		showProgress(getString(R.string.pkg_prepareinstalltask),
+    				getString(R.string.pkg_checkupdates));
+    	}
+    	
+		@Override
+		protected List<PackageInfo> doInBackground(Void... params) {
+			List<PackageInfo> installedPackages = RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR);
+			return RepoUtils.checkingForUpdates(remoteRepo, installedPackages);
+		}
+		
+		protected void onPostExecute(List<PackageInfo> list) {
+			super.onPostExecute(list);
+			hideProgress();
+			if (list != null) {
+				for (PackageInfo pkg: list) {
+					Log.i(TAG, "update list = " + pkg.getName());
+				}
+			} else {
+				Log.i(TAG, "no new updates");
+			}
+		}
+    }
+    
 	private boolean downloadAndUnpack(String file, String from, String to, String log) {
 		updateProgress(getString(R.string.download_file) + " " + file + "...");
 		
@@ -638,12 +677,13 @@ public class PkgMgrActivity extends ListActivity {
 				"ANDROID_PROPERTY_WORKSPACE=10,32768",
 				"ANDROID_ROOT=/system",
 				"BOOTCLASSPATH=/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar",
-				"TERM=xterm",
+				"CCTOOLSDIR=" + cctoolsDir,
+				"CCTOOLSRES=" + getPackageResourcePath(),
 				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
+				"HOME=" + homeDir,
+				"TERM=xterm",
 				"SDDIR=" + sdCardDir,
 				"EXTERNAL_STORAGE=" + Environment.getExternalStorageDirectory().getPath(),
-				"CCTOOLSDIR=" + cctoolsDir,
-				"CCTOOLSRES=" + getPackageResourcePath()
 				};
 		try {
 			Log.i(TAG, "exec cmd " + cmd + ", cctoolsdir " + cctoolsDir);

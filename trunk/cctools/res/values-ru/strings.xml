@@ -134,7 +134,8 @@
 	<string name="pkg_installpackage">Устанавливается пакет</string>
 	<string name="pkg_uninstallpackagetask">Удаление пакета</string>
 	<string name="pkg_uninstallpackage">Удаляется пакет</string>
-    
+ 	<string name="pkg_checkupdates">Проверка обновлений...</string>
+	
     <string name="pkg_name">Название</string>
     <string name="pkg_version">Версия:\u0020</string>
     <string name="pkg_description">Описание</string>
