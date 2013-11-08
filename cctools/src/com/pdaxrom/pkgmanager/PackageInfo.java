@@ -1,56 +1,56 @@
 package com.pdaxrom.pkgmanager;
 
 public class PackageInfo {
-	private String	_name;
-	private String	_file;
-	private int		_size;
-	private int		_filesize;
-	private String	_version;
-	private String	_description;
-	private String	_depends;
-	private String	_arch;
+	private String	name;
+	private String	file;
+	private int		size;
+	private int		filesize;
+	private String	version;
+	private String	description;
+	private String	depends;
+	private String	arch;
 	
 	PackageInfo(String name, String file, int size, int filesize,
 				String version, String description, String depends, String arch) {
-		_name = name;
-		_file = file;
-		_size = size;
-		_filesize = filesize;
-		_version = version;
-		_description = description;
-		_depends = depends;
-		_arch = arch;
+		this.name = name;
+		this.file = file;
+		this.size = size;
+		this.filesize = filesize;
+		this.version = version;
+		this.description = description;
+		this.depends = depends;
+		this.arch = arch;
 	}
 	
 	String getName() {
-		return _name;
+		return name;
 	}
 	
 	String getFile() {
-		return _file;
+		return file;
 	}
 	
 	int getSize() {
-		return _size;
+		return size;
 	}
 	
 	int getFileSize() {
-		return _filesize;
+		return filesize;
 	}
 	
 	String getVersion() {
-		return _version;
+		return version;
 	}
 	
 	String getDescription() {
-		return _description;
+		return description;
 	}
 	
 	String getDepends() {
-		return _depends;
+		return depends;
 	}
 	
 	String getArch() {
-		return _arch;
+		return arch;
 	}
 }

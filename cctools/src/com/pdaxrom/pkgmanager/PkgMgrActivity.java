@@ -51,8 +51,7 @@ public class PkgMgrActivity extends ListActivity {
 	private Context context = this;
 	private static final String PKGS_LISTS_DIR = "/installed/";
 	
-	private List<PackageInfo> availablePackages = null;
-	private List<PackageInfo> installedPackages = null;
+	private PackagesLists packagesLists = new PackagesLists();
 	
 	private static boolean fCheckedUpdatesAtStartup = false;
 	
@@ -313,26 +312,26 @@ public class PkgMgrActivity extends ListActivity {
         }
 
 		protected List<PackageInfo> doInBackground(String... params) {
-			installedPackages = RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR);
-	        Log.i(TAG, "Repo URL: " + params[0] + "/Packages");
-			availablePackages = RepoUtils.getRepoFromUrl(params[0] + "/Packages");
-			if (availablePackages == null || installedPackages == null) {
+			packagesLists.setInstalledPackages(RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR));
+			packagesLists.setAvailablePackages(RepoUtils.getRepoFromUrl(params[0] + "/Packages"));
+			if (packagesLists.getAvailablePackages() == null ||
+				packagesLists.getInstalledPackages() == null) {
 				return null;
 			}
-			return RepoUtils.checkingForUpdates(availablePackages, installedPackages);
+			return RepoUtils.checkingForUpdates(packagesLists);
 		}
 
 		protected void onPostExecute(List<PackageInfo> result) {
 			super.onPostExecute(result);
-	        if (availablePackages != null) {
-		        Log.i(TAG, "Downloaded repo with " + availablePackages.size() + " packages.");
-	        	showPackages(availablePackages);
+	        if (packagesLists.getAvailablePackages() != null) {
+		        Log.i(TAG, "Downloaded repo with " + packagesLists.getAvailablePackages().size() + " packages.");
+	        	showPackages(packagesLists.getAvailablePackages());
 	        }
 	        hideProgress();
 	        if (!fCheckedUpdatesAtStartup && result != null) {
 	        	final InstallPackageInfo updateInfo = new InstallPackageInfo();
 				for (PackageInfo pkg: result) {
-					updateInfo.addPackage(availablePackages, pkg.getName());
+					updateInfo.addPackage(packagesLists, pkg.getName());
 				}
 				Log.i(TAG, "update list = " + updateInfo.getPackagesStrings());
 	        	fCheckedUpdatesAtStartup = true;
@@ -368,8 +367,8 @@ public class PkgMgrActivity extends ListActivity {
 		@Override
 		protected InstallPackageInfo doInBackground(String... params) {
 			// Update installed packages list
-			installedPackages = RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR);
-    		return new InstallPackageInfo(availablePackages, params[0]);
+			packagesLists.setInstalledPackages(RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR));
+    		return new InstallPackageInfo(packagesLists, params[0]);
 		}
     	
 		protected void onPostExecute(final InstallPackageInfo info) {
@@ -409,7 +408,7 @@ public class PkgMgrActivity extends ListActivity {
 		protected void onPostExecute(Boolean result) {
 			super.onPostExecute(result);
 			lastPosition = lv.getFirstVisiblePosition();
-			showPackages(availablePackages);
+			showPackages(packagesLists.getAvailablePackages());
 			hideProgress();
 		}
     }
@@ -428,7 +427,7 @@ public class PkgMgrActivity extends ListActivity {
 		protected void onPostExecute(Boolean result) {
 			super.onPostExecute(result);
 			lastPosition = lv.getFirstVisiblePosition();
-			showPackages(availablePackages);
+			showPackages(packagesLists.getAvailablePackages());
 			hideProgress();
 		}
     }
@@ -580,8 +579,9 @@ public class PkgMgrActivity extends ListActivity {
     	for (PackageInfo packageInfo: info.getPackagesList()) {
     		if ((new File(toolchainDir + "/" + PKGS_LISTS_DIR + "/" 
     				+ packageInfo.getName() + ".pkgdesc")).exists()) {
-    			PackageInfo oldPackage = RepoUtils.getPackageByName(installedPackages, packageInfo.getName());
-    			if (packageInfo.getVersion().contentEquals(oldPackage.getVersion())) {
+    			PackageInfo oldPackage = RepoUtils.getPackageByName(packagesLists.getInstalledPackages(),
+    																packageInfo.getName());
+    			if (packageInfo.getVersion().equals(oldPackage.getVersion())) {
     				Log.i(TAG, "Package " + packageInfo.getName() + " already installed.");
     				continue;
     			} else {
@@ -609,7 +609,7 @@ public class PkgMgrActivity extends ListActivity {
 					try {
 						Utils.copyDirectory(new File(toolchainDir + "/" + infoFile),
 											new File(infoFilePath));
-						if (infoFile.contentEquals("postinst")) {
+						if (infoFile.equals("postinst")) {
 							postinstList.add(packageInfo.getName());
 						}
 					} catch (IOException e) {

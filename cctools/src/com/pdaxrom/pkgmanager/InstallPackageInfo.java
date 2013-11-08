@@ -8,54 +8,54 @@ import android.util.Log;
 public class InstallPackageInfo {
 	private static final String TAG = "InstallPackageInfo";
 
-	private String _pkg = null;
-	private List<PackageInfo> _list = null;
+	private String pkg = null;
+	private List<PackageInfo> list = null;
 	private int installSize = 0;
 	private int downloadSize = 0;
 	
 	InstallPackageInfo() {
-		_list = new ArrayList<PackageInfo>();
+		list = new ArrayList<PackageInfo>();
 	}
 	
-	InstallPackageInfo(List<PackageInfo> repo, String pkg) {
-		installPackageInfo(repo, pkg, null);
+	InstallPackageInfo(PackagesLists packagesLists, String pkg) {
+		installPackageInfo(packagesLists, pkg, null);
 	}
 	
-	InstallPackageInfo(List<PackageInfo> repo, String pkg, List<PackageInfo> list) {
-		installPackageInfo(repo, pkg, list);
+	InstallPackageInfo(PackagesLists packagesLists, String pkg, List<PackageInfo> list) {
+		installPackageInfo(packagesLists, pkg, list);
 	}
 
-	public void addPackage(List<PackageInfo> repo, String pkg) {
-		if (RepoUtils.isContainsPackage(repo, pkg)) {
-			if (_pkg == null) {
-				_pkg = pkg;
+	public void addPackage(PackagesLists packagesLists, String pkg) {
+		if (RepoUtils.isContainsPackage(packagesLists.getAvailablePackages(), pkg)) {
+			if (this.pkg == null) {
+				this.pkg = pkg;
 			} else {
-				_pkg += " " + pkg;
+				this.pkg += " " + pkg;
 			}
-			getDepends(repo, pkg, _list);
+			getDepends(packagesLists, pkg, list);
 			calculateSizes();
 		}
 	}
 	
-	private void installPackageInfo(List<PackageInfo> repo, String pkg, List<PackageInfo> list) {		
-		_pkg = pkg;
+	private void installPackageInfo(PackagesLists packagesLists, String pkg, List<PackageInfo> list) {		
+		this.pkg = pkg;
 		if (list == null) {
-			_list = new ArrayList<PackageInfo>();
+			this.list = new ArrayList<PackageInfo>();
 		} else {
-			_list = list;
+			this.list = list;
 		}
-		getDepends(repo, _pkg, _list);
+		getDepends(packagesLists, this.pkg, this.list);
 		calculateSizes();
 	}
 	
 	public String getName() {
-		return _pkg;
+		return pkg;
 	}
 	
 	public void calculateSizes() {
 		installSize = 0;
 		downloadSize = 0;
-		for (PackageInfo pkg: _list) {
+		for (PackageInfo pkg: list) {
 			installSize += pkg.getSize();
 			downloadSize += pkg.getFileSize();
 		}
@@ -70,13 +70,13 @@ public class InstallPackageInfo {
 	}
 	
 	public List<PackageInfo> getPackagesList() {
-		return _list;
+		return list;
 	}
 	
 	public String getPackagesStrings() {
 		String packages = "";
 		boolean isFirstAdded = false;
-		for (PackageInfo pkg: _list) {
+		for (PackageInfo pkg: list) {
 			if (isFirstAdded) {
 				packages += " " + pkg.getName();
 			} else {
@@ -87,24 +87,32 @@ public class InstallPackageInfo {
 		return packages;
 	}
 	
-    private void getDepends(List<PackageInfo> repo, String pkg ,List<PackageInfo> list) {
+    private void getDepends(PackagesLists packagesLists, String pkg ,List<PackageInfo> list) {
     	if (RepoUtils.isContainsPackage(list, pkg)) {
     		return;
     	}
 
-    	for (PackageInfo info: repo) {
-    		if (pkg.contentEquals(info.getName())) {
+    	for (PackageInfo info: packagesLists.getAvailablePackages()) {
+    		if (pkg.equals(info.getName())) {
     			String deps = info.getDepends();
-    			Log.i(TAG, "pkg deps = " + deps);
-    			if (deps != null && !deps.contentEquals("")) {
+    			Log.i(TAG, "package deps = " + deps);
+    			if (deps != null && !deps.equals("")) {
     				deps = deps.replaceAll("\\s+", " ");
     				for (String dep: deps.split("\\s+")) {
     					Log.i(TAG, "check package = " + dep);
-    					getDepends(repo, dep, list);
+    					getDepends(packagesLists, dep, list);
+    				}
+    			}
+    			PackageInfo installedPackage = RepoUtils.getPackageByName(
+    					packagesLists.getInstalledPackages(), pkg);
+    			if (installedPackage != null) {
+    				if (installedPackage.getVersion().equals(info.getVersion())) {
+    					Log.i(TAG, "the same version, skip package = " + pkg);
+    					break;
     				}
     			}
     			list.add(info);
-    			Log.i(TAG, "added pkg = " + pkg);
+    			Log.i(TAG, "add package = " + pkg);
     			break;
     		}
     	}

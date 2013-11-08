@@ -95,7 +95,7 @@ public class RepoUtils {
 	
     public static boolean isContainsPackage(List<PackageInfo> repo, String pkg) {
     	for (PackageInfo packageInfo: repo) {
-    		if (packageInfo.getName().contains(pkg)) {
+    		if (packageInfo.getName().equals(pkg)) {
     			return true;
     		}
     	}
@@ -104,7 +104,7 @@ public class RepoUtils {
 
     public static PackageInfo getPackageByName(List<PackageInfo> repo, String pkg) {
     	for (PackageInfo packageInfo: repo) {
-    		if (packageInfo.getName().contains(pkg)) {
+    		if (packageInfo.getName().equals(pkg)) {
     			return packageInfo;
     		}
     	}
@@ -160,13 +160,14 @@ public class RepoUtils {
     	return str;
     }
 
-    public static List<PackageInfo> checkingForUpdates(List<PackageInfo> repoList, List<PackageInfo> installedList) {
+    public static List<PackageInfo> checkingForUpdates(List<PackageInfo> availablePackages,
+    		List<PackageInfo> installedPackages) {
     	List<PackageInfo> list = null;
     	
-    	for (PackageInfo installedPkg: installedList) {
-    		for (PackageInfo pkg: repoList) {
-    			if (installedPkg.getName().contentEquals(pkg.getName())) {
-    				if (!installedPkg.getVersion().contentEquals(pkg.getVersion())) {
+    	for (PackageInfo installedPkg: installedPackages) {
+    		for (PackageInfo pkg: availablePackages) {
+    			if (installedPkg.getName().equals(pkg.getName())) {
+    				if (!installedPkg.getVersion().equals(pkg.getVersion())) {
     					if (list == null) {
     						list = new ArrayList<PackageInfo>();
     					}
@@ -177,5 +178,10 @@ public class RepoUtils {
     		}
     	}    	
     	return list;
+    }
+    
+    public static List<PackageInfo> checkingForUpdates(PackagesLists packagesLists) {
+    	return checkingForUpdates(packagesLists.getAvailablePackages(),
+    								packagesLists.getInstalledPackages());
     }
 }
