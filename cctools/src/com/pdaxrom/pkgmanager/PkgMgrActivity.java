@@ -23,7 +23,6 @@ import android.app.AlertDialog.Builder;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -33,6 +32,9 @@ import android.os.StatFs;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -53,8 +55,6 @@ public class PkgMgrActivity extends ListActivity {
 	private List<PackageInfo> installedPackages = null;
 	
 	private static boolean fCheckedUpdatesAtStartup = false;
-	
-	private static final int ACTIVITY_PKGCTL = 1;
 	
     // Last list position
     private int lastPosition = 0;
@@ -169,15 +169,22 @@ public class PkgMgrActivity extends ListActivity {
     	Log.i(TAG, "Position " + lastPosition);
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	if (requestCode == ACTIVITY_PKGCTL) {
-    		Log.i(TAG, "install/uninstall finished");
-    		if (availablePackages != null) {
-    			showPackages(availablePackages);
-    		}
-    	}
+    public boolean onCreateOptionsMenu(Menu menu) {
+    	MenuInflater inflater = getMenuInflater();
+    	inflater.inflate(R.menu.pkgmanager_menu, menu);
+    	return true;
     }
     
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        	case R.id.item_update:
+        		fCheckedUpdatesAtStartup = false;
+                (new DownloadRepoTask()).execute(URL);
+        		break;
+        }
+        return true;
+    }
+        
     private void setupDirs() {
     	sdCardDir 	= Environment.getExternalStorageDirectory().getPath() + "/CCTools";
     	filesDir 	= sdCardDir + "/backup";
@@ -360,6 +367,8 @@ public class PkgMgrActivity extends ListActivity {
 
 		@Override
 		protected InstallPackageInfo doInBackground(String... params) {
+			// Update installed packages list
+			installedPackages = RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR);
     		return new InstallPackageInfo(availablePackages, params[0]);
 		}
     	
@@ -421,33 +430,6 @@ public class PkgMgrActivity extends ListActivity {
 			lastPosition = lv.getFirstVisiblePosition();
 			showPackages(availablePackages);
 			hideProgress();
-		}
-    }
-
-    private class CheckingForUpdatesTask extends AsyncTask<Void, Void, List<PackageInfo>> {
-    	protected void onPreExecute() {
-    		super.onPreExecute();
-    		Log.i(TAG, "Checking for updates...");
-    		showProgress(getString(R.string.pkg_prepareinstalltask),
-    				getString(R.string.pkg_checkupdates));
-    	}
-    	
-		@Override
-		protected List<PackageInfo> doInBackground(Void... params) {
-			installedPackages = RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR);
-			return RepoUtils.checkingForUpdates(availablePackages, installedPackages);
-		}
-		
-		protected void onPostExecute(List<PackageInfo> list) {
-			super.onPostExecute(list);
-			hideProgress();
-			if (list != null) {
-				for (PackageInfo pkg: list) {
-					Log.i(TAG, "update list = " + pkg.getName());
-				}
-			} else {
-				Log.i(TAG, "no new updates");
-			}
 		}
     }
     
@@ -664,7 +646,7 @@ public class PkgMgrActivity extends ListActivity {
     
 	private boolean uninstallPackage(String name) {
 		if (name != null) {
-			updateProgressTitle(getString(R.string.removing_caption));
+			updateProgressTitle(getString(R.string.pkg_uninstallpackagetask) + " " + name);
 			updateProgress(getString(R.string.wait_message));
 			String prermFile = toolchainDir + "/" + PKGS_LISTS_DIR + "/" + name + ".prerm";
 			if ((new File(prermFile)).exists()) {
