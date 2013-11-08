@@ -1,4 +1,4 @@
-package com.pdaxrom.utils;
+package com.pdaxrom.pkgmanager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,6 +12,8 @@ import java.util.List;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import com.pdaxrom.utils.XMLParser;
 
 import android.util.Log;
 
@@ -100,6 +102,15 @@ public class RepoUtils {
     	return false;
     }
 
+    public static PackageInfo getPackageByName(List<PackageInfo> repo, String pkg) {
+    	for (PackageInfo packageInfo: repo) {
+    		if (packageInfo.getName().contains(pkg)) {
+    			return packageInfo;
+    		}
+    	}
+    	return null;    	
+    }
+    
     private static List<PackageInfo> parseRepoXml(String repo) {
 		List<PackageInfo> list = new ArrayList<PackageInfo>();
 		
@@ -110,11 +121,25 @@ public class RepoUtils {
 
 	    	for (int i = 0; i < nl.getLength(); i++) {
 	    		Element e = (Element) nl.item(i);
+	    		int size;
+	    		int filesize;
+	    		Log.i(TAG, "pkg [ " + parser.getValue(e, KEY_NAME) + " ][ " + parser.getValue(e, KEY_SIZE) + "]");
+	    		if (parser.getValue(e, KEY_SIZE).length() > 0) {
+	    			size = Integer.valueOf(parser.getValue(e, KEY_SIZE).replaceAll("@SIZE@", "0"));
+	    		} else {
+	    			size = 0;
+	    		}
+	    		if (parser.getValue(e, KEY_FILESIZE).length() > 0) {
+	    			filesize = Integer.valueOf(parser.getValue(e, KEY_FILESIZE).replaceAll("@SIZE@", "0"));
+	    		} else {
+	    			// old format of packages not included unpacked size
+	    			filesize = size;
+	    		}
 	    		PackageInfo packageInfo = new PackageInfo(
 	    				parser.getValue(e, KEY_NAME),
 	    				parser.getValue(e, KEY_FILE),
-	    				Integer.valueOf(parser.getValue(e, KEY_SIZE)),
-	    				Integer.valueOf(0 /*parser.getValue(e, KEY_FILESIZE)*/), //filesize is undefined in package info file
+	    				size /*Integer.valueOf(parser.getValue(e, KEY_SIZE))*/,
+	    				filesize /*Integer.valueOf(parser.getValue(e, KEY_FILESIZE))*/,
 	    				parser.getValue(e, KEY_VERSION),
 	    				parser.getValue(e, KEY_DESC),
 	    				parser.getValue(e, KEY_DEPENDS),

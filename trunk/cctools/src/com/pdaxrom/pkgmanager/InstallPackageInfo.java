@@ -1,4 +1,4 @@
-package com.pdaxrom.utils;
+package com.pdaxrom.pkgmanager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,14 +8,42 @@ import android.util.Log;
 public class InstallPackageInfo {
 	private static final String TAG = "InstallPackageInfo";
 
-	private String _pkg;
-	private List<PackageInfo> _list;
+	private String _pkg = null;
+	private List<PackageInfo> _list = null;
 	private int installSize = 0;
 	private int downloadSize = 0;
 	
-	InstallPackageInfo(List<PackageInfo> repo, String pkg) {
-		_pkg = pkg;
+	InstallPackageInfo() {
 		_list = new ArrayList<PackageInfo>();
+	}
+	
+	InstallPackageInfo(List<PackageInfo> repo, String pkg) {
+		installPackageInfo(repo, pkg, null);
+	}
+	
+	InstallPackageInfo(List<PackageInfo> repo, String pkg, List<PackageInfo> list) {
+		installPackageInfo(repo, pkg, list);
+	}
+
+	public void addPackage(List<PackageInfo> repo, String pkg) {
+		if (RepoUtils.isContainsPackage(repo, pkg)) {
+			if (_pkg == null) {
+				_pkg = pkg;
+			} else {
+				_pkg += " " + pkg;
+			}
+			getDepends(repo, pkg, _list);
+			calculateSizes();
+		}
+	}
+	
+	private void installPackageInfo(List<PackageInfo> repo, String pkg, List<PackageInfo> list) {		
+		_pkg = pkg;
+		if (list == null) {
+			_list = new ArrayList<PackageInfo>();
+		} else {
+			_list = list;
+		}
 		getDepends(repo, _pkg, _list);
 		calculateSizes();
 	}
