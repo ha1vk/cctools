@@ -148,6 +148,8 @@
     <string name="pkg_selected1">Пакеты для установки:\u0020</string>
     <string name="pkg_selected2">Будет загружено:\u0020</string>
     <string name="pkg_selected3">Займет после установки:\u0020</string>
+    <string name="pkg_selectedforupdate">Обновление пакетов</string>
+    <string name="pkg_selectedforupdate1">Пакеты для обновления:\u0020</string>
     <string name="pkg_alreadyinstalled">Этот пакет уже установлен</string>
     <string name="pkg_install">Установить</string>
     <string name="pkg_reinstall">Переустановить</string>

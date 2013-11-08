@@ -1,4 +1,4 @@
-package com.pdaxrom.utils;
+package com.pdaxrom.pkgmanager;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.pdaxrom.cctools.R;
+import com.pdaxrom.utils.Utils;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -48,7 +49,9 @@ public class PkgMgrActivity extends ListActivity {
 	private Context context = this;
 	private static final String PKGS_LISTS_DIR = "/installed/";
 	
-	private List<PackageInfo> remoteRepo = null;
+	private List<PackageInfo> availablePackages = null;
+	private List<PackageInfo> installedPackages = null;
+	
 	private static boolean fCheckedUpdatesAtStartup = false;
 	
 	private static final int ACTIVITY_PKGCTL = 1;
@@ -169,8 +172,8 @@ public class PkgMgrActivity extends ListActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     	if (requestCode == ACTIVITY_PKGCTL) {
     		Log.i(TAG, "install/uninstall finished");
-    		if (remoteRepo != null) {
-    			showPackages(remoteRepo);
+    		if (availablePackages != null) {
+    			showPackages(availablePackages);
     		}
     	}
     }
@@ -303,23 +306,47 @@ public class PkgMgrActivity extends ListActivity {
         }
 
 		protected List<PackageInfo> doInBackground(String... params) {
+			installedPackages = RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR);
 	        Log.i(TAG, "Repo URL: " + params[0] + "/Packages");
-			return RepoUtils.getRepoFromUrl(params[0] + "/Packages");
+			availablePackages = RepoUtils.getRepoFromUrl(params[0] + "/Packages");
+			if (availablePackages == null || installedPackages == null) {
+				return null;
+			}
+			return RepoUtils.checkingForUpdates(availablePackages, installedPackages);
 		}
 
 		protected void onPostExecute(List<PackageInfo> result) {
 			super.onPostExecute(result);
-	        Log.i(TAG, "Downloaded repo with " + result.size() + " packages.");
-	        if (result != null) {
-	        	remoteRepo = result;
-	        	showPackages(result);
+	        if (availablePackages != null) {
+		        Log.i(TAG, "Downloaded repo with " + availablePackages.size() + " packages.");
+	        	showPackages(availablePackages);
 	        }
 	        hideProgress();
-	        if (!fCheckedUpdatesAtStartup) {
-	        	if (remoteRepo != null) {
-	        		(new CheckingForUpdatesTask()).execute();
-	        		fCheckedUpdatesAtStartup = true;
-	        	}
+	        if (!fCheckedUpdatesAtStartup && result != null) {
+	        	final InstallPackageInfo updateInfo = new InstallPackageInfo();
+				for (PackageInfo pkg: result) {
+					updateInfo.addPackage(availablePackages, pkg.getName());
+				}
+				Log.i(TAG, "update list = " + updateInfo.getPackagesStrings());
+	        	fCheckedUpdatesAtStartup = true;
+	        	Builder dialog = new AlertDialog.Builder(context)
+	            .setIcon(android.R.drawable.ic_dialog_alert)
+	            .setTitle(getString(R.string.pkg_selectedforupdate))
+	            .setMessage(getString(R.string.pkg_selectedforupdate1) + updateInfo.getPackagesStrings()
+	            		+ "\n\n"
+	            		+ getString(R.string.pkg_selected2) 
+	            		+ Utils.humanReadableByteCount(updateInfo.getDownloadSize(), false)
+	            		+ "\u0020"
+	            		+ getString(R.string.pkg_selected3)
+	            		+ Utils.humanReadableByteCount(updateInfo.getInstallSize(), false))
+	            .setNeutralButton(getString(R.string.cancel), null)
+	        	.setPositiveButton(getString(R.string.pkg_install), new DialogInterface.OnClickListener() {
+	            	public void onClick(DialogInterface dialog, int which) {
+	            		Log.i(TAG, "Get install packages = " + updateInfo.getPackagesStrings());
+	            		(new InstallPackagesTask()).execute(updateInfo);
+	            	}
+	            });
+	        	dialog.show();
 	        }
 		}
     }
@@ -333,7 +360,7 @@ public class PkgMgrActivity extends ListActivity {
 
 		@Override
 		protected InstallPackageInfo doInBackground(String... params) {
-    		return new InstallPackageInfo(remoteRepo, params[0]);
+    		return new InstallPackageInfo(availablePackages, params[0]);
 		}
     	
 		protected void onPostExecute(final InstallPackageInfo info) {
@@ -373,7 +400,7 @@ public class PkgMgrActivity extends ListActivity {
 		protected void onPostExecute(Boolean result) {
 			super.onPostExecute(result);
 			lastPosition = lv.getFirstVisiblePosition();
-			showPackages(remoteRepo);
+			showPackages(availablePackages);
 			hideProgress();
 		}
     }
@@ -392,7 +419,7 @@ public class PkgMgrActivity extends ListActivity {
 		protected void onPostExecute(Boolean result) {
 			super.onPostExecute(result);
 			lastPosition = lv.getFirstVisiblePosition();
-			showPackages(remoteRepo);
+			showPackages(availablePackages);
 			hideProgress();
 		}
     }
@@ -407,8 +434,8 @@ public class PkgMgrActivity extends ListActivity {
     	
 		@Override
 		protected List<PackageInfo> doInBackground(Void... params) {
-			List<PackageInfo> installedPackages = RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR);
-			return RepoUtils.checkingForUpdates(remoteRepo, installedPackages);
+			installedPackages = RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR);
+			return RepoUtils.checkingForUpdates(availablePackages, installedPackages);
 		}
 		
 		protected void onPostExecute(List<PackageInfo> list) {
@@ -571,9 +598,16 @@ public class PkgMgrActivity extends ListActivity {
     	for (PackageInfo packageInfo: info.getPackagesList()) {
     		if ((new File(toolchainDir + "/" + PKGS_LISTS_DIR + "/" 
     				+ packageInfo.getName() + ".pkgdesc")).exists()) {
-        		//TODO: check package version for update
-    			Log.i(TAG, "Package " + packageInfo.getName() + " already installed.");
-    			continue;
+    			PackageInfo oldPackage = RepoUtils.getPackageByName(installedPackages, packageInfo.getName());
+    			if (packageInfo.getVersion().contentEquals(oldPackage.getVersion())) {
+    				Log.i(TAG, "Package " + packageInfo.getName() + " already installed.");
+    				continue;
+    			} else {
+    				uninstallPackage(packageInfo.getName());
+    				if ((new File(filesDir + "/" + oldPackage.getFile())).exists()) {
+    					(new File(filesDir + "/" + oldPackage.getFile())).delete();
+    				}
+    			}
     		}
     		updateProgressTitle(getString(R.string.pkg_installpackagetask) + " " + packageInfo.getName());
     		String file = packageInfo.getFile();

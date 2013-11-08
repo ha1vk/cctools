@@ -56,7 +56,7 @@
         <activity android:name="android.app.NativeActivity">
 			<meta-data android:name="android.app.lib_name" android:value="native-loader" />
 		</activity>   		
-        <activity android:name="com.pdaxrom.utils.PkgMgrActivity"
+        <activity android:name="com.pdaxrom.pkgmanager.PkgMgrActivity"
             	  android:label="@string/pkgmgr_name"
             	  android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
         <activity android:name="com.pdaxrom.cctools.DialogWindow"

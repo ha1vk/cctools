@@ -1,4 +1,4 @@
-package com.pdaxrom.utils;
+package com.pdaxrom.pkgmanager;
 
 public class PackageInfo {
 	private String	_name;

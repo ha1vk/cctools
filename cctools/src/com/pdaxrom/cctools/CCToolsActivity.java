@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.pdaxrom.editor.CodeEditor;
+import com.pdaxrom.pkgmanager.PkgMgrActivity;
 import com.pdaxrom.utils.FileDialog;
 import com.pdaxrom.utils.LogItem;
-import com.pdaxrom.utils.PkgMgrActivity;
 import com.pdaxrom.utils.SelectionMode;
 import com.pdaxrom.utils.Utils;
 
