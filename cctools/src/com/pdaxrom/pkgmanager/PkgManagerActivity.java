@@ -44,16 +44,26 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-public class PkgMgrActivity extends ListActivity {
+public class PkgManagerActivity extends ListActivity {
 	private static final String TAG = "PkgMgrActivity";
 	private static final String URL = "http://cctools.info/repo-4.8-1/" + Build.CPU_ABI;
 
 	private Context context = this;
-	private static final String PKGS_LISTS_DIR = "/installed/";
+	private static final String PKGS_LISTS_DIR	= "/installed/";
+
+	public static final String INTENT_CMD		= "command";
+	public static final String INTENT_DATA		= "data";
+	public static final String INTENT_RETURN	= "return";
+	public static final String CMD_INSTALL		= "install";
+	public static final String CMD_UNINSTALL	= "uninstall";
+	public static final String CMD_UPDATE		= "update";
 	
 	private PackagesLists packagesLists = new PackagesLists();
 	
 	private static boolean fCheckedUpdatesAtStartup = false;
+	
+	private String activityCmd	= null;
+	private String activityData	= null;
 	
     // Last list position
     private int lastPosition = 0;
@@ -90,15 +100,42 @@ public class PkgMgrActivity extends ListActivity {
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.pkgmgr_main);
-
-        inputSearch = (EditText) findViewById(R.id.inputSearch);
         
         setupDirs();
         setupVersion();
         
-        (new DownloadRepoTask()).execute(URL);
+        activityCmd = null;
+        activityData = null;
+        if (getIntent().getExtras() != null) {
+        	setTheme(android.R.style.Theme_Translucent_NoTitleBar);
+        	super.onCreate(savedInstanceState);
+        	        	
+        	String cmd = getIntent().getExtras().getString(INTENT_CMD);
+        	
+        	Log.i(TAG, "External command " + cmd);
+        	
+        	if (cmd.equals(CMD_UPDATE)) {
+        		activityCmd = cmd;
+        		fCheckedUpdatesAtStartup = false;
+        	} else if (cmd.equals(CMD_INSTALL)) {
+        		activityCmd = cmd;
+        		activityData = getIntent().getExtras().getString(INTENT_DATA);
+        	} else if (cmd.equals(CMD_UNINSTALL)) {
+        		activityCmd = cmd;
+        		activityData = getIntent().getExtras().getString(INTENT_DATA);
+        	}
+        	
+            (new DownloadRepoTask()).execute(URL);
+            
+            return;
+        } else {
+        	super.onCreate(savedInstanceState);
+            setContentView(R.layout.pkgmgr_main);
+
+            inputSearch = (EditText) findViewById(R.id.inputSearch);
+            
+            (new DownloadRepoTask()).execute(URL);
+        }
          
         // selecting single ListView item
         lv = getListView();
@@ -118,12 +155,6 @@ public class PkgMgrActivity extends ListActivity {
                     .setTitle(getString(R.string.pkg_selected) + name)
                     .setMessage(getString(R.string.pkg_alreadyinstalled))
                     .setNeutralButton(getString(R.string.cancel), null);
-/*            		
-                	dialog.setPositiveButton(getString(R.string.pkg_reinstall), new DialogInterface.OnClickListener() {
-                    	public void onClick(DialogInterface dialog, int which) {
-                    	}
-                    });
- */
                 	dialog.setNegativeButton(getString(R.string.pkg_uninstall), new DialogInterface.OnClickListener() {
                     	public void onClick(DialogInterface dialog, int which) {
                     		(new UninstallPackagesTask()).execute(name);
@@ -323,37 +354,58 @@ public class PkgMgrActivity extends ListActivity {
 
 		protected void onPostExecute(List<PackageInfo> result) {
 			super.onPostExecute(result);
-	        if (packagesLists.getAvailablePackages() != null) {
+	        if (packagesLists.getAvailablePackages() != null && activityCmd == null) {
 		        Log.i(TAG, "Downloaded repo with " + packagesLists.getAvailablePackages().size() + " packages.");
 	        	showPackages(packagesLists.getAvailablePackages());
 	        }
 	        hideProgress();
-	        if (!fCheckedUpdatesAtStartup && result != null) {
-	        	final InstallPackageInfo updateInfo = new InstallPackageInfo();
-				for (PackageInfo pkg: result) {
-					updateInfo.addPackage(packagesLists, pkg.getName());
-				}
-				Log.i(TAG, "update list = " + updateInfo.getPackagesStrings());
+	        if (!fCheckedUpdatesAtStartup) {
 	        	fCheckedUpdatesAtStartup = true;
-	        	Builder dialog = new AlertDialog.Builder(context)
-	            .setIcon(android.R.drawable.ic_dialog_alert)
-	            .setTitle(getString(R.string.pkg_selectedforupdate))
-	            .setMessage(getString(R.string.pkg_selectedforupdate1) + updateInfo.getPackagesStrings()
-	            		+ "\n\n"
-	            		+ getString(R.string.pkg_selected2) 
-	            		+ Utils.humanReadableByteCount(updateInfo.getDownloadSize(), false)
-	            		+ "\u0020"
-	            		+ getString(R.string.pkg_selected3)
-	            		+ Utils.humanReadableByteCount(updateInfo.getInstallSize(), false))
-	            .setNeutralButton(getString(R.string.cancel), null)
-	        	.setPositiveButton(getString(R.string.pkg_install), new DialogInterface.OnClickListener() {
-	            	public void onClick(DialogInterface dialog, int which) {
-	            		Log.i(TAG, "Get install packages = " + updateInfo.getPackagesStrings());
-	            		(new InstallPackagesTask()).execute(updateInfo);
-	            	}
-	            });
-	        	dialog.show();
+	        	if (result != null) {
+		        	final InstallPackageInfo updateInfo = new InstallPackageInfo();
+					for (PackageInfo pkg: result) {
+						updateInfo.addPackage(packagesLists, pkg.getName());
+					}
+					Log.i(TAG, "update list = " + updateInfo.getPackagesStrings());
+		        	Builder dialog = new AlertDialog.Builder(context)
+		            .setIcon(android.R.drawable.ic_dialog_alert)
+		            .setTitle(getString(R.string.pkg_selectedforupdate))
+		            .setMessage(getString(R.string.pkg_selectedforupdate1) + updateInfo.getPackagesStrings()
+		            		+ "\n\n"
+		            		+ getString(R.string.pkg_selected2) 
+		            		+ Utils.humanReadableByteCount(updateInfo.getDownloadSize(), false)
+		            		+ "\u0020"
+		            		+ getString(R.string.pkg_selected3)
+		            		+ Utils.humanReadableByteCount(updateInfo.getInstallSize(), false))
+		            .setOnCancelListener(new DialogInterface.OnCancelListener() {
+						public void onCancel(DialogInterface dialog) {
+							if (activityCmd != null && activityCmd.equals(CMD_UPDATE)) {
+								setResult(RESULT_CANCELED);
+		        				finish();
+							}
+						}
+					})
+		            .setNeutralButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							if (activityCmd != null && activityCmd.equals(CMD_UPDATE)) {
+								setResult(RESULT_CANCELED);
+		        				finish();
+							}
+						}
+					})
+		        	.setPositiveButton(getString(R.string.pkg_install), new DialogInterface.OnClickListener() {
+		            	public void onClick(DialogInterface dialog, int which) {
+		            		Log.i(TAG, "Get install packages = " + updateInfo.getPackagesStrings());
+		            		(new InstallPackagesTask()).execute(updateInfo);
+		            	}
+		            });
+		        	dialog.show();
+	        	}
 	        }
+       		if (result == null && activityCmd != null && activityCmd.equals(CMD_UPDATE)) {
+       			setResult(RESULT_OK);
+       			finish();
+       		}	        	
 		}
     }
     
@@ -407,9 +459,14 @@ public class PkgMgrActivity extends ListActivity {
     	
 		protected void onPostExecute(Boolean result) {
 			super.onPostExecute(result);
+			hideProgress();
+    		if (activityCmd != null && activityCmd.equals(CMD_UPDATE)) {
+    			setResult(RESULT_OK);
+    			finish();
+    			return;
+    		}
 			lastPosition = lv.getFirstVisiblePosition();
 			showPackages(packagesLists.getAvailablePackages());
-			hideProgress();
 		}
     }
 
@@ -426,9 +483,9 @@ public class PkgMgrActivity extends ListActivity {
     	
 		protected void onPostExecute(Boolean result) {
 			super.onPostExecute(result);
+			hideProgress();
 			lastPosition = lv.getFirstVisiblePosition();
 			showPackages(packagesLists.getAvailablePackages());
-			hideProgress();
 		}
     }
     
