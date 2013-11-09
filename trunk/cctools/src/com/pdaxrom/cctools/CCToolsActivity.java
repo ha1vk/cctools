@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.pdaxrom.editor.CodeEditor;
-import com.pdaxrom.pkgmanager.PkgMgrActivity;
+import com.pdaxrom.pkgmanager.PkgManagerActivity;
 import com.pdaxrom.utils.FileDialog;
 import com.pdaxrom.utils.LogItem;
 import com.pdaxrom.utils.SelectionMode;
@@ -177,6 +177,11 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
         } else {
 //FIXME New installer need        	
 //        	updateBasePackages();
+        	
+        	Intent intent = new Intent(this, PkgManagerActivity.class);
+        	intent.putExtra(PkgManagerActivity.INTENT_CMD, PkgManagerActivity.CMD_UPDATE);
+        	startActivity(intent);
+
 			newTitle(getString(R.string.new_file));
 			fileName = "";
         }
@@ -685,7 +690,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     }
     
     private void packageManager() {
-    	Intent intent = new Intent(CCToolsActivity.this, PkgMgrActivity.class);
+    	Intent intent = new Intent(CCToolsActivity.this, PkgManagerActivity.class);
     	startActivity(intent);
     }
     
