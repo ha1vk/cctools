@@ -2,7 +2,7 @@ build_build_essential_gcc_objc() {
     PKG=build-essential-gcc-objc
     PKG_VERSION=1.0
     PKG_DESC="Informational list of gcc objc build-essential packages"
-    PKG_DEPS="busybox binutils gobjc make ndk-misc ndk-sysroot-\${HOSTNDKARCH}-\${HOSTNDKVERSION} cctools-examples"
+    PKG_DEPS="busybox binutils gobjc make ndk-misc ndk-sysroot-\${HOSTNDKARCH}-\${HOSTNDKVERSION} cctools-examples gobjc-examples"
     c_tag ${PKG} && return
 
     banner "Build gcc build essential"
