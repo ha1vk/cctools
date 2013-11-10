@@ -12,13 +12,13 @@
     <string name="bytes">\u0020bytes</string>
     <string name="download_file">Download</string>
     <string name="unpacking_file">Unpacking</string>
-    <string name="error_downloading">Error downloading file, restart application and try again</string>
-    <string name="bad_archive">Bad or corrupted archive file, restart application and try again</string>
+    <string name="error_downloading">Error downloading file, restart package manager and try to reinstall package</string>
+    <string name="bad_archive">Bad or corrupted archive file, restart package manager and try to reinstall package</string>
     <string name="sd_no_memory">No free space on SD card, need\u0020</string>
-    <string name="sd_no_memory2">MB. Remove unnecessary files and try again.</string>
+    <string name="sd_no_memory2">. Remove unnecessary files, run package manager and install package</string>
     <string name="cache_no_memory">No free space, need\u0020</string>
-    <string name="cache_no_memory1">MB, but\u0020</string>
-   	<string name="cache_no_memory2">MB available. Remove unnecessary applications and try again.</string>
+    <string name="cache_no_memory1">, but\u0020</string>
+   	<string name="cache_no_memory2">\u0020available. Remove unnecessary applications, run package manager and install package</string>
    	
    	<string name="toolchain_selector">Quick installer</string>
    	<string name="toolchain_selectormsg">Select toolchain to quick install. Later you can install other additional packages from Add-ons.</string>

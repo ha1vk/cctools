@@ -12,13 +12,13 @@
     <string name="bytes">\u0020байт(ов)</string>
     <string name="download_file">Загрузка</string>
     <string name="unpacking_file">Распаковка</string>
-    <string name="error_downloading">Ошибка загрузки файла, перезапустите приложение чтобы повторить</string>
-    <string name="bad_archive">Плохой или поврежденный архивный файл, перезапустите приложение для новой загрузки</string>
+    <string name="error_downloading">Ошибка загрузки файла, перезапустите менеджер пакетов и переустановите пакет</string>
+    <string name="bad_archive">Плохой или поврежденный архивный файл, перезапустите менеджер пакетов и установите пакет</string>
     <string name="sd_no_memory">Нет свободного места на SD карте, нужно\u0020</string>
-    <string name="sd_no_memory2">МБ. Удалите ненужные файлы и перезапустите программу.</string>
+    <string name="sd_no_memory2">. Удалите ненужные файлы, перезапустите менеджер пакетов и установите пакет</string>
     <string name="cache_no_memory">Нет свободного места, нужно\u0020</string>
-    <string name="cache_no_memory1">МБ, но\u0020</string>
-   	<string name="cache_no_memory2">МБ доступно. Удалите ненужные приложения и перезапустите программу.</string>
+    <string name="cache_no_memory1">, но\u0020</string>
+   	<string name="cache_no_memory2">\u0020доступно. Удалите ненужные приложения, запустите менеджер пакетов и установите пакет</string>
 
 	<string name="toolchain_selector">Быстрая установка</string>
 	<string name="toolchain_selectormsg">Выберите инструменты для быстрой установки. Другие пакеты можно установить позже из Дополнений.</string>
