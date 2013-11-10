@@ -82,6 +82,8 @@ public class PkgManagerActivity extends ListActivity {
 	final Handler handler = new Handler();
     private ProgressDialog pd;    
     
+    String errorString = null;
+    
 	final int sdk2ndk_arm[] = {
 			/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  */
 			-1, -1, -1,  3,  4,  5,  5,  5,  8,  9,  9,  9,  9, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, -1
@@ -492,12 +494,17 @@ public class PkgManagerActivity extends ListActivity {
 		protected void onPostExecute(Boolean result) {
 			super.onPostExecute(result);
 			hideProgress();
-    		if (activityCmd != null && 
-    				(activityCmd.equals(CMD_UPDATE) || activityCmd.equals(CMD_INSTALL))) {
-    			setResult(RESULT_OK);
-    			finish();
-    			return;
-    		}
+			if (result) {
+	    		if (activityCmd != null && 
+	    				(activityCmd.equals(CMD_UPDATE) || activityCmd.equals(CMD_INSTALL))) {
+	    			setResult(RESULT_OK);
+	    			finish();
+	    			return;
+	    		}
+			} else {
+				showError(errorString);
+				return;
+			}
 			lastPosition = lv.getFirstVisiblePosition();
 			showPackages(packagesLists.getAvailablePackages());
 		}
@@ -530,6 +537,8 @@ public class PkgManagerActivity extends ListActivity {
 	private boolean downloadAndUnpack(String file, String from, String to, String log) {
 		updateProgress(getString(R.string.download_file) + " " + file + "...");
 		
+		errorString = null;
+		
 		File temp = new File(filesDir + "/" + file);
 		if (!temp.exists()) {
 			try {
@@ -544,12 +553,12 @@ public class PkgManagerActivity extends ListActivity {
 				int sdAvailSize = stat.getAvailableBlocks();// * stat.getBlockSize();
 				Log.i(TAG, "File size " + file_size);
 				Log.i(TAG, "Available on SD (in blocks " + stat.getBlockSize() + ") " + sdAvailSize);
-				int need_mem = (file_size + 1024 * 1024 * 4) / stat.getBlockSize();
+				int need_mem = file_size / stat.getBlockSize();
 				if (sdAvailSize < need_mem) {
 					temp.delete();
-					need_mem /= 1024 * 1024;
-					need_mem += 1;
-					show_error(getString(R.string.sd_no_memory) + " " + need_mem + " " + getString(R.string.sd_no_memory2));
+					errorString = getString(R.string.sd_no_memory) + 
+									" " + Utils.humanReadableByteCount(need_mem, false) + 
+									" " + getString(R.string.sd_no_memory2);
 					return false;
 				}
 				InputStream stream = cn.getInputStream();
@@ -576,7 +585,7 @@ public class PkgManagerActivity extends ListActivity {
 			} catch (Exception e) {
 				temp.delete();
 				Log.i(TAG, "Error downloading file " + file);
-				show_error(getString(R.string.error_downloading) + " (" + file + ")");
+				errorString = getString(R.string.error_downloading) + " (" + file + ")";
 				return false;
 			}
 		} else
@@ -596,16 +605,12 @@ public class PkgManagerActivity extends ListActivity {
 			Log.i(TAG, "Unzipped size " + need_mem);
 			Log.i(TAG, "Available (blocks) " + cacheAvailSize + "(" + stat.getBlockSize() + ")");
 			cacheAvailSize *= stat.getBlockSize();
-			need_mem += 1024 * 1024 * 2;
 			if (cacheAvailSize < need_mem) {
-				need_mem /= 1024 * 1024;
-				need_mem += 1;
-				cacheAvailSize /= 1024 * 1024;
-				show_error(getString(R.string.cache_no_memory) +
-						need_mem + 
+				errorString = getString(R.string.cache_no_memory) +
+						Utils.humanReadableByteCount(need_mem, false) + 
 						getString(R.string.cache_no_memory1) + 
-						(int)cacheAvailSize + 
-						getString(R.string.cache_no_memory2));
+						Utils.humanReadableByteCount((int)cacheAvailSize, false) + 
+						getString(R.string.cache_no_memory2);
 				return false;
 			}
 			if (logFile == null) {
@@ -620,7 +625,7 @@ public class PkgManagerActivity extends ListActivity {
 		} catch (Exception e) {
 			temp.delete();
 			Log.i(TAG, "Corrupted archive, restart application and try install again");
-			show_error(getString(R.string.bad_archive) + " (" + file +")");
+			errorString = getString(R.string.bad_archive) + " (" + file +")";
 			return false;
 		}
 		return true;
@@ -650,23 +655,30 @@ public class PkgManagerActivity extends ListActivity {
 		pd.dismiss();
 	}
 	
-    private void show_error(final String message) {
-    	Runnable proc = new Runnable() {
-    		public void run() {
-    	    	AlertDialog alertDialog = new AlertDialog.Builder(context).create();
-    	    	alertDialog.setTitle(R.string.app_name);
-    	    	alertDialog.setMessage(message);
-//    	    	alertDialog.setButton(getString(R.string.exit_button), new DialogInterface.OnClickListener() {
-//    	    		   public void onClick(DialogInterface dialog, int which) {
-//    	    			   finish();
-//    	    			   System.exit(0);
-//    	    		   }
-//    	    		});
-    	    	alertDialog.setIcon(android.R.drawable.ic_dialog_alert);
-    	    	alertDialog.show();    			
-    		}
-    	};
-    	handler.post(proc);
+    private void showError(String message) {
+    	new AlertDialog.Builder(context)
+    	.setTitle(R.string.pkgmgr_name)
+    	.setMessage(message)
+    	.setNeutralButton(getText(R.string.button_continue), new DialogInterface.OnClickListener() {			
+			public void onClick(DialogInterface dialog, int which) {
+	    		if (activityCmd != null) {
+	    			setResult(RESULT_CANCELED);
+	    			finish();
+	    			return;
+	    		}
+			}
+		})
+		.setOnCancelListener(new DialogInterface.OnCancelListener() {
+			public void onCancel(DialogInterface dialog) {
+	    		if (activityCmd != null) {
+	    			setResult(RESULT_CANCELED);
+	    			finish();
+	    			return;
+	    		}
+			}
+		})
+		.setIcon(android.R.drawable.ic_dialog_alert)
+		.show();
     }
 
     private boolean installPackage(InstallPackageInfo info) {
@@ -691,6 +703,9 @@ public class PkgManagerActivity extends ListActivity {
     		Log.i(TAG, "Install " + packageInfo.getName() + " -> " + packageInfo.getFile());
 			if (!downloadAndUnpack(file, URL, toolchainDir, 
 					toolchainDir + "/" + PKGS_LISTS_DIR + "/" + packageInfo.getName() + ".list")) {
+				if (errorString != null) {
+					errorString += "\u0020" + info.getName();
+				}
 				return false;
 			}
 			updateProgress(getString(R.string.wait_message));
