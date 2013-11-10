@@ -1,6 +1,6 @@
-diff -Nur dropbear-0.52-orig/cli-runopts.c dropbear-0.52/cli-runopts.c
---- dropbear-0.52-orig/cli-runopts.c	2008-11-11 20:09:02.000000000 +0600
-+++ dropbear-0.52/cli-runopts.c	2013-03-18 20:21:15.659907429 +0700
+diff -Nur dropbear-0.52/cli-runopts.c dropbear-0.52-new/cli-runopts.c
+--- dropbear-0.52/cli-runopts.c	2008-11-11 20:09:02.000000000 +0600
++++ dropbear-0.52-new/cli-runopts.c	2013-11-06 07:58:05.504956585 +0700
 @@ -557,7 +557,9 @@
  
  	pw = getpwuid(uid);
@@ -12,9 +12,9 @@ diff -Nur dropbear-0.52-orig/cli-runopts.c dropbear-0.52/cli-runopts.c
  	}
  
  	cli_opts.own_user = m_strdup(pw->pw_name);
-diff -Nur dropbear-0.52-orig/common-session.c dropbear-0.52/common-session.c
---- dropbear-0.52-orig/common-session.c	2008-11-11 20:09:02.000000000 +0600
-+++ dropbear-0.52/common-session.c	2013-03-18 20:21:15.659907429 +0700
+diff -Nur dropbear-0.52/common-session.c dropbear-0.52-new/common-session.c
+--- dropbear-0.52/common-session.c	2008-11-11 20:09:02.000000000 +0600
++++ dropbear-0.52-new/common-session.c	2013-11-06 07:58:05.504956585 +0700
 @@ -443,8 +443,8 @@
  		m_free(ses.authstate.pw_shell);
  	if (ses.authstate.pw_passwd)
@@ -26,9 +26,9 @@ diff -Nur dropbear-0.52-orig/common-session.c dropbear-0.52/common-session.c
  	if (!pw) {
  		return;
  	}
-diff -Nur dropbear-0.52-orig/config.sub dropbear-0.52/config.sub
---- dropbear-0.52-orig/config.sub	2008-11-11 20:09:02.000000000 +0600
-+++ dropbear-0.52/config.sub	2013-03-18 20:21:15.659907429 +0700
+diff -Nur dropbear-0.52/config.sub dropbear-0.52-new/config.sub
+--- dropbear-0.52/config.sub	2008-11-11 20:09:02.000000000 +0600
++++ dropbear-0.52-new/config.sub	2013-11-06 07:58:05.508956586 +0700
 @@ -1252,6 +1252,9 @@
  	-linux*)
  		os=`echo $os | sed -e 's|linux|linux-gnu|'`
@@ -39,9 +39,9 @@ diff -Nur dropbear-0.52-orig/config.sub dropbear-0.52/config.sub
  	-sunos5*)
  		os=`echo $os | sed -e 's|sunos5|solaris2|'`
  		;;
-diff -Nur dropbear-0.52-orig/loginrec.c dropbear-0.52/loginrec.c
---- dropbear-0.52-orig/loginrec.c	2008-11-11 20:09:03.000000000 +0600
-+++ dropbear-0.52/loginrec.c	2013-03-18 20:21:15.663907429 +0700
+diff -Nur dropbear-0.52/loginrec.c dropbear-0.52-new/loginrec.c
+--- dropbear-0.52/loginrec.c	2008-11-11 20:09:03.000000000 +0600
++++ dropbear-0.52-new/loginrec.c	2013-11-06 07:58:05.508956586 +0700
 @@ -157,6 +157,7 @@
  #include "loginrec.h"
  #include "dbutil.h"
@@ -82,9 +82,9 @@ diff -Nur dropbear-0.52-orig/loginrec.c dropbear-0.52/loginrec.c
  	}
  #endif
  
-diff -Nur dropbear-0.52-orig/options.h dropbear-0.52/options.h
---- dropbear-0.52-orig/options.h	2008-11-11 20:13:50.000000000 +0600
-+++ dropbear-0.52/options.h	2013-03-18 20:21:15.663907429 +0700
+diff -Nur dropbear-0.52/options.h dropbear-0.52-new/options.h
+--- dropbear-0.52/options.h	2008-11-11 20:13:50.000000000 +0600
++++ dropbear-0.52-new/options.h	2013-11-06 07:58:05.508956586 +0700
 @@ -11,7 +11,7 @@
   ******************************************************************/
  
@@ -232,9 +232,9 @@ diff -Nur dropbear-0.52-orig/options.h dropbear-0.52/options.h
  
  /* Some other defines (that mostly should be left alone) are defined
   * in sysoptions.h */
-diff -Nur dropbear-0.52-orig/runopts.h dropbear-0.52/runopts.h
---- dropbear-0.52-orig/runopts.h	2008-11-11 20:09:03.000000000 +0600
-+++ dropbear-0.52/runopts.h	2013-03-18 20:21:15.663907429 +0700
+diff -Nur dropbear-0.52/runopts.h dropbear-0.52-new/runopts.h
+--- dropbear-0.52/runopts.h	2008-11-11 20:09:03.000000000 +0600
++++ dropbear-0.52-new/runopts.h	2013-11-06 07:58:05.508956586 +0700
 @@ -25,6 +25,7 @@
  #ifndef _RUNOPTS_H_
  #define _RUNOPTS_H_
@@ -257,9 +257,9 @@ diff -Nur dropbear-0.52-orig/runopts.h dropbear-0.52/runopts.h
  
  } svr_runopts;
  
-diff -Nur dropbear-0.52-orig/scp.c dropbear-0.52/scp.c
---- dropbear-0.52-orig/scp.c	2008-11-11 20:09:03.000000000 +0600
-+++ dropbear-0.52/scp.c	2013-03-18 20:21:15.663907429 +0700
+diff -Nur dropbear-0.52/scp.c dropbear-0.52-new/scp.c
+--- dropbear-0.52/scp.c	2008-11-11 20:09:03.000000000 +0600
++++ dropbear-0.52-new/scp.c	2013-11-06 07:58:05.508956586 +0700
 @@ -392,8 +392,8 @@
  	argc -= optind;
  	argv += optind;
@@ -289,9 +289,9 @@ diff -Nur dropbear-0.52-orig/scp.c dropbear-0.52/scp.c
  		}
  		host = cleanhostname(host);
  		len = strlen(src) + CMDNEEDS + 20;
-diff -Nur dropbear-0.52-orig/sshpty.c dropbear-0.52/sshpty.c
---- dropbear-0.52-orig/sshpty.c	2008-11-11 20:09:03.000000000 +0600
-+++ dropbear-0.52/sshpty.c	2013-03-18 20:21:15.663907429 +0700
+diff -Nur dropbear-0.52/sshpty.c dropbear-0.52-new/sshpty.c
+--- dropbear-0.52/sshpty.c	2008-11-11 20:09:03.000000000 +0600
++++ dropbear-0.52-new/sshpty.c	2013-11-06 07:58:05.508956586 +0700
 @@ -249,12 +249,12 @@
  {
  	if (chown(tty_name, (uid_t) 0, (gid_t) 0) < 0
@@ -344,9 +344,9 @@ diff -Nur dropbear-0.52-orig/sshpty.c dropbear-0.52/sshpty.c
  			}
  		}
  	}
-diff -Nur dropbear-0.52-orig/svr-auth.c dropbear-0.52/svr-auth.c
---- dropbear-0.52-orig/svr-auth.c	2008-11-11 20:09:03.000000000 +0600
-+++ dropbear-0.52/svr-auth.c	2013-03-18 20:21:15.663907429 +0700
+diff -Nur dropbear-0.52/svr-auth.c dropbear-0.52-new/svr-auth.c
+--- dropbear-0.52/svr-auth.c	2008-11-11 20:09:03.000000000 +0600
++++ dropbear-0.52-new/svr-auth.c	2013-11-06 07:58:05.508956586 +0700
 @@ -164,7 +164,10 @@
  		if (methodlen == AUTH_METHOD_PASSWORD_LEN &&
  				strncmp(methodname, AUTH_METHOD_PASSWORD,
@@ -401,9 +401,9 @@ diff -Nur dropbear-0.52-orig/svr-auth.c dropbear-0.52/svr-auth.c
  
  	/* check the shell is valid. If /etc/shells doesn't exist, getusershell()
  	 * should return some standard shells like "/bin/sh" and "/bin/csh" (this
-diff -Nur dropbear-0.52-orig/svr-authpasswd.c dropbear-0.52/svr-authpasswd.c
---- dropbear-0.52-orig/svr-authpasswd.c	2008-11-11 20:09:03.000000000 +0600
-+++ dropbear-0.52/svr-authpasswd.c	2013-03-18 20:21:15.667907428 +0700
+diff -Nur dropbear-0.52/svr-authpasswd.c dropbear-0.52-new/svr-authpasswd.c
+--- dropbear-0.52/svr-authpasswd.c	2008-11-11 20:09:03.000000000 +0600
++++ dropbear-0.52-new/svr-authpasswd.c	2013-11-06 07:58:05.512956586 +0700
 @@ -29,9 +29,48 @@
  #include "buffer.h"
  #include "dbutil.h"
@@ -453,9 +453,9 @@ diff -Nur dropbear-0.52-orig/svr-authpasswd.c dropbear-0.52/svr-authpasswd.c
  /* Process a password auth request, sending success or failure messages as
   * appropriate */
  void svr_auth_password() {
-diff -Nur dropbear-0.52-orig/svr-authpubkey.c dropbear-0.52/svr-authpubkey.c
---- dropbear-0.52-orig/svr-authpubkey.c	2008-11-11 20:09:03.000000000 +0600
-+++ dropbear-0.52/svr-authpubkey.c	2013-03-18 20:21:15.687907429 +0700
+diff -Nur dropbear-0.52/svr-authpubkey.c dropbear-0.52-new/svr-authpubkey.c
+--- dropbear-0.52/svr-authpubkey.c	2008-11-11 20:09:03.000000000 +0600
++++ dropbear-0.52-new/svr-authpubkey.c	2013-11-06 07:58:05.512956586 +0700
 @@ -64,6 +64,7 @@
  #include "ssh.h"
  #include "packet.h"
@@ -499,9 +499,9 @@ diff -Nur dropbear-0.52-orig/svr-authpubkey.c dropbear-0.52/svr-authpubkey.c
  
  	/* open the file */
  	authfile = fopen(filename, "r");
-diff -Nur dropbear-0.52-orig/svr-chansession.c dropbear-0.52/svr-chansession.c
---- dropbear-0.52-orig/svr-chansession.c	2008-11-11 20:09:03.000000000 +0600
-+++ dropbear-0.52/svr-chansession.c	2013-03-19 00:23:26.864296562 +0700
+diff -Nur dropbear-0.52/svr-chansession.c dropbear-0.52-new/svr-chansession.c
+--- dropbear-0.52/svr-chansession.c	2008-11-11 20:09:03.000000000 +0600
++++ dropbear-0.52-new/svr-chansession.c	2013-11-11 00:06:55.019821059 +0700
 @@ -555,10 +555,17 @@
  		dropbear_exit("out of memory"); /* TODO disconnect */
  	}
@@ -521,7 +521,7 @@ diff -Nur dropbear-0.52-orig/svr-chansession.c dropbear-0.52/svr-chansession.c
  
  	/* Set up the rows/col counts */
  	sessionwinchange(chansess);
-@@ -869,7 +876,7 @@
+@@ -869,16 +876,31 @@
  		 * differing groups won't be set (as with initgroups()). The solution
  		 * is for the sysadmin not to give out the UID twice */
  		if (getuid() != ses.authstate.pw_uid) {
@@ -530,30 +530,35 @@ diff -Nur dropbear-0.52-orig/svr-chansession.c dropbear-0.52/svr-chansession.c
  		}
  	}
  
-@@ -878,7 +885,19 @@
+ 	/* set env vars */
+ 	addnewvar("USER", ses.authstate.pw_name);
  	addnewvar("LOGNAME", ses.authstate.pw_name);
- 	addnewvar("HOME", ses.authstate.pw_dir);
+-	addnewvar("HOME", ses.authstate.pw_dir);
  	addnewvar("SHELL", get_user_shell());
 -	addnewvar("PATH", DEFAULT_PATH);
-+   if (svr_opts.android_mode) {
-+      addnewvar("PATH", "/data/data/com.pdaxrom.cctools/root/cctools/sbin:/data/data/com.pdaxrom.cctools/root/cctools/bin:/system/sbin:/system/bin:/system/xbin");
-+      addnewvar("ANDROID_ASSETS", "/system/app");
-+      addnewvar("ANDROID_BOOTLOGO", "1");
-+      addnewvar("ANDROID_DATA", "/data/data/com.pdaxrom.cctools/root/cctools/var/dalvik");
-+      addnewvar("ANDROID_PROPERTY_WORKSPACE", "10,32768");
-+      addnewvar("ANDROID_ROOT", "/system");
-+      addnewvar("BOOTCLASSPATH", "/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar");
-+      addnewvar("EXTERNAL_STORAGE", (getenv("EXTERNAL_STORAGE"))?getenv("EXTERNAL_STORAGE"):"/sdcard");
-+      addnewvar("LD_LIBRARY_PATH", "/data/data/com.pdaxrom.cctools/root/cctools/lib:/vendor/lib:/system/lib");
-+      addnewvar("CCTOOLSDIR", "/data/data/com.pdaxrom.cctools/root/cctools");
-+   } else
-+      addnewvar("PATH", DEFAULT_PATH);
++	if (svr_opts.android_mode) {
++		addnewvar("HOME", "/data/data/com.pdaxrom.cctools/root/cctools/home");
++		addnewvar("PATH", "/data/data/com.pdaxrom.cctools/root/cctools/sbin:/data/data/com.pdaxrom.cctools/root/cctools/bin:/system/sbin:/system/bin:/system/xbin");
++		addnewvar("ANDROID_ASSETS", "/system/app");
++		addnewvar("ANDROID_BOOTLOGO", "1");
++		addnewvar("ANDROID_DATA", "/data/data/com.pdaxrom.cctools/root/cctools/var/dalvik");
++		addnewvar("ANDROID_PROPERTY_WORKSPACE", "10,32768");
++		addnewvar("ANDROID_ROOT", "/system");
++		addnewvar("BOOTCLASSPATH", "/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar");
++		addnewvar("EXTERNAL_STORAGE", (getenv("EXTERNAL_STORAGE"))?getenv("EXTERNAL_STORAGE"):"/sdcard");
++		addnewvar("LD_LIBRARY_PATH", "/data/data/com.pdaxrom.cctools/root/cctools/lib:/vendor/lib:/system/lib");
++		addnewvar("CCTOOLSDIR", "/data/data/com.pdaxrom.cctools/root/cctools");
++	} else {
++		addnewvar("HOME", ses.authstate.pw_dir);
++		addnewvar("PATH", DEFAULT_PATH);
++	}
++
  	if (chansess->term != NULL) {
  		addnewvar("TERM", chansess->term);
  	}
-diff -Nur dropbear-0.52-orig/svr-runopts.c dropbear-0.52/svr-runopts.c
---- dropbear-0.52-orig/svr-runopts.c	2008-11-11 20:09:03.000000000 +0600
-+++ dropbear-0.52/svr-runopts.c	2013-03-18 20:21:15.691907429 +0700
+diff -Nur dropbear-0.52/svr-runopts.c dropbear-0.52-new/svr-runopts.c
+--- dropbear-0.52/svr-runopts.c	2008-11-11 20:09:03.000000000 +0600
++++ dropbear-0.52-new/svr-runopts.c	2013-11-06 07:58:05.512956586 +0700
 @@ -39,6 +39,12 @@
  	fprintf(stderr, "Dropbear sshd v%s\n"
  					"Usage: %s [options]\n"
