@@ -5,15 +5,13 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,11 +33,11 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.StatFs;
 import android.text.Html;
 import android.text.InputType;
 import android.text.method.LinkMovementMethod;
@@ -55,10 +53,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.BufferType;
 import android.widget.Toast;
@@ -76,8 +77,6 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	private String tmpDir;
 	private String filesDir;
 	private String serviceDir;
-	private String toolsVersion = "4.8";
-	private String downloadPath = "http://cctools.info/cctools/gcc-" + toolsVersion;
 	private String fileName;
 	private String buildBaseDir; // Project base directory
 	private boolean buildAfterSave = false;
@@ -119,8 +118,6 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 
 	private static final int SERVICE_STOP = 0;
 	private static final int SERVICE_START = 1;
-	
-	private boolean externalCommandFlag = false;
 	
     /** Called when the activity is first created. */
     @Override
@@ -175,37 +172,10 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
         		newTitle(fileName);
         	}
         } else {
-//FIXME New installer need        	
-//        	updateBasePackages();
+        	installOrUpgradeToolchain();
         	
-        	Intent intent = new Intent(this, PkgManagerActivity.class);
-        	intent.putExtra(PkgManagerActivity.INTENT_CMD, PkgManagerActivity.CMD_UPDATE);
-        	startActivity(intent);
-
 			newTitle(getString(R.string.new_file));
 			fileName = "";
-        }
-
-        if (getIntent().getExtras() != null) {
-        	String pkgName = getIntent().getExtras().getString("installPackage");
-        	String pkgVers = getIntent().getExtras().getString("installPackageVersion");
-        	String pkgFile = getIntent().getExtras().getString("installPackageFile");
-        	String pkgUrl  = getIntent().getExtras().getString("installPackageUrl");
-        	if (pkgFile != null && pkgUrl != null) {
-        		Log.i(TAG, "Package for installation: " + pkgName + " vers " + pkgVers + " " + pkgUrl + "/" + pkgFile);
-        		externalCommandFlag = true;
-        		installPackage(pkgName, pkgVers, pkgFile, pkgUrl);
-        		return;
-        	} else {
-        		pkgName = getIntent().getExtras().getString("uninstallPackage");
-        		pkgFile = getIntent().getExtras().getString("uninstallPackageFile");
-        		if (pkgName != null || pkgFile != null) {
-        			Log.i(TAG, "Uninstalling package: " + pkgName);
-            		externalCommandFlag = true;
-        			uninstallPackage(pkgName, pkgFile);
-        		}
-        		return;
-        	}
         }
 
         newButton = (ImageButton) findViewById(R.id.newButton);
@@ -320,28 +290,26 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     }
 
 	protected void onDestroy() {
-		if (!externalCommandFlag) {
-			if (fileName != null) {
-				setLastOpenedDir((new File (fileName)).getParent());				
-			}
-	        serviceStartStop(SERVICE_STOP);
-
-	        if (dialogServiceThread.isAlive()) {
-				Log.i(TAG, "Stop dialog service");
-				dialogServiceThread.interrupt();
-			}
-			if ((dialogServerSocket != null) && 
-				(!dialogServerSocket.isClosed())) {
-				try {
-					dialogServerSocket.close();
-				} catch (IOException e) {
-					Log.e(TAG, "Error close dialogServerSocket " + e);
-				}
-			}
-			
-			Log.i(TAG, "Clean temp directory");
-			Utils.deleteDirectory(new File(toolchainDir + "/tmp"));
+		if (fileName != null) {
+			setLastOpenedDir((new File (fileName)).getParent());				
 		}
+        serviceStartStop(SERVICE_STOP);
+
+        if (dialogServiceThread.isAlive()) {
+			Log.i(TAG, "Stop dialog service");
+			dialogServiceThread.interrupt();
+		}
+		if ((dialogServerSocket != null) && 
+			(!dialogServerSocket.isClosed())) {
+			try {
+				dialogServerSocket.close();
+			} catch (IOException e) {
+				Log.e(TAG, "Error close dialogServerSocket " + e);
+			}
+		}
+		
+		Log.i(TAG, "Clean temp directory");
+		Utils.deleteDirectory(new File(toolchainDir + "/tmp"));
 		super.onDestroy();
 	}
 
@@ -868,332 +836,126 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		.show();    	
     }
     
-	private ProgressDialog pd;
+    private void installOrUpgradeToolchain() {
+		if (!getPrefString("use_package_manager").equals("yes")) {
+			(new RemoveOldToolchainTask()).execute((Void)null);
+		} else if (!getPrefString("toolchain_installed").equals("yes")) {
+			installToolchainPackage();
+		} else {
+        	Intent intent = new Intent(this, PkgManagerActivity.class);
+        	intent.putExtra(PkgManagerActivity.INTENT_CMD, PkgManagerActivity.CMD_UPDATE);
+        	startActivity(intent);
+		}
+    }
 
-	//
-	// Download and install package
-	//
-	private void updateBasePackages() {
-		Thread t = new Thread() {
-			public void run() {
-				downloadAndUnpackBase();
+    //FIXME
+	int toolchainPackageToInstall = 0;
+    private void installToolchainPackage() {
+    	final String[] toolchainPackage = {
+    			"build-essential-clang",
+    			"build-essential-gcc",
+    			"build-essential-fortran",
+    			"build-essential-gcc-avr",
+    			"LuaJIT"
+    	};
+    	
+    	setPrefString("toolchain_installed", "yes");
+    	
+		final Spinner spinner = new Spinner(context);
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+		        R.array.toolchain_selector, android.R.layout.simple_spinner_item);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinner.setAdapter(adapter);	
+		
+		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+			public void onItemSelected(AdapterView<?> arg0, View view,
+					int position, long id) {
+				Log.i(TAG, "selected " + toolchainPackage[position]);
+				toolchainPackageToInstall = position;
 			}
-		};
-		t.start();
-	}
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+			}
+		});
+		
+		new AlertDialog.Builder(this)
+		.setTitle(getText(R.string.toolchain_selector))
+		.setMessage(getText(R.string.toolchain_selectormsg))
+		.setView(spinner)
+		.setPositiveButton(getText(R.string.pkg_install), new DialogInterface.OnClickListener() {			
+			public void onClick(DialogInterface dialog, int which) {
+	        	Intent intent = new Intent(context, PkgManagerActivity.class);
+	        	intent.putExtra(PkgManagerActivity.INTENT_CMD, PkgManagerActivity.CMD_INSTALL);
+	        	intent.putExtra(PkgManagerActivity.INTENT_DATA, toolchainPackage[toolchainPackageToInstall]);
+	        	startActivity(intent);
+			}
+		})
+		.show();
+    }
+    
+    private class RemoveOldToolchainTask extends AsyncTask<Void, Void, Void> {
+    	protected void onPreExecute() {
+    		super.onPreExecute();
+    	}
 
-	private void installPackage(final String pkgName, final String vers, final String file, final String url) {
-		Thread t = new Thread() {
-			public void run() {
-				String name = pkgName;
-				if (name == null) {
-					name = file;
-				}
-				if (file != null) {
-					if (!downloadAndUnpack(file, url, toolchainDir, null, toolchainDir + PKGS_LISTS_DIR + name + ".list")) {
-						return;
-					}
-				} else {
-					return;
-				}
-				show_progress();
-				output(getString(R.string.wait_message));
-				if ((new File(toolchainDir + "/cctools/Examples")).exists()) {
-					try {
-						Utils.copyDirectory(new File(toolchainDir + "/cctools/Examples"), new File(sdCardDir + "/Examples"));
-						Utils.deleteDirectory(new File(toolchainDir + "/cctools/Examples"));
-					} catch (IOException e) {
-						Log.e(TAG, "Can't copy examples directory " + e);
-					}
-				}
-				if ((new File(toolchainDir + "/pkgdesc")).exists()) {
-					try {
-						Utils.copyDirectory(new File(toolchainDir + "/pkgdesc"), new File(toolchainDir + PKGS_LISTS_DIR + name + ".pkgdesc"));
-						Utils.deleteDirectory(new File(toolchainDir + "/pkgdesc"));
-					} catch (IOException e) {
-						Log.e(TAG, "Copy pkgdesc file failed " + e);
-					}
-				}
-				if ((new File(toolchainDir + "/postinst")).exists()) {
-					Log.i(TAG, "Execute postinst script");
-					Utils.chmod(toolchainDir + "/postinst", 0x1ed);
-					system(toolchainDir + "/postinst");
-					(new File(toolchainDir + "/postinst")).delete();
-				}
-				if ((new File(toolchainDir + "/prerm")).exists()) {
-					String prermFile = toolchainDir + PKGS_LISTS_DIR + name + ".prerm";
-					Log.i(TAG, "Copy prerm file to " + prermFile);
-					try {
-						Utils.copyDirectory(new File(toolchainDir + "/prerm"), new File(prermFile));
-						Utils.chmod(prermFile, 0x1ed);
-					} catch (IOException e) {
-						Log.e(TAG, "Copy prerm file failed " + e);
-					}
-					(new File(toolchainDir + "/prerm")).delete();
-				}
-				hide_progress();
-				finishExternalCommand();
-			}
-		};
-		t.start();
-	}
-	
-	private void removeFilesByList(String name) {
-		if (name != null) {
-			show_progress();
-			outputTitle(getString(R.string.removing_caption));
-			output(getString(R.string.wait_message));
-			String prermFile = toolchainDir + PKGS_LISTS_DIR + name + ".prerm";
-			if ((new File(prermFile)).exists()) {
-				Log.i(TAG, "Execute prerm script " + prermFile);
-				system(prermFile);
-				(new File(prermFile)).delete();
-			}
-			String descFile = toolchainDir + PKGS_LISTS_DIR + name + ".pkgdesc";
-			if ((new File(descFile)).exists()) {
-				(new File(descFile)).delete();
-			}
-			String logFile = toolchainDir + PKGS_LISTS_DIR + name + ".list";
-			if (!(new File(logFile)).exists()) {
-				hide_progress();
-				return;
-			}
-			try {
-				FileInputStream fin = new FileInputStream(logFile);
-				DataInputStream in = new DataInputStream(fin);
-				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-				String line = "";
-				while((line = reader.readLine()) != null) {
-					Log.i(TAG, "Delete file: " + line);
-					(new File(toolchainDir + "/" + line)).delete();
-				}
-				in.close();
-				(new File(logFile)).delete();
-			} catch (Exception e) {
-				Log.e(TAG, "Error during remove files " + e);
+		protected Void doInBackground(Void... params) {
+			final String[] oldPackages = {
+					"cctools-examples-1.00.zip",	"cctools-examples-1.01.zip","cctools-examples-1.02.zip",
+					"cctools-examples-1.03.zip", 	"platform-arm-3.zip",		"platform-arm-8.zip",
+					"platform-mips-14.zip", 		"platform-x86-14.zip",		"toolchain-arm.zip",
+					"platform-arm-14.zip",			"platform-arm-4.zip",		"platform-arm-9.zip",
+					"platform-mips-18.zip",			"platform-x86-18.zip",		"toolchain-mips.zip",
+					"platform-arm-18.zip",			"platform-arm-5.zip",		"platform-common.zip",
+					"platform-mips-9.zip",			"platform-x86-9.zip",		"toolchain-x86.zip" };
+
+			if (getPrefString("use_package_manager").equals("yes")) {
+				return null;
 			}
 			
-		}
-		hide_progress();		
-	}
-	
-	private void uninstallPackage(final String pkgName, final String file) {
-		Thread t = new Thread() {
-			public void run() {
-				String name = pkgName;
-				if (name == null) {
-					name = file;
-				}
-				removeFilesByList(name);
-				finishExternalCommand();
-			}
-		};
-		t.start();
-	}
-	
-	final int sdk2ndk_arm[] = {
-			/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  */
-			-1, -1, -1,  3,  4,  5,  5,  5,  8,  9,  9,  9,  9,  9, 14, 14, 14, 14, 18, 18, 18, 18, 18, -1
-	};
-	final int sdk2ndk_mips[] = {
-			/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 */
-			-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, -1, 14, 14, 14, 14, 18, 18, 18, 18, 18, -1
-	};
-	final int sdk2ndk_x86[] = {
-			/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 */
-			-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, -1, 14, 14, 14, 14, 18, 18, 18, 18, 18, -1
-	};
-	final Handler handler = new Handler();
-
-	private void downloadAndUnpackBase() {
-        String cctools_base = "toolchain-";
-        String cctools_sdk  = "platform-";
-        int sdk_version = Build.VERSION.SDK_INT;
-        int ndk_version = -1;
-        if (Build.CPU_ABI.startsWith("arm")) {
-			cctools_base += "arm";
-        	cctools_sdk  += "arm";
-        	if (sdk2ndk_arm.length > sdk_version) {
-        		ndk_version = sdk2ndk_arm[sdk_version];
-        	}
-        } else if (Build.CPU_ABI.startsWith("mips")) {
-			cctools_base += "mips";
-        	cctools_sdk  += "mips";
-        	if (sdk2ndk_mips.length > sdk_version) {
-        		ndk_version = sdk2ndk_mips[sdk_version];
-        	}
-        } else {
-			cctools_base += "x86";
-        	cctools_sdk  += "x86";
-        	if (sdk2ndk_x86.length > sdk_version) {
-        		ndk_version = sdk2ndk_x86[sdk_version];
-        	}
-        }
-        
-        cctools_sdk  += "-" + ndk_version;
-
-        if (ndk_version == -1) {
-        	show_error(getString(R.string.unsupported_device) + " (" + Build.CPU_ABI + "/" + Build.VERSION.SDK_INT + ")");
-        	return;
-        }
-
-		cctools_base += ".zip";
-		cctools_sdk  += ".zip";
-
-		Log.i(TAG, "TOOLCHAIN VERSION " + toolsVersion + " (" + getPrefString("base_version") + ")");
-		
-		if (!getPrefString("base_version").contentEquals(toolsVersion)) {
-			if ((new File(toolchainDir + "/installed/" + cctools_base + ".list")).exists()) {
-				removeFilesByList(cctools_base);
-				new File(filesDir + "/" + cctools_base).delete();
-			}
-			if (!downloadAndUnpack(cctools_base, downloadPath, toolchainDir, null, null)) {
-				return;
-			}
-			setPrefString("base_version", toolsVersion);
-		}
-		
-		if (!getPrefString("sdk_version").contentEquals(toolsVersion)) {
-			if ((new File(toolchainDir + "/installed/" + cctools_sdk + ".list")).exists()) {
-				removeFilesByList(cctools_sdk);
-				new File(filesDir + "/" + cctools_sdk).delete();
-			}
-			if (!downloadAndUnpack(cctools_sdk, downloadPath, toolchainDir, null, null)) {
-				return;
-			}
-			setPrefString("sdk_version", toolsVersion);
-		}
-		
-		// Common support files
-		String cctools_common = "platform-common.zip";
-		if (!getPrefString("common_version").contentEquals(toolsVersion)) {
-			if ((new File(toolchainDir + "/installed/" + cctools_common + ".list")).exists()) {
-				removeFilesByList(cctools_common);
-				new File(filesDir + "/" + cctools_common).delete();
-			}
-			if (!downloadAndUnpack(cctools_common, downloadPath, toolchainDir, null, null)) {
-				return;
-			}
-			setPrefString("common_version", toolsVersion);
-		}
-
-		// Examples
-		String cctools_examples = "cctools-examples-1.03.zip";
-		if (!(new File(toolchainDir + "/installed/" + cctools_examples + ".list")).exists()) {
-			if (!downloadAndUnpack(cctools_examples, downloadPath, sdCardDir, "Examples", null)) {
-				return;
-			}
-		}
-	}
-
-	private boolean downloadAndUnpack(String file, String from, String to, String delDir, String log) {
-		show_progress();
-		
-		output(getString(R.string.download_file) + " " + file + "...");
-		
-		File temp = new File(filesDir + "/" + file);
-		if (!temp.exists()) {
-			try {
-				int totalread = 0;
-				Log.i(TAG, "Downloading file " + from + "/" + file);
-				URL url = new URL(from + "/" + file);
-				URLConnection cn = url.openConnection();
-				cn.setReadTimeout(3 * 60 * 1000); // timeout 3 minutes
-				cn.connect();
-				int file_size = cn.getContentLength();
-				StatFs stat = new StatFs(filesDir);
-				int sdAvailSize = stat.getAvailableBlocks();// * stat.getBlockSize();
-				Log.i(TAG, "File size " + file_size);
-				Log.i(TAG, "Available on SD (in blocks " + stat.getBlockSize() + ") " + sdAvailSize);
-				int need_mem = (file_size + 1024 * 1024 * 4) / stat.getBlockSize();
-				if (sdAvailSize < need_mem) {
-					temp.delete();
-					hide_progress();
-					need_mem /= 1024 * 1024;
-					need_mem += 1;
-					show_error(getString(R.string.sd_no_memory) + " " + need_mem + " " + getString(R.string.sd_no_memory2));
+			FilenameFilter filter = new FilenameFilter() {
+				public boolean accept(File dir, String name) {
+					String lowercaseName = name.toLowerCase();
+					for (String file: oldPackages) {
+						if (lowercaseName.equals(file + ".list")) {
+							return true;
+						}
+					}
 					return false;
 				}
-				InputStream stream = cn.getInputStream();
-				if (stream == null) {
-					throw new RuntimeException("stream is null");
-				}
-				Log.i(TAG, "File is " + temp.getAbsolutePath());
-				FileOutputStream out = new FileOutputStream(temp);
-				byte buf[] = new byte[128 * 1024];
-				do {
-					int numread = stream.read(buf);
-					if (numread <= 0) {
-						break;
+			};
+			File dir = new File(toolchainDir + PKGS_LISTS_DIR);
+			if (dir.isDirectory()) {
+				for (String fileName: dir.list(filter)) {
+					try {
+						Log.i(TAG, "uninstalling " + dir.getPath() + "/" + fileName);
+						FileInputStream fin = new FileInputStream(dir.getPath() + "/" + fileName);
+						DataInputStream in = new DataInputStream(fin);
+						BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+						String line = "";
+						while((line = reader.readLine()) != null) {
+							Log.i(TAG, "Delete file: " + line);
+							(new File(toolchainDir + "/" + line)).delete();
+						}
+						in.close();
+						(new File(dir.getPath() + "/" + fileName)).delete();
+					} catch (Exception e) {
+						Log.e(TAG, "Error during remove files " + e);
 					}
-					out.write(buf, 0, numread);
-					totalread += numread;
-					output(getString(R.string.received) + " " + totalread + " " + getString(R.string.from) + " " + file_size + " " + getString(R.string.bytes));
-				} while (true);
-				stream.close();
-				out.close();
-				if (totalread != file_size) {
-					throw new RuntimeException("Partially downloaded file!");
 				}
-			} catch (Exception e) {
-				temp.delete();
-				Log.i(TAG, "Error downloading file " + file);
-				hide_progress();
-				show_error(getString(R.string.error_downloading) + " (" + file + ")");
-				return false;
 			}
-		} else
-			Log.i(TAG, "Use file " + temp.getAbsolutePath());
-
-		String tempPath = temp.getAbsolutePath();
-		output(getString(R.string.unpacking_file) + " " + file + "...");
-		Log.i(TAG, "Unpack file " + tempPath + " to " + to);
-		String logFile = log;
-		try {
-			int need_mem = Utils.unzippedSize(tempPath);
-			if (need_mem < 0) {
-				throw new RuntimeException("bad archive");
-			}
-			StatFs stat = new StatFs(to);
-			double cacheAvailSize = stat.getAvailableBlocks();
-			Log.i(TAG, "Unzipped size " + need_mem);
-			Log.i(TAG, "Available (blocks) " + cacheAvailSize + "(" + stat.getBlockSize() + ")");
-			cacheAvailSize *= stat.getBlockSize();
-			need_mem += 1024 * 1024 * 2;
-			if (cacheAvailSize < need_mem) {
-				hide_progress();
-				need_mem /= 1024 * 1024;
-				need_mem += 1;
-				cacheAvailSize /= 1024 * 1024;
-				show_error(getString(R.string.cache_no_memory) +
-						need_mem + 
-						getString(R.string.cache_no_memory1) + 
-						(int)cacheAvailSize + 
-						getString(R.string.cache_no_memory2));
-				return false;
-			}
-			if (logFile == null) {
-				logFile = toolchainDir + PKGS_LISTS_DIR + file + ".list";
-			}
-			if (Utils.unzip(tempPath, to, logFile) != 0) {
-				if ((new File(logFile)).exists()) {
-					(new File(logFile)).delete();
-				}
-				throw new RuntimeException("bad archive");
-			}
-		} catch (Exception e) {
-			if (delDir != null) {
-				Utils.deleteDirectory(new File(to + "/" + delDir));
-			}
-			temp.delete();
-			Log.i(TAG, "Corrupted archive, restart application and try install again");
-			hide_progress();
-			show_error(getString(R.string.bad_archive) + " (" + file +")");
-			return false;
+			setPrefString("use_package_manager", "yes");
+			return null;
 		}
-		hide_progress();
-		return true;
-	}
+		
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			installToolchainPackage();
+		}
+    }
+    
+	private ProgressDialog pd;
+
+	final Handler handler = new Handler();
 
 	private void show_progress() {
 		handler.post(new Runnable() {
@@ -1248,18 +1010,6 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     	};
     	handler.post(proc);
     }
-
-	private void finishExternalCommand() {
-		handler.post(new Runnable() {
-			public void run() {
-				Intent intent = new Intent();
-				setResult(RESULT_OK, intent);
-				finish();
-				//TODO: probably we don't need it
-				//System.exit(0);
-			}
-		});
-	}
 
 	private Thread dialogService(final int port) {
 		Log.i(TAG, "Launch dialog service (port " + port + ")");

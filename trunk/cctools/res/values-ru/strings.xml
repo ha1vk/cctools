@@ -20,6 +20,9 @@
     <string name="cache_no_memory1">МБ, но\u0020</string>
    	<string name="cache_no_memory2">МБ доступно. Удалите ненужные приложения и перезапустите программу.</string>
 
+	<string name="toolchain_selector">Быстрая установка</string>
+	<string name="toolchain_selectormsg">Выберите инструменты для быстрой установки. Другие пакеты можно установить позже из Дополнений.</string>
+   	
    	<string name="exit_dialog">Подтверждение выхода</string>
    	<string name="exit_dialog_text">Имеются несохраненные изменения, которые будут потеряны. Продолжить?</string>
    	<string name="exit_dialog_yes">Да</string>

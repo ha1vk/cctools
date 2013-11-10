@@ -20,4 +20,12 @@
         <item>16</item>
         <item>20</item>
     </string-array>
+    
+    <string-array name="toolchain_selector">
+        <item>Clang C/C++</item>
+        <item>GNU C/C++</item>
+        <item>GNU Fortran</item>
+        <item>AVR C/C++ (crosscompiler)</item>
+        <item>Lua JIT</item>
+	</string-array>
 </resources>

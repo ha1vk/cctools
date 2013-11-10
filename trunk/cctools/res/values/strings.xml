@@ -20,6 +20,9 @@
     <string name="cache_no_memory1">MB, but\u0020</string>
    	<string name="cache_no_memory2">MB available. Remove unnecessary applications and try again.</string>
    	
+   	<string name="toolchain_selector">Quick installer</string>
+   	<string name="toolchain_selectormsg">Select toolchain to quick install. Later you can install other additional packages from Add-ons.</string>
+   	
    	<string name="exit_dialog">Confirm exit</string>
    	<string name="exit_dialog_text">Text has been modified, but not saved. Are you sure you want to exit?</string>
    	<string name="exit_dialog_yes">Yes</string>
