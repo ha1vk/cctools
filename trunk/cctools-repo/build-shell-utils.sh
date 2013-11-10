@@ -355,6 +355,7 @@ build_ndk_misc
 build_ndk_sysroot
 build_cctools_examples
 build_fortran_examples
+build_objc_examples
 
 # Clang
 build_llvm
