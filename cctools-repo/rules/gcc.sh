@@ -245,6 +245,7 @@ EOF
 #!/system/bin/sh
 
 ln -sf gfortran-${gcc_version}  \${CCTOOLSDIR}/bin/gfortran
+ln -sf gfortran-${gcc_version}  \${CCTOOLSDIR}/bin/f77
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/postinst
 
@@ -252,6 +253,7 @@ EOF
 #!/system/bin/sh
 
 test \`readlink \${CCTOOLSDIR}/bin/gfortran\` = "gfortran-${gcc_version}" && rm -f \${CCTOOLSDIR}/bin/gfortran
+test \`readlink \${CCTOOLSDIR}/bin/f77\`      = "gfortran-${gcc_version}" && rm -f \${CCTOOLSDIR}/bin/f77
 EOF
 
     chmod 755 ${TMPINST_DIR}/${PKG}/prerm
