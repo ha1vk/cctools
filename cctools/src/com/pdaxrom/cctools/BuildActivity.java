@@ -52,6 +52,7 @@ public class BuildActivity extends Activity {
 	private boolean runExe;
 	private boolean buildNativeActivity;
 	private boolean execJava;
+	private boolean execObjC;
 	
 	private int mProcId;
 	private FileDescriptor mFd;
@@ -112,6 +113,7 @@ public class BuildActivity extends Activity {
         	int dotPos = infile.lastIndexOf(".");
         	if (dotPos != -1) {
         		execJava = false;
+        		execObjC = false;
             	String ext = infile.substring(dotPos);
             	outFile = infile.substring(0, dotPos);
             	Log.i(TAG, "extension [" + ext + "]");
@@ -119,12 +121,14 @@ public class BuildActivity extends Activity {
             		cmdline = "make -f " + infile + " " + systemShell;
                 	argsDialog(getString(R.string.make_title), getString(R.string.make_args));
                 	return;
-            	} else if (ext.contentEquals(".c") || ext.contentEquals(".s")) {
+            	} else if (ext.contentEquals(".c") || ext.contentEquals(".s") ||
+            			   ext.endsWith(".m")) {
             		cmdline = "gcc " + infile;
             		if (forceBuild) {
             			cmdline += " " + mPrefs.getString("force_ccopts", "");
             		}
-            	} else if (ext.contentEquals(".c++") || ext.contentEquals(".cpp")) {
+            	} else if (ext.contentEquals(".c++") || ext.contentEquals(".cpp") ||
+            			   ext.endsWith(".mm")) {
             		cmdline = "g++ " + infile;
             		if (forceBuild) {
             			cmdline += " " + mPrefs.getString("force_cxxopts", "");
@@ -143,6 +147,10 @@ public class BuildActivity extends Activity {
 //            		if (forceBuild) {
 //            			cmdline += " " + mPrefs.getString("force_ccopts", "");
 //            		}
+            	}
+            	
+            	if (ext.equals(".m") || ext.equals(".mm")) {
+            		execObjC = true;
             	}
         	}
         }
@@ -222,6 +230,9 @@ public class BuildActivity extends Activity {
 	    		} else {
 	    			cmdline += " -o " + outFile;
 	    		}
+	    		if (execObjC) {
+	    			cmdline += " -lobjc";
+	    		}
 			}
             cmdThread = new MyThread();
             cmdThread.start();
@@ -292,6 +303,9 @@ public class BuildActivity extends Activity {
 	        		} else {
 	        			cmdline += " -o " + outFile;
 	        		}
+		    		if (execObjC) {
+		    			cmdline += " -lobjc";
+		    		}
 	        	} else {
 	        		if (buildNativeActivity) {
 	        			cmdline += " -I" + cctoolsDir + "/sources/native_app_glue";
