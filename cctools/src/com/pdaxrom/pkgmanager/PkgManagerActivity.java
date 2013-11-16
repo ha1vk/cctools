@@ -698,6 +698,17 @@ public class PkgManagerActivity extends ListActivity {
     				}
     			}
     		}
+    		
+    		if (RepoUtils.isContainsPackage(packagesLists.getInstalledPackages(), packageInfo.getReplaces())) {
+    			Log.i(TAG, "Replace package " + packageInfo.getReplaces());
+    			PackageInfo oldPackage = RepoUtils.getPackageByName(packagesLists.getInstalledPackages(),
+						packageInfo.getReplaces());
+				uninstallPackage(oldPackage.getName());
+				if ((new File(filesDir + "/" + oldPackage.getFile())).exists()) {
+					(new File(filesDir + "/" + oldPackage.getFile())).delete();
+				}
+    		}
+    		
     		updateProgressTitle(getString(R.string.pkg_installpackagetask) + " " + packageInfo.getName());
     		String file = packageInfo.getFile();
     		Log.i(TAG, "Install " + packageInfo.getName() + " -> " + packageInfo.getFile());

@@ -30,6 +30,7 @@ public class RepoUtils {
     static public final String KEY_DESC		= "description";
     static public final String KEY_DEPENDS	= "depends";
     static public final String KEY_ARCH		= "arch";
+    static public final String KEY_REPLACES = "replaces";
     static public final String KEY_STATUS	= "status";
 
 	private static String	_ndkArch;
@@ -143,7 +144,8 @@ public class RepoUtils {
 	    				parser.getValue(e, KEY_VERSION),
 	    				parser.getValue(e, KEY_DESC),
 	    				parser.getValue(e, KEY_DEPENDS),
-	    				parser.getValue(e, KEY_ARCH));
+	    				parser.getValue(e, KEY_ARCH),
+	    				parser.getValue(e, KEY_REPLACES));
 				list.add(packageInfo);
 				Log.i(TAG, "added pkg = " + packageInfo.getName());
 	    	}
