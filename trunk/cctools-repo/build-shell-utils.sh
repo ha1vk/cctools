@@ -262,7 +262,7 @@ get_pkg_deps() {
 }
 
 #
-# build_package_desc <path> <filename> <name> <version> <arch> <description>
+# build_package_desc <path> <filename> <name> <version> <arch> <description> [<depends> [<replaces>]]
 #
 
 build_package_desc() {
@@ -271,6 +271,7 @@ build_package_desc() {
     local vers=$4
     local arch=$5
     local desc=$6
+    local replaces=$8
 
     local unpacked_size=`du -sb ${1}/cctools | cut -f1`
 
@@ -286,6 +287,7 @@ build_package_desc() {
 cat >$1/pkgdesc << EOF
     <package>
 	<name>$name</name>
+	<replaces>$replaces</replaces>
 	<version>$vers</version>
 	<arch>$arch</arch>
 	<description>$desc</description>
@@ -358,15 +360,24 @@ build_fortran_examples
 build_objc_examples
 
 # Clang
+#build_zlib
 build_llvm
 
 # presets
 build_build_essential_clang
+build_build_essential_clang_objc
 build_build_essential_gcc
 build_build_essential_fortran
 build_build_essential_gcc_avr
 build_build_essential_gcc_objc
 build_build_essential_gcc_objc_fortran
+
+build_build_essential_clang_compact
+build_build_essential_clang_objc_compact
+build_build_essential_gcc_compact
+build_build_essential_fortran_compact
+build_build_essential_gcc_objc_compact
+build_build_essential_gcc_objc_fortran_compact
 
 # utils
 build_busybox
@@ -408,3 +419,4 @@ build_file
 
 # Bug fixes for firmware
 build_acer_a200_ics403_libc_fix
+build_android_pre_233_libc_fix
