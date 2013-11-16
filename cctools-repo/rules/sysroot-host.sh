@@ -7,17 +7,17 @@ build_sysroot_host() {
 
     pushd .
 
-    local FROM="${NDK_DIR}/platforms/android-9"
+    local FROM="${NDK_DIR}/platforms/android"
 
     case $TARGET_ARCH in
     arm*)
-	FROM="${FROM}/arch-arm"
+	FROM="${FROM}-9/arch-arm"
 	;;
     mips*)
-	FROM="${FROM}/arch-mips"
+	FROM="${FROM}-9/arch-mips"
 	;;
     *86*)
-	FROM="${FROM}/arch-x86"
+	FROM="${FROM}-9/arch-x86"
 	;;
     *)
 	error "host sysroot - unknown target"
