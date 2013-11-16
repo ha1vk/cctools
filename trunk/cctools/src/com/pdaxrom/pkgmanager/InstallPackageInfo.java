@@ -87,13 +87,23 @@ public class InstallPackageInfo {
 		return packages;
 	}
 	
-    private void getDepends(PackagesLists packagesLists, String pkg ,List<PackageInfo> list) {
-    	if (RepoUtils.isContainsPackage(list, pkg)) {
-    		return;
+    private void getDepends(PackagesLists packagesLists, String packageWithVariants ,List<PackageInfo> list) {
+    	String[] packageVariants = packageWithVariants.replace('|', ' ').split("\\s+");
+    	Log.i(TAG, "packageVariants = " + packageWithVariants.replace('|', ' '));
+    	String firstPackage = packageVariants[0];
+    	for (String packageVariant: packageVariants) {
+    		Log.i(TAG, "packageVariant = " + packageVariant);
+    		if (RepoUtils.isContainsPackage(list, packageVariant)) {
+    			return;
+    		}
+    		if (RepoUtils.isContainsPackage(packagesLists.getInstalledPackages(), packageVariant)) {
+    			firstPackage = packageVariant;
+    			break;
+    		}
     	}
-
+    	
     	for (PackageInfo info: packagesLists.getAvailablePackages()) {
-    		if (pkg.equals(info.getName())) {
+    		if (firstPackage.equals(info.getName())) {
     			String deps = info.getDepends();
     			Log.i(TAG, "package deps = " + deps);
     			if (deps != null && !deps.equals("")) {
@@ -104,15 +114,15 @@ public class InstallPackageInfo {
     				}
     			}
     			PackageInfo installedPackage = RepoUtils.getPackageByName(
-    					packagesLists.getInstalledPackages(), pkg);
+    					packagesLists.getInstalledPackages(), firstPackage);
     			if (installedPackage != null) {
     				if (installedPackage.getVersion().equals(info.getVersion())) {
-    					Log.i(TAG, "the same version, skip package = " + pkg);
+    					Log.i(TAG, "the same version, skip package = " + firstPackage);
     					break;
     				}
     			}
     			list.add(info);
-    			Log.i(TAG, "add package = " + pkg);
+    			Log.i(TAG, "add package = " + firstPackage);
     			break;
     		}
     	}

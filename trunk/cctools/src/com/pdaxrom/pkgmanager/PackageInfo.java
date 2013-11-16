@@ -9,9 +9,11 @@ public class PackageInfo {
 	private String	description;
 	private String	depends;
 	private String	arch;
+	private String replaces;
 	
 	PackageInfo(String name, String file, int size, int filesize,
-				String version, String description, String depends, String arch) {
+				String version, String description, String depends,
+				String arch, String replaces) {
 		this.name = name;
 		this.file = file;
 		this.size = size;
@@ -20,6 +22,7 @@ public class PackageInfo {
 		this.description = description;
 		this.depends = depends;
 		this.arch = arch;
+		this.replaces = replaces;
 	}
 	
 	String getName() {
@@ -52,5 +55,9 @@ public class PackageInfo {
 	
 	String getArch() {
 		return arch;
+	}
+	
+	String getReplaces() {
+		return replaces;
 	}
 }

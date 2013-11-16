@@ -852,9 +852,9 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	int toolchainPackageToInstall = 0;
     private void installToolchainPackage() {
     	final String[] toolchainPackage = {
-    			"build-essential-clang",
-    			"build-essential-gcc",
-    			"build-essential-fortran",
+    			"build-essential-clang-compact",
+    			"build-essential-gcc-compact",
+    			"build-essential-fortran-compact",
     			"build-essential-gcc-avr",
     			"LuaJIT"
     	};
