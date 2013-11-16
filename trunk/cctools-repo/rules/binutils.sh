@@ -53,10 +53,42 @@ build_binutils() {
     rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/libopcodes.*a
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "binutils-compact"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     popd
     s_tag $PKG
+
+    PKG=binutils-compact
+    PKG_DESC="GNU assembler and linker only, compact version"
+    rm -rf ${TMPINST_DIR}/binutils-compact
+    cp -a ${TMPINST_DIR}/binutils ${TMPINST_DIR}/binutils-compact
+    for f in addr2line ar c++filt elfedit gprof nm objcopy objdump ranlib readelf size strings strip; do
+	rm -f ${TMPINST_DIR}/binutils-compact/cctools/bin/$f
+    done
+    case $TARGET_ARCH in
+    arm*)
+	rm -f ${TMPINST_DIR}/binutils-compact/cctools/${TARGET_ARCH}/lib/ldscripts/*btsmip*
+	rm -f ${TMPINST_DIR}/binutils-compact/cctools/${TARGET_ARCH}/lib/ldscripts/*ltsmip*
+	rm -f ${TMPINST_DIR}/binutils-compact/cctools/${TARGET_ARCH}/lib/ldscripts/elf_*
+	rm -f ${TMPINST_DIR}/binutils-compact/cctools/${TARGET_ARCH}/lib/ldscripts/elf32_*
+	rm -f ${TMPINST_DIR}/binutils-compact/cctools/${TARGET_ARCH}/lib/ldscripts/i386*
+	;;
+    mips*)
+	rm -f ${TMPINST_DIR}/binutils-compact/cctools/${TARGET_ARCH}/lib/ldscripts/armelf*
+	rm -f ${TMPINST_DIR}/binutils-compact/cctools/${TARGET_ARCH}/lib/ldscripts/elf_*
+	rm -f ${TMPINST_DIR}/binutils-compact/cctools/${TARGET_ARCH}/lib/ldscripts/elf32_*
+	rm -f ${TMPINST_DIR}/binutils-compact/cctools/${TARGET_ARCH}/lib/ldscripts/i386*
+	;;
+    i*86*|x86*)
+	rm -f ${TMPINST_DIR}/binutils-compact/cctools/${TARGET_ARCH}/lib/ldscripts/armelf*
+	rm -f ${TMPINST_DIR}/binutils-compact/cctools/${TARGET_ARCH}/lib/ldscripts/*btsmip*
+	rm -f ${TMPINST_DIR}/binutils-compact/cctools/${TARGET_ARCH}/lib/ldscripts/*ltsmip*
+	;;
+    esac
+    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "binutils"
+    cd ${TMPINST_DIR}/${PKG}
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 }
