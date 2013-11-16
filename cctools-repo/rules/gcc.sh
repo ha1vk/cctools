@@ -223,7 +223,7 @@ EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/prerm
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "libgcc-dev libstdc++-dev"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "libgcc-dev|libgcc-compact-dev libstdc++-dev|libstdc++-compact-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
@@ -234,7 +234,7 @@ EOF
     PKG_DESC="GNU Objective-C and Objective-C++ compilers"
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "gcc libobjc-dev"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "gcc libobjc-dev|libobjc-compact-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
@@ -259,15 +259,19 @@ EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/prerm
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "gcc libgfortran-dev"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "gcc libgfortran-dev|libgfortran-compact-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
+
+    #
+    # LIBGCC
+    #
 
     PKG="libgcc-dev"
     PKG_DESC="GCC support library (development files)"
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libgcc-compact-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
@@ -292,12 +296,45 @@ EOF
     fi
 
     rm -f ${REPO_DIR}/$filename
+
+    #
+    # LIBGCC-COMPACT
+    #
+
+    rm -rf ${TMPINST_DIR}/libgcc-compact-dev
+    cp -a ${TMPINST_DIR}/${PKG} ${TMPINST_DIR}/libgcc-compact-dev
+    PKG="libgcc-compact-dev"
+    PKG_DESC="GCC support library, compact version (development files)"
+
+    case $TARGET_ARCH in
+    arm*)
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/thumb
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/armv7-a
+	#ln -sf . ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/thumb
+	#ln -sf . ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/armv7-a
+	;;
+    mips*)
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/mips-r2
+	#ln -sf . ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/mips-r2
+	;;
+    i*86*|x86*)
+	;;
+    esac
+
+    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libgcc-dev"
+    cd ${TMPINST_DIR}/${PKG}
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+
+    #
+    # LIBSTDC++
+    #
 
     PKG="libstdc++-dev"
     PKG_DESC="GNU Standard C++ Library v3 (development files)"
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libstdc++-compact-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
@@ -322,12 +359,55 @@ EOF
     fi
 
     rm -f ${REPO_DIR}/$filename
+
+    #
+    # LIBSTDC++-COMPACT
+    #
+
+    rm -rf ${TMPINST_DIR}/libstdc++-compact-dev
+    cp -a ${TMPINST_DIR}/${PKG} ${TMPINST_DIR}/libstdc++-compact-dev
+
+    PKG="libstdc++-compact-dev"
+    PKG_DESC="GNU Standard C++ Library v3, compact version (development files)"
+
+    case $TARGET_ARCH in
+    arm*)
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${gcc_version}/${TARGET_ARCH}/thumb
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${gcc_version}/${TARGET_ARCH}/armv7-a
+	#ln -sf . ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${gcc_version}/${TARGET_ARCH}/thumb
+	#ln -sf . ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${gcc_version}/${TARGET_ARCH}/armv7-a
+
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib/thumb
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib/armv7-a
+	#ln -sf . ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/thumb
+	#ln -sf . ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/armv7-a
+	;;
+    mips*)
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${gcc_version}/${TARGET_ARCH}/mips-r2
+	#ln -sf . ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${gcc_version}/${TARGET_ARCH}/mips-r2
+
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib/mips-r2
+	#ln -sf . ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib/mips-r2
+	;;
+    i*86*|x86*)
+	;;
+    esac
+
+    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libstdc++-dev"
+    cd ${TMPINST_DIR}/${PKG}
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+
+
+    #
+    # LIBGFORTRAN
+    #
 
     PKG="libgfortran-dev"
     PKG_DESC="Runtime library for GNU Fortran applications (development files)"
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libgfortran-compact-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
@@ -352,12 +432,46 @@ EOF
     fi
 
     rm -f ${REPO_DIR}/$filename
+
+    #
+    # LIBGFORTRAN-COMPACT
+    #
+
+    rm -rf ${TMPINST_DIR}/libgfortran-compact-dev
+    cp -a ${TMPINST_DIR}/${PKG} ${TMPINST_DIR}/libgfortran-compact-dev
+
+    PKG="libgfortran-compact-dev"
+    PKG_DESC="Runtime library for GNU Fortran applications, compact version (development files)"
+
+    case $TARGET_ARCH in
+    arm*)
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/thumb
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/armv7-a
+	#ln -sf . ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/thumb
+	#ln -sf . ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/armv7-a
+	;;
+    mips*)
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/mips-r2
+	#ln -sf . ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/mips-r2
+	;;
+    i*86*|x86*)
+	;;
+    esac
+
+    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libgfortran-dev"
+    cd ${TMPINST_DIR}/${PKG}
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+
+    #
+    # LIBOBJC
+    #
 
     PKG="libobjc-dev"
     PKG_DESC="Runtime library for GNU Objective-C applications (development files)"
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libobjc-compact-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
@@ -382,4 +496,35 @@ EOF
     fi
 
     rm -f ${REPO_DIR}/$filename
+
+    #
+    # LIBOBJC-COMPACT
+    #
+
+    rm -rf ${TMPINST_DIR}/libobjc-compact-dev
+    cp -a ${TMPINST_DIR}/${PKG} ${TMPINST_DIR}/libobjc-compact-dev
+
+    PKG="libobjc-compact-dev"
+    PKG_DESC="Runtime library for GNU Objective-C applications, compact version (development files)"
+
+    case $TARGET_ARCH in
+    arm*)
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/thumb
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/armv7-a
+	#ln -sf . ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/thumb
+	#ln -sf . ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/armv7-a
+	;;
+    mips*)
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/mips-r2
+	#ln -sf . ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/mips-r2
+	;;
+    i*86*|x86*)
+	;;
+    esac
+
+    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libobjc-dev"
+    cd ${TMPINST_DIR}/${PKG}
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+
 }
