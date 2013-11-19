@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<CheckBoxPreference
+  	<CheckBoxPreference
+  	    android:key="updater"
+  	    android:title="@string/pref_updater"
+  	    android:defaultValue="true"/>
+    <CheckBoxPreference
 		android:key="showToolBar"
 		android:title="@string/pref_toolbar"
 		android:defaultValue="true" />
@@ -33,7 +37,8 @@
   	<PreferenceCategory android:title="@string/pref_force_run">
   		<EditTextPreference android:title="@string/pref_ccopts" android:key="force_ccopts"/>
   		<EditTextPreference android:title="@string/pref_cxxopts" android:key="force_cxxopts"/>
-  		<CheckBoxPreference android:title="@string/gccnativeactivity" android:key="force_native_activity" android:defaultValue="false" /><CheckBoxPreference android:title="@string/pref_runargs" android:key="force_run" android:defaultValue="true"/>
+  		<CheckBoxPreference android:title="@string/gccnativeactivity" android:key="force_native_activity" android:defaultValue="false" />
+  		<CheckBoxPreference android:title="@string/pref_runargs" android:key="force_run" android:defaultValue="true"/>
   		
   	</PreferenceCategory>
   	
