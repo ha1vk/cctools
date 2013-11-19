@@ -25,7 +25,6 @@ import com.pdaxrom.utils.Utils;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -37,7 +36,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.text.Html;
 import android.text.InputType;
 import android.text.method.LinkMovementMethod;
@@ -160,6 +158,8 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
         	(new File(serviceDir)).mkdir();
         }
         
+        mPrefs = getSharedPreferences(SHARED_PREFS_NAME, 0);
+
         codeEditor = (CodeEditor) findViewById(R.id.codeEditor);
         registerForContextMenu(codeEditor);
         
@@ -241,13 +241,12 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
         
         buttBar = (View) findViewById(R.id.toolButtonsBar);
 
-        mPrefs = getSharedPreferences(SHARED_PREFS_NAME, 0);
-        mPrefs.registerOnSharedPreferenceChangeListener(this);
-        onSharedPreferenceChanged(mPrefs, null);
-        
         dialogServiceThread = dialogService(13527);
         serviceStartStop(SERVICE_START);
-        
+
+        mPrefs.registerOnSharedPreferenceChangeListener(this);
+        onSharedPreferenceChanged(mPrefs, null);
+
         // Get intent, action and MIME type
         Intent intent = getIntent();
         String action = intent.getAction();
@@ -842,9 +841,11 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		} else if (!getPrefString("toolchain_installed").equals("yes")) {
 			installToolchainPackage();
 		} else {
-        	Intent intent = new Intent(this, PkgManagerActivity.class);
-        	intent.putExtra(PkgManagerActivity.INTENT_CMD, PkgManagerActivity.CMD_UPDATE);
-        	startActivity(intent);
+			if (mPrefs.getBoolean("updater", true)) {
+				Intent intent = new Intent(this, PkgManagerActivity.class);
+				intent.putExtra(PkgManagerActivity.INTENT_CMD, PkgManagerActivity.CMD_UPDATE);
+				startActivity(intent);
+			}
 		}
     }
 
@@ -953,64 +954,6 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		}
     }
     
-	private ProgressDialog pd;
-
-	final Handler handler = new Handler();
-
-	private void show_progress() {
-		handler.post(new Runnable() {
-			public void run() {
-				pd = ProgressDialog.show(context, getString(R.string.updating_caption) + "...",
-						getString(R.string.establishing_handshake_message) + "...",
-						true);
-
-			}
-		});
-	}
-	
-	private void output(final String out) {
-		handler.post(new Runnable() {
-			public void run() {
-				pd.setMessage(out);
-			}
-		});
-	}
-
-	private void outputTitle(final String out) {
-		handler.post(new Runnable() {
-			public void run() {
-				pd.setTitle(out);
-			}
-		});
-	}
-	
-	private void hide_progress() {
-		handler.post(new Runnable() {
-			public void run() {
-				pd.dismiss();
-			}
-		});
-	}
-	
-    private void show_error(final String message) {
-    	Runnable proc = new Runnable() {
-    		public void run() {
-    	    	AlertDialog alertDialog = new AlertDialog.Builder(context).create();
-    	    	alertDialog.setTitle(R.string.app_name);
-    	    	alertDialog.setMessage(message);
-    	    	alertDialog.setButton(getString(R.string.exit_button), new DialogInterface.OnClickListener() {
-    	    		   public void onClick(DialogInterface dialog, int which) {
-    	    			   finish();
-    	    			   System.exit(0);
-    	    		   }
-    	    		});
-    	    	alertDialog.setIcon(android.R.drawable.ic_dialog_alert);
-    	    	alertDialog.show();    			
-    		}
-    	};
-    	handler.post(proc);
-    }
-
 	private Thread dialogService(final int port) {
 		Log.i(TAG, "Launch dialog service (port " + port + ")");
 		Thread t = new Thread() {

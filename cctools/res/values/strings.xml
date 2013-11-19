@@ -40,6 +40,7 @@
    	<string name="prefs_button">Settings</string>
    	
    	<string name="preferences">Settings</string>
+   	<string name="pref_updater">Check for updates at startup</string>
    	<string name="pref_toolbar">Toolbar</string>
 	<string name="pref_syntax">Syntax highlighting</string>
 	<string name="pref_linenumbers">Line numbers</string>

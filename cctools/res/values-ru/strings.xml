@@ -40,6 +40,7 @@
    	<string name="prefs_button">Настройки</string>
    	
    	<string name="preferences">Настройки</string>
+   	<string name="pref_updater">Проверить обновления при запуске</string>
    	<string name="pref_toolbar">Панель инструментов</string>
 	<string name="pref_syntax">Подсветка синтаксиса</string>
 	<string name="pref_linenumbers">Нумерация строк</string>
