@@ -1051,7 +1051,6 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 				"ANDROID_ASSETS=/system/app",
 				"ANDROID_BOOTLOGO=1",				
 				"ANDROID_DATA=" + cctoolsDir + "/var/dalvik",
-				"ANDROID_PROPERTY_WORKSPACE=10,32768",
 				"ANDROID_ROOT=/system",
 				"BOOTCLASSPATH=/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar",
 				"TERM=xterm",

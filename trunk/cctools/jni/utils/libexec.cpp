@@ -139,7 +139,6 @@ static int create_subprocess(const char *dir, const char *cmd,
         }
 
         close(ptm);
-        close(pts);
 
         execv(cmd, argv);
         exit(-1);
