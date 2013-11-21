@@ -20,6 +20,9 @@
     <item android:id="@+id/item_buildlog"
         android:icon="@drawable/logviewer"
         android:title="@string/logButton" />
+    <item android:id="@+id/item_terminal"
+        android:icon="@drawable/gnome_terminal"
+        android:title="@string/terminalButton" />
     <item android:id="@+id/item_pkgmgr"
         android:icon="@drawable/pkgmgr"
         android:title="@string/pkgmgrButton" />
