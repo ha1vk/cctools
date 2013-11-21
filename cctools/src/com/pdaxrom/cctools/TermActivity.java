@@ -142,6 +142,7 @@ public class TermActivity extends Activity {
 				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
 				"HOME=" + cctoolsDir + "/home",
 				"TERM=xterm",
+				"PS1=$ ",
 				};
 		String[] argv = cmdline.split("\\s+");
 

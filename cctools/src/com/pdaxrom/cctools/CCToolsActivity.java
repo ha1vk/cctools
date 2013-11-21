@@ -84,6 +84,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	private ImageButton playButton;
 	private ImageButton buildButton;
 	private ImageButton logButton;
+	private ImageButton terminalButton;
 	private ImageButton saveButton;
 	private ImageButton saveAsButton;
 	private ImageButton undoButton;
@@ -223,6 +224,13 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
         	public void onClick(View v) {
         		showLog();
         	}
+        });
+        
+        terminalButton = (ImageButton) findViewById(R.id.terminalButton);
+        terminalButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				runTerminal();
+			}
         });
         
         undoButton = (ImageButton) findViewById(R.id.undoButton);
@@ -384,6 +392,9 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
         		break;
         	case R.id.item_buildlog:
         		showLog();
+        		break;
+        	case R.id.item_terminal:
+        		runTerminal();
         		break;
         	case R.id.item_pkgmgr:
         		packageManager();
@@ -833,6 +844,22 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 			}
 		})
 		.show();    	
+    }
+    
+    private void runTerminal() {
+		Intent myIntent = new Intent(this, TermActivity.class);
+		String cmdLine = toolchainDir + "/cctools/bin/ash";
+		if (!(new File(cmdLine)).exists()) {
+			cmdLine = "/system/bin/sh";
+		}
+		myIntent.putExtra("filename", cmdLine);
+		myIntent.putExtra("cctoolsdir", toolchainDir + "/cctools");
+		String workDir = toolchainDir + "/cctools/home";
+		if ((new File(fileName)).exists()) {
+			workDir = (new File(fileName)).getParentFile().getAbsolutePath();
+		}
+		myIntent.putExtra("workdir", workDir);
+		startActivity(myIntent);
     }
     
     private void installOrUpgradeToolchain() {

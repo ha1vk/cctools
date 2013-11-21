@@ -77,7 +77,14 @@
                     android:layout_height="wrap_content"
                     android:contentDescription="@string/imgbuttdesc"
                     android:text="@string/logButton" />
-            	
+				<ImageButton
+                    android:id="@+id/terminalButton"
+                    android:src="@drawable/gnome_terminal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/imgbuttdesc"
+                    android:text="@string/terminalButton" />
+					
 			</LinearLayout>
     	</HorizontalScrollView>
 
