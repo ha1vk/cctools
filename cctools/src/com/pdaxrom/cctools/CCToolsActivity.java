@@ -10,6 +10,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.BindException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -983,13 +984,16 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		Thread t = new Thread() {
 			public void run() {
 				try {
-					//ServerSocket ss = new ServerSocket(port, 0, null /*InetAddress.getByName(null)*/);
 					dialogServerSocket = new ServerSocket();
 					dialogServerSocket.setReuseAddress(true);
 					dialogServerSocket.bind(new InetSocketAddress(port));
 					Log.i(TAG, "Waiting for incoming requests");
 					while (true) {
 						dialogServiceSocket = dialogServerSocket.accept();
+						Log.i(TAG, "Dialog request from " + dialogServiceSocket.getInetAddress().toString());
+						if (!dialogServiceSocket.getInetAddress().toString().equals("/127.0.0.1")) {
+							continue;
+						}
 						Intent intent = new Intent(CCToolsActivity.this, DialogWindow.class);
 						startActivity(intent);
 						Log.i(TAG, "Waiting for finish dialog activity");
