@@ -146,9 +146,10 @@ public class DialogWindow extends Activity {
 		DataOutputStream outToClient;
 		try {
 			outToClient = new DataOutputStream(socket.getOutputStream());
-			outToClient.writeChars(status + "\n");
 			if (message != null) {
-				outToClient.writeChars(message + "\n");
+				outToClient.writeBytes(status + " " + message);
+			} else {
+				outToClient.writeBytes(status);
 			}
 			socket.close();
 			finish();
