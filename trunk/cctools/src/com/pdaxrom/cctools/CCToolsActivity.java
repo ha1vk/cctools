@@ -849,11 +849,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     
     private void runTerminal() {
 		Intent myIntent = new Intent(this, TermActivity.class);
-		String cmdLine = toolchainDir + "/cctools/bin/ash";
-		if (!(new File(cmdLine)).exists()) {
-			cmdLine = "/system/bin/sh";
-		}
-		myIntent.putExtra("filename", cmdLine);
+		myIntent.putExtra("filename", getShell());
 		myIntent.putExtra("cctoolsdir", toolchainDir + "/cctools");
 		String workDir = toolchainDir + "/cctools/home";
 		if ((new File(fileName)).exists()) {
@@ -1059,6 +1055,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 				"CCTOOLSRES=" + getPackageResourcePath(),
 				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
 				"HOME=" + cctoolsDir + "/home",
+				"SHELL=" + getShell(),
 				"TERM=xterm",
 				"PS1=$ ",
 				"SDDIR=" + sdCardDir,
@@ -1102,6 +1099,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 				"CCTOOLSRES=" + getPackageResourcePath(),
 				"LD_LIBRARY_PATH=" + baseDir + "/lib",
 				"HOME=" + baseDir + "/home",
+				"SHELL=" + getShell(),
 				"TERM=xterm",
 				"PS1=$ ",
 				"SDDIR=" + sdCardDir,
@@ -1129,5 +1127,14 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 			Log.e(TAG, "exception " + e);
 		}
 		return ret;
+	}
+	
+	private String getShell() {
+		String shell = toolchainDir + "/cctools/bin/ash";
+		if (!(new File(shell)).exists()) {
+			shell = "/system/bin/sh";
+		}
+		Log.i(TAG, "shell=" + shell);
+		return shell;
 	}
 }
