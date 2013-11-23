@@ -157,7 +157,7 @@ tcp_channel *tcp_open(int mode, const char *addr, int port)
 #endif
 
     tcp_channel *u = (tcp_channel *)malloc(sizeof(tcp_channel));
-    memset(u, 0, sizeof(u));
+    memset(u, 0, sizeof(tcp_channel));
 
     u->mode = mode;
 

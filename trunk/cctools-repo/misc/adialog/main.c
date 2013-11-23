@@ -1,6 +1,28 @@
+/*-------------------------------------------------------------------------
+
+CCTools console dialog utility
+
+(c) 2013 Alexander Chukov <sash@pdaXrom.org>
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+-------------------------------------------------------------------------*/
+
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "tcp.h"
 
@@ -11,6 +33,18 @@ enum {
     FUNC_EDITBOX,
 };
 
+int send_command(tcp_channel *channel, char *cmd, char *title, char *message)
+{
+    char buf[1024];
+    int r;
+    snprintf(buf, sizeof(buf) - 1, "%s\n%s\n%s\n", cmd, title, message);
+    if ((r = tcp_write(channel, buf, strlen(buf))) <= 0) {
+	fprintf(stderr, "tcp_write()\n");
+	return -1;
+    }
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     int r;
@@ -18,6 +52,7 @@ int main(int argc, char *argv[])
     char *title = NULL;
     char *message = NULL;
     char *text = NULL;
+    char buf[1024];
 
     while (--argc > 0) {
 	if (!strcmp(argv[1], "--yesno"))
@@ -45,34 +80,50 @@ int main(int argc, char *argv[])
 	argv++;
     }
 
+    int port = 0;
 
-    tcp_channel *server = tcp_open(TCP_CLIENT, "192.168.1.205", 13527);
+    if (getenv("ADIALOG_PORT")) {
+	port = atoi(getenv("ADIALOG_PORT"));
+    }
+
+    if (!port) {
+	port = 13527;
+    }
+
+    tcp_channel *server = tcp_open(TCP_CLIENT, "127.0.0.1", port);
     if (!server) {
 	fprintf(stderr, "tcp_open()\n");
 	return -1;
     }
 
+
     if (func == FUNC_YESNO) {
-	char buf[1024];
-	snprintf(buf, sizeof(buf) - 1, "yesno\n%s\n%s\n", title, message);
+	send_command(server, "yesno", title, message);
+	if ((r = tcp_read(server, buf, sizeof(buf))) > 0) {
+	    buf[r] = 0;
+	    printf("%s\n", buf);
+	}
+    }
+
+    if (func == FUNC_MSGBOX) {
+	send_command(server, "textview", title, message);
+	snprintf(buf, sizeof(buf), "%s\n", text);
 	if ((r = tcp_write(server, buf, strlen(buf))) <= 0) {
 	    fprintf(stderr, "tcp_write()\n");
 	    return -1;
 	}
-
 	if ((r = tcp_read(server, buf, sizeof(buf))) > 0) {
-//	    fprintf(stderr, "buf[%d]=%s\n", r, buf);
-	    printf("%s", buf);
-	    printf("1%c", buf[0]);
-	    printf("2%c", buf[1]);
-	    printf("3%c", buf[2]);
-	    printf("4%c", buf[3]);
-	    printf("5%c", buf[4]);
-	    printf("6%c", buf[5]);
-	    printf("7%c", buf[6]);
-	    printf("8%c", buf[7]);
+	    buf[r] = 0;
+	    printf("%s\n", buf);
 	}
-	fprintf(stderr, "ret=%d\n", r);
+    }
+
+    if (func == FUNC_EDITBOX) {
+	send_command(server, "editbox", title, message);
+	if ((r = tcp_read(server, buf, sizeof(buf))) > 0) {
+	    buf[r] = 0;
+	    printf("%s\n", buf);
+	}
     }
 
 /*
