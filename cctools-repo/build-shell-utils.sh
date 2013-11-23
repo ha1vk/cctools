@@ -382,6 +382,7 @@ build_build_essential_gcc_objc_fortran_compact
 # utils
 build_busybox
 build_make
+build_adialog
 
 # Addons
 build_ncurses

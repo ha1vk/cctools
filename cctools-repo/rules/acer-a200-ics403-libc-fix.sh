@@ -24,5 +24,7 @@ build_acer_a200_ics403_libc_fix() {
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
+    rm -f ${TMPINST_DIR}/libso/${PKG}.txt
+
     s_tag $PKG
 }
