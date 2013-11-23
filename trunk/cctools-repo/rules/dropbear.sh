@@ -95,6 +95,23 @@ EOF
     cat >> ${TMPINST_DIR}/${PKG}/postinst << EOF
 #!/system/bin/sh
 
+ret=\`adialog --editbox --title "Dropbear SSH server" --message "Create a new password"\`
+
+status=\`echo \$ret | cut -f1 -d' '\`
+
+case \$status in
+ok)
+    passwd=\`echo \$ret | cut -f2 -d' '\`
+    echo \$passwd > \${CCTOOLSDIR}/etc/dropbear.passwd
+    ;;
+*)
+    ;;
+esac
+
+iface=\`ip r l | tail -n 1 | awk '{ print \$3 }'\`
+ip=\`ifconfig \$iface | grep 'inet addr:' | cut -d: -f2 | awk '{ print \$1}'\`
+adialog --msgbox --title "Dropbear SSH server" --message "SSH access to CCTools shell: ssh -p 22022 alpine@\${ip}" --text "Use dropbearpasswd to change SSH password from console."
+
 \${CCTOOLSDIR}/services/dropbear start
 
 EOF
