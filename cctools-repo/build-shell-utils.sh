@@ -378,6 +378,7 @@ build_build_essential_gcc_compact
 build_build_essential_fortran_compact
 build_build_essential_gcc_objc_compact
 build_build_essential_gcc_objc_fortran_compact
+build_build_essential_luajit
 
 # utils
 build_busybox
