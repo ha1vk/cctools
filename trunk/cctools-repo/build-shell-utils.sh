@@ -11,7 +11,7 @@ cloog_version="0.18.0"
 isl_version="0.11.1"
 ppl_version="1.0"
 
-make_version="3.82"
+make_version="4.0"
 ncurses_version="5.9"
 nano_version="2.2.6"
 busybox_version="1.21.1"
