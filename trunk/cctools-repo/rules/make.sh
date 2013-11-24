@@ -29,6 +29,9 @@ build_make() {
     mips*)
 	cp -f ${TOPDIR}/configs/config.cache-mips config.cache
 	;;
+    i*86*|x86*)
+	cp -f ${TOPDIR}/configs/config.cache-x86 config.cache
+	;;
     esac
 
     CFLAGS="-g -O2 -DNO_ARCHIVES" $S_DIR/configure --target=$TARGET_ARCH --host=$TARGET_ARCH --prefix=$TARGET_DIR --disable-werror -C || error "configure"
