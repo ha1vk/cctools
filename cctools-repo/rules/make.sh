@@ -1,5 +1,6 @@
 build_make() {
     PKG=make
+    PKG_VERSION=$make_version
     PKG_URL="http://ftp.gnu.org/gnu/make/make-$make_version.tar.bz2"
     PKG_DESC="An utility for Directing compilation."
     O_FILE=$SRC_PREFIX/make/make-$make_version.tar.bz2
@@ -11,15 +12,23 @@ build_make() {
     banner "Build $PKG"
 
     pushd .
-    mkdir -p $SRC_PREFIX/make
-    test -e $O_FILE || wget $PKG_URL -O $O_FILE || error "download $PKG_URL"
 
-    tar jxf $O_FILE -C $src_dir || error "tar jxf $O_FILE"
+    download $PKG_URL $O_FILE
+
+    unpack $src_dir $O_FILE
+
+    patchsrc $S_DIR $PKG $PKG_VERSION
 
     mkdir -p $B_DIR
     cd $B_DIR
 
-    CFLAGS="-g -O2 -DNO_ARCHIVES" $S_DIR/configure --target=$TARGET_ARCH --host=$TARGET_ARCH --prefix=$TARGET_DIR --disable-werror || error "configure"
+    case $TARGET_ARCH in
+    arm*)
+	cp -f ${TOPDIR}/configs/config.cache-arm config.cache
+	;;
+    esac
+
+    CFLAGS="-g -O2 -DNO_ARCHIVES" $S_DIR/configure --target=$TARGET_ARCH --host=$TARGET_ARCH --prefix=$TARGET_DIR --disable-werror -C || error "configure"
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
@@ -27,6 +36,7 @@ build_make() {
 
     $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/bin/*
 
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/include
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/share
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
