@@ -881,7 +881,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     			"build-essential-gcc-compact",
     			"build-essential-fortran-compact",
     			"build-essential-gcc-avr",
-    			"LuaJIT"
+    			"build-essential-luajit"
     	};
     	
     	setPrefString("toolchain_installed", "yes");
