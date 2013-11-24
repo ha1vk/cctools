@@ -3,6 +3,7 @@ package com.pdaxrom.pkgmanager;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -47,8 +48,8 @@ import android.widget.TextView;
 public class PkgManagerActivity extends ListActivity {
 	private static final String TAG = "PkgMgrActivity";
 	//private static final String URL = "http://cctools.info/repo-4.8-1/" + Build.CPU_ABI;
-	//private static final String URL = "http://192.168.111.1/cctools/packages/" + Build.CPU_ABI;
-	private static final String URL = "http://sashz-laptop/cctools/packages/" + Build.CPU_ABI;
+	private static final String URL = "http://192.168.111.1/cctools/packages/" + Build.CPU_ABI;
+	//private static final String URL = "http://sashz-laptop/cctools/packages/" + Build.CPU_ABI;
 
 	private Context context = this;
 	private static final String PKGS_LISTS_DIR	= "/installed/";
@@ -804,7 +805,7 @@ public class PkgManagerActivity extends ListActivity {
 		return true;
 	}
 
-	private void system(String cmd) {
+	private void system(String cmdline) {
 		String cctoolsDir = toolchainDir + "/cctools";
 		String[] envp = {
 				"TMPDIR=" + Environment.getExternalStorageDirectory().getPath(),
@@ -812,23 +813,78 @@ public class PkgManagerActivity extends ListActivity {
 				"ANDROID_ASSETS=/system/app",
 				"ANDROID_BOOTLOGO=1",				
 				"ANDROID_DATA=" + cctoolsDir + "/var/dalvik",
+				"ANDROID_PROPERTY_WORKSPACE=" + getEnv(cctoolsDir, "ANDROID_PROPERTY_WORKSPACE"),
 				"ANDROID_ROOT=/system",
 				"BOOTCLASSPATH=/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar",
 				"CCTOOLSDIR=" + cctoolsDir,
 				"CCTOOLSRES=" + getPackageResourcePath(),
 				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
-				"HOME=" + homeDir,
+				"HOME=" + cctoolsDir + "/home",
+				"SHELL=" + getShell(),
 				"TERM=xterm",
+				"PS1=$ ",
 				"SDDIR=" + sdCardDir,
 				"EXTERNAL_STORAGE=" + Environment.getExternalStorageDirectory().getPath(),
 				};
 		try {
-			Log.i(TAG, "exec cmd " + cmd + ", cctoolsdir " + cctoolsDir);
-			Process p = Runtime.getRuntime().exec(cmd, envp);
+			Log.i(TAG, "exec cmd " + cmdline + ", cctoolsdir " + cctoolsDir);
+			Process p = Runtime.getRuntime().exec(cmdline, envp);
 			p.waitFor();
 		} catch (Exception e) {
 			Log.i(TAG, "Exec exception " + e);
 		}		
 	}
 
+	private String getEnv(String baseDir, String variable) {
+		String ret = null;
+		String[] envp = {
+				"TMPDIR=" + Environment.getExternalStorageDirectory().getPath(),
+				"PATH=" + baseDir + "/bin:" + baseDir + "/sbin:/sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin",
+				"ANDROID_ASSETS=/system/app",
+				"ANDROID_BOOTLOGO=1",				
+				"ANDROID_DATA=" + baseDir + "/var/dalvik",
+				"ANDROID_ROOT=/system",
+				"BOOTCLASSPATH=/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar",
+				"CCTOOLSDIR=" + baseDir,
+				"CCTOOLSRES=" + getPackageResourcePath(),
+				"LD_LIBRARY_PATH=" + baseDir + "/lib",
+				"HOME=" + baseDir + "/home",
+				"SHELL=" + getShell(),
+				"TERM=xterm",
+				"PS1=$ ",
+				"SDDIR=" + sdCardDir,
+				"EXTERNAL_STORAGE=" + Environment.getExternalStorageDirectory().getPath(),
+				};
+		String[] argv = { "/system/bin/sh", "-c", "set"};
+		int[] pId = new int[1];
+		FileDescriptor fd = Utils.createSubProcess(baseDir, argv[0], argv, envp, pId);
+		FileInputStream fis = new FileInputStream(fd);
+		DataInputStream in = new DataInputStream(fis);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		String line = "";
+		try {
+			while((line = reader.readLine()) != null) {
+				if (line.startsWith(variable + "=")) {
+					if (line.indexOf("=") != -1) {
+						ret = line.substring(line.indexOf("=") + 1);
+						break;
+					}
+				}
+			}
+			in.close();
+			Utils.waitFor(pId[0]);
+		} catch (Exception e) {
+			Log.e(TAG, "exception " + e);
+		}
+		return ret;
+	}
+
+	private String getShell() {
+		String shell = toolchainDir + "/cctools/bin/ash";
+		if (!(new File(shell)).exists()) {
+			shell = "/system/bin/sh";
+		}
+		Log.i(TAG, "shell=" + shell);
+		return shell;
+	}
 }
