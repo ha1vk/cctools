@@ -108,7 +108,7 @@ ok)
     ;;
 esac
 
-iface=\`ip r l | tail -n 1 | awk '{ print \$3 }'\`
+iface=\`ip r l | grep default | awk '{ for (i = 1; \$i != ""; i++) { if (\$i == "dev") print \$(i + 1) } }'\`
 ip=\`ifconfig \$iface | grep 'inet addr:' | cut -d: -f2 | awk '{ print \$1}'\`
 adialog --msgbox --title "Dropbear SSH server" --message "SSH access to CCTools shell: ssh -p 22022 alpine@\${ip}" --text "Use dropbearpasswd to change SSH password from console."
 
