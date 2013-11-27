@@ -48,8 +48,8 @@ import android.widget.TextView;
 public class PkgManagerActivity extends ListActivity {
 	private static final String TAG = "PkgMgrActivity";
 	//private static final String URL = "http://cctools.info/repo-4.8-1/" + Build.CPU_ABI;
-	private static final String URL = "http://192.168.111.1/cctools/packages/" + Build.CPU_ABI;
-	//private static final String URL = "http://sashz-laptop/cctools/packages/" + Build.CPU_ABI;
+	//private static final String URL = "http://192.168.111.1/cctools/packages/" + Build.CPU_ABI;
+	private static final String URL = "http://sashz-laptop/cctools/packages/" + Build.CPU_ABI;
 
 	private Context context = this;
 	private static final String PKGS_LISTS_DIR	= "/installed/";
@@ -880,11 +880,16 @@ public class PkgManagerActivity extends ListActivity {
 	}
 
 	private String getShell() {
-		String shell = toolchainDir + "/cctools/bin/ash";
-		if (!(new File(shell)).exists()) {
-			shell = "/system/bin/sh";
+		String[] shellList = {
+				toolchainDir + "/cctools/bin/bash",
+				toolchainDir + "/cctools/bin/ash",
+		};
+		
+		for (String shell: shellList) {
+			if ((new File(shell)).exists()) {
+				return shell;
+			}
 		}
-		Log.i(TAG, "shell=" + shell);
-		return shell;
+		return "/system/bin/sh";
 	}
 }

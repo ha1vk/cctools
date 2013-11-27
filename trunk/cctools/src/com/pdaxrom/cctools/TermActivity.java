@@ -1,5 +1,7 @@
 package com.pdaxrom.cctools;
 
+import java.io.File;
+
 import com.pdaxrom.term.ShellTermSession;
 import com.pdaxrom.term.TermView;
 import com.pdaxrom.utils.Utils;
@@ -140,6 +142,7 @@ public class TermActivity extends Activity {
 				"CCTOOLSRES=" + getPackageResourcePath(),
 				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
 				"HOME=" + cctoolsDir + "/home",
+				"SHELL=" + getShell(cctoolsDir),
 				"TERM=xterm",
 				"PS1=$ ",
 				};
@@ -151,5 +154,20 @@ public class TermActivity extends Activity {
 		isRunning = true;
 		
 		return new ShellTermSession(argv, envp, workdir, mMsgHandler);
+	}
+	
+	private String getShell(String toolchainDir) {
+		String[] shellList = {
+				toolchainDir + "/bin/bash",
+				toolchainDir + "/bin/ash",
+		};
+		
+		for (String shell: shellList) {
+			if ((new File(shell)).exists()) {
+				return shell;
+			}
+		}
+
+		return "/system/bin/sh";
 	}
 }
