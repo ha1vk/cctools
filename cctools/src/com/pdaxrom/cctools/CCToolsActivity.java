@@ -1133,11 +1133,17 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	}
 	
 	private String getShell() {
-		String shell = toolchainDir + "/cctools/bin/ash";
-		if (!(new File(shell)).exists()) {
-			shell = "/system/bin/sh";
+		String[] shellList = {
+				toolchainDir + "/cctools/bin/bash",
+				toolchainDir + "/cctools/bin/ash",
+		};
+		
+		for (String shell: shellList) {
+			if ((new File(shell)).exists()) {
+				return shell;
+			}
 		}
-		Log.i(TAG, "shell=" + shell);
-		return shell;
+
+		return "/system/bin/sh";
 	}
 }
