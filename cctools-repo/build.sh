@@ -16,4 +16,15 @@ export PATH=/opt/CodeSourcery/bin:$PATH
 
 ./build-shell-utils.sh ${PWD}/src i686-linux-android    ${WRKDIR}/i686-repo || exit 1
 
+test -e ${WRKDIR}/repo/armeabi-v7a || ln -sf armeabi ${WRKDIR}/repo/armeabi-v7a
+test -e ${WRKDIR}/repo/mips-r2     || ln -sf mips    ${WRKDIR}/repo/mips-r2
+
+for d in armeabi mips x86; do
+    pushd .
+    cp -f make_packages.sh ${WRKDIR}/repo/${d}/
+    cd ${WRKDIR}/repo/${d}
+    ./make_packages.sh
+    popd
+done
+
 echo "DONE!"
