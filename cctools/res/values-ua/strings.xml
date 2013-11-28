@@ -33,7 +33,7 @@
 
     <string name="about_dialog">CCTools IDE</string>
     <string name="about_dialog_text">C/C++ інструменти розробки\nВерсiя</string>
-    <string name="about_dialog_text2">\nCopyright &#169; 2012, Alexander Chukov</string>
+    <string name="about_dialog_text2">\nCopyright &#169; 2012-2013, Alexander Chukov</string>
     <string name="about_dialog_show">Домашня сторінка</string>
 
     <string name="about_button">Про програму</string>
