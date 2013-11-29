@@ -1,6 +1,7 @@
 build_busybox() {
     PKG=busybox
     PKG_VERSION=$busybox_version
+    PKG_SUBVERSION="-1"
     PKG_DESC="BusyBox provides several stripped-down Unix tools in a single executable."
     PKG_URL="http://busybox.net/downloads/busybox-$busybox_version.tar.bz2"
     O_FILE=$SRC_PREFIX/busybox/busybox-$busybox_version.tar.bz2
@@ -46,8 +47,8 @@ build_busybox() {
 	CONFIG_EXTRA_LDFLAGS="$EXTRA_LDFLAGS" \
 	CONFIG_PREFIX=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
