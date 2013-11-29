@@ -1,6 +1,7 @@
 build_git() {
     PKG=git
     PKG_VERSION=1.8.1.2
+    PKG_SUBVERSION="-1"
     PKG_DESC="Git is a distributed revision control and source code management (SCM) system with an emphasis on speed.[3] Git was initially designed and developed by Linus Torvalds for Linux kernel development; it has since been adopted by many other projects."
     PKG_URL=http://git-core.googlecode.com/files/${PKG}-${PKG_VERSION}.tar.gz
     O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.gz
@@ -37,17 +38,27 @@ build_git() {
 
     #$MAKE install NEEDS_SSL_WITH_CURL=1 NEEDS_CRYPTO_WITH_SSL=1 NO_INSTALL_HARDLINKS=1 || error "make install"
 
-    $MAKE install NEEDS_SSL_WITH_CURL=1 NEEDS_CRYPTO_WITH_SSL=1 NO_INSTALL_HARDLINKS=1 prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
+    rm -rf ${TMPINST_DIR}/${PKG}
+    rm -rf ${TMPINST_DIR}/${PKG}-tmp
+
+    $MAKE install NEEDS_SSL_WITH_CURL=1 NEEDS_CRYPTO_WITH_SSL=1 NO_INSTALL_HARDLINKS=1 DESTDIR=${TMPINST_DIR}/${PKG}-tmp || error "package install"
+
+    mkdir -p ${TMPINST_DIR}/${PKG}/cctools
+
+    cp -a ${TMPINST_DIR}/${PKG}-tmp/${TARGET_INST_DIR}/* ${TMPINST_DIR}/${PKG}/cctools/
+
+    rm -rf ${TMPINST_DIR}/${PKG}-tmp
 
     $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/bin/*
+    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/git-core/*
 
     #rm -rf ${TMPINST_DIR}/${PKG}/cctools/share ${TMPINST_DIR}/${PKG}/cctools/lib/pkgconfig ${TMPINST_DIR}/${PKG}/cctools/lib/*.la
     #mkdir ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}
     #mv ${TMPINST_DIR}/${PKG}/cctools/include ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/
     #mv ${TMPINST_DIR}/${PKG}/cctools/lib     ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "ca-certificates"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
