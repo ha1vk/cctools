@@ -2,6 +2,7 @@ dropbear_version=0.52
 build_dropbear() {
     PKG=dropbear
     PKG_VERSION=$dropbear_version
+    PKG_SUBVERSION="-1"
     PKG_DESC="Dropbear is a software package written by Matt Johnston that provides a Secure Shell-compatible server and client. It is designed as a replacement for standard OpenSSH for environments with low memory and processor resources, such as embedded systems."
     PKG_URL="http://matt.ucc.asn.au/dropbear/releases/dropbear-$dropbear_version.tar.gz"
     O_FILE=$SRC_PREFIX/dropbear/dropbear-$dropbear_version.tar.gz
@@ -138,8 +139,8 @@ EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/prerm
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/dropbearpasswd
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC" "adialog"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "adialog"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc postinst prerm
 
