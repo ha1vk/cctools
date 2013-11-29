@@ -25,6 +25,7 @@ build_curl() {
     cd $B_DIR
 
     ./configure --host=$TARGET_ARCH --prefix=$TMPINST_DIR --disable-shared --enable-static \
+	--with-ca-bundle=${TARGET_INST_DIR}/etc/ssl/certs/ca-certificates.crt \
 	--with-ssl=${TMPINST_DIR} || error "configure"
 
     $MAKE $MAKEARGS || error "make"

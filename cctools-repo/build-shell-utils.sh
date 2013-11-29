@@ -406,6 +406,7 @@ build_subversion
 build_curl
 build_wget
 build_git
+build_ca_certificates
 build_dropbear
 #build_fpc
 #build_nano
