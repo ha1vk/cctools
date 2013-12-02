@@ -12,7 +12,7 @@
   		android:layout_width="0px"
   		android:layout_height="0px" />
 <!-- Editext for Search -->
-    <EditText android:id="@+id/inputSearch"
+    <org.droidparts.widget.ClearableEditText android:id="@+id/inputSearch"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:hint="@string/pkg_searchHint"
