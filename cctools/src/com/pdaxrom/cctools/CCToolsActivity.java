@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.droidparts.widget.ClearableEditText;
+
 import com.pdaxrom.editor.CodeEditor;
 import com.pdaxrom.pkgmanager.PkgManagerActivity;
 import com.pdaxrom.utils.FileDialog;
@@ -802,7 +804,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     }
     
     private void gotoDialog() {
-    	final EditText input = new EditText(context);
+    	final ClearableEditText input = new ClearableEditText(context);
     	input.setInputType(InputType.TYPE_CLASS_NUMBER);
     	input.setSingleLine(true);
     	new AlertDialog.Builder(context)
@@ -826,7 +828,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     }
     
     private void searchDialog() {
-    	final EditText input = new EditText(context);
+    	final ClearableEditText input = new ClearableEditText(context);
     	input.setInputType(InputType.TYPE_CLASS_TEXT);
     	input.setSingleLine(true);
     	input.setText(codeEditor.getLastSearchText());

@@ -15,13 +15,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.droidparts.widget.ClearableEditText;
+
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.pdaxrom.cctools.R;
 import com.pdaxrom.utils.Utils;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.AlertDialog.Builder;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
@@ -33,9 +37,6 @@ import android.os.StatFs;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -45,7 +46,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-public class PkgManagerActivity extends ListActivity {
+public class PkgManagerActivity extends SherlockListActivity {
 	private static final String TAG = "PkgMgrActivity";
 	private static final String URL = "http://cctools.info/packages/" + Build.CPU_ABI;
 	//private static final String URL = "http://192.168.111.1/cctools/packages/" + Build.CPU_ABI;
@@ -72,7 +73,7 @@ public class PkgManagerActivity extends ListActivity {
     private int lastPosition = 0;
     
     private ListView lv;
-    private EditText inputSearch;
+    private ClearableEditText inputSearch;
     
 	private String sdCardDir;
 	private String filesDir;
@@ -137,7 +138,7 @@ public class PkgManagerActivity extends ListActivity {
         	super.onCreate(savedInstanceState);
             setContentView(R.layout.pkgmgr_main);
 
-            inputSearch = (EditText) findViewById(R.id.inputSearch);
+            inputSearch = (ClearableEditText) findViewById(R.id.inputSearch);
             
             (new DownloadRepoTask()).execute(URL);
         }
@@ -204,9 +205,9 @@ public class PkgManagerActivity extends ListActivity {
     	Log.i(TAG, "Position " + lastPosition);
     }
 
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-    	MenuInflater inflater = getMenuInflater();
-    	inflater.inflate(R.menu.pkgmanager_menu, menu);
+    	getSupportMenuInflater().inflate(R.menu.pkgmanager_menu, menu);
     	return true;
     }
     
@@ -219,7 +220,7 @@ public class PkgManagerActivity extends ListActivity {
         }
         return true;
     }
-        
+      
     private void setupDirs() {
     	sdCardDir 	= Environment.getExternalStorageDirectory().getPath() + "/CCTools";
     	filesDir 	= sdCardDir + "/backup";
