@@ -306,6 +306,27 @@ EOF
 
 }
 
+fix_bionic_shell() {
+    local p="$1"
+    local f=""
+    if [ "x$p" = "x" ]; then
+	p="."
+    fi
+#    find $p -name build-aux -a -type d -prune -o -print -a -type f | grep -v 'acinclude.m4\|aclocal.m4\|configure.ac\|lib-ld.m4\|lib-link.m4' | while read f; do
+#    find $p -name build-aux -a -type d -prune -o -print -a -type f | while read f; do
+    find $p -type f | while read f; do
+        if file $f | grep -q 'ASCII text'; then
+	    if cat $f | grep -q '/bin/sh'; then
+		echo "fix bionic shell in $f"
+		touch -r $f ${f}.timestamp
+		sed -i -e 's|/bin/sh|/system/bin/sh|' $f
+		touch -r ${f}.timestamp $f
+		rm -f ${f}.timestamp
+	    fi
+	fi
+    done
+}
+
 case $TARGET_ARCH in
 arm*)
     PKG_ARCH="armel"
@@ -343,6 +364,15 @@ makedirs
 if [ "$USE_NATIVE_BUILD" = "yes" ]; then
 
     build_native_perl
+
+    build_m4
+    build_autoconf
+
+    if ! which autoconf 2>/dev/null >/dev/null; then
+	echo "Please install autoconf package and restart build."
+	exit 0
+    fi
+
     build_automake
 
     exit 0
@@ -443,10 +473,6 @@ build_file
 
 build_zip
 build_unzip
-
-# autotools utils
-build_m4
-build_autoconf
 
 # Bug fixes for firmware
 build_acer_a200_ics403_libc_fix

@@ -20,6 +20,8 @@ build_m4() {
 
     patchsrc $S_DIR $PKG $PKG_VERSION
 
+    fix_bionic_shell $S_DIR
+
     mkdir -p $B_DIR
     cd $B_DIR
 
@@ -36,7 +38,7 @@ build_m4() {
 
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/bin/*
+    $STRIP ${TMPINST_DIR}/${PKG}/cctools/bin/*
 
     rm ${TMPINST_DIR}/${PKG}/cctools/lib/charset.alias
 
