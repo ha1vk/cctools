@@ -343,6 +343,7 @@ makedirs
 if [ "$USE_NATIVE_BUILD" = "yes" ]; then
 
     build_native_perl
+    build_automake
 
     exit 0
 fi
@@ -446,7 +447,6 @@ build_unzip
 # autotools utils
 build_m4
 build_autoconf
-#build_automake
 
 # Bug fixes for firmware
 build_acer_a200_ics403_libc_fix
