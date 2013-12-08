@@ -1,6 +1,7 @@
 build_mc() {
     PKG=mc
     PKG_VERSION=4.6.2
+    PKG_SUBVERSION="-1"
     PKG_URL="http://cctools.info/src/${PKG}/${PKG}-${PKG_VERSION}.tar.gz"
     PKG_DESC="Midnight Commander - a powerful file manager"
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.gz
@@ -45,8 +46,12 @@ build_mc() {
     $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/bin/*
     $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/mc/*
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    replace_string ${TMPINST_DIR}/${PKG}/cctools/share/mc/extfs/ "/bin/sh" "/system/bin/sh"
+    replace_string ${TMPINST_DIR}/${PKG}/cctools/share/mc/extfs/ "/usr/bin/perl" "${TARGET_INST_DIR}/bin/perl"
+    replace_string ${TMPINST_DIR}/${PKG}/cctools/share/mc/extfs/ "/usr/bin" "${TARGET_INST_DIR}/bin"
+
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
