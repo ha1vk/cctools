@@ -13,7 +13,7 @@ build_native_perl() {
     pushd .
 
     banner "Build $PKG"
-if false; then
+
     download $PKG_URL $O_FILE
 
     unpack $src_dir $O_FILE
@@ -31,7 +31,7 @@ if false; then
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
     $MAKE install DESTDIR=${TMPINST_DIR}/${PKG}-fakeroot || error "package install"
-fi
+
     mkdir -p ${TMPINST_DIR}/${PKG}/cctools
 
     cp -a ${TMPINST_DIR}/${PKG}-fakeroot/${TARGET_INST_DIR}/* ${TMPINST_DIR}/${PKG}/cctools || error "copying to target dir"

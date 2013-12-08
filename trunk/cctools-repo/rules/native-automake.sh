@@ -1,9 +1,9 @@
-build_autoconf() {
-    PKG=autoconf
-    PKG_VERSION=2.69
-    PKG_URL="http://ftp.gnu.org/gnu/autoconf/${PKG}-${PKG_VERSION}.tar.xz"
-    PKG_DESC="automatic configure script builder"
-    PKG_DEPS="m4"
+build_automake() {
+    PKG=automake
+    PKG_VERSION=1.14
+    PKG_URL="http://ftp.gnu.org/gnu/automake/${PKG}-${PKG_VERSION}.tar.xz"
+    PKG_DESC="Tool for generating GNU Standards-compliant Makefiles"
+    PKG_DEPS="autoconf"
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.xz
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
     B_DIR=$build_dir/${PKG}
@@ -20,6 +20,8 @@ build_autoconf() {
 
     patchsrc $S_DIR $PKG $PKG_VERSION
 
+    fix_bionic_shell $S_DIR
+
     mkdir -p $B_DIR
     cd $B_DIR
 
@@ -28,15 +30,27 @@ build_autoconf() {
     ${S_DIR}/configure	\
 			--host=${TARGET_ARCH} \
                         --prefix=$TARGET_INST_DIR \
+			PERL=${TARGET_INST_DIR}/bin/perl \
 			|| error "Configure $PKG."
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
-    #$MAKE install || error "make install"
-
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/bin/*
+    #$STRIP ${TMPINST_DIR}/${PKG}/cctools/bin/*
+
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/aclocal
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/automake
+
+    cat >> ${TMPINST_DIR}/${PKG}/postinst << EOF
+#!/system/bin/sh
+
+ln -sf aclocal-${PKG_VERSION}  \${CCTOOLSDIR}/bin/aclocal
+ln -sf automake-${PKG_VERSION} \${CCTOOLSDIR}/bin/automake
+
+EOF
+
+    chmod 755 ${TMPINST_DIR}/${PKG}/postinst
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC" "$PKG_DEPS"
