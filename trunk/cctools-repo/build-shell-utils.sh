@@ -117,6 +117,12 @@ banner() {
 
 trap "banner ''" 2
 
+if ! which bash ; then
+alias pushd='ASHDIRSTACK="$PWD
+$ASHDIRSTACK"; cd'
+alias popd='ASHDIRSLINE=`echo "\$ASHDIRSTACK" | sed -ne "1p"`;[ "$ASHDIRSLINE" != "" ] && cd $ASHDIRSLINE; ASHDIRSTACK=`echo "\$ASHDIRSTACK" | sed -e "1d"`'
+fi
+
 error() {
     echo
     echo "*********************************************************************************"
@@ -215,7 +221,7 @@ get_pkg_libso_list() {
 
 get_pkg_exec_list() {
     local f
-    find $1 -type f -executable | while read f; do
+    find $1 -type f | while read f; do
 	if ${TARGET_ARCH}-readelf -h $f &>/dev/null; then
 	    echo $f
 	fi
@@ -273,7 +279,7 @@ build_package_desc() {
     local desc=$6
     local replaces=$8
 
-    local unpacked_size=`du -sb ${1}/cctools | cut -f1`
+    local unpacked_size=`find ${1}/cctools -type f | xargs stat -c "%s" | awk '{s+=$1} END {print s}'`
 
     local deps="`get_pkg_deps $name $1`"
     if [ "x$7" != "x" ]; then
@@ -325,7 +331,21 @@ done
 
 export PATH=${TARGET_DIR}-host/bin:$PATH
 
+if [ -f /system/bin/sh ]; then
+    USE_NATIVE_BUILD="yes"
+    STRIP="strip"
+else
+    STRIP=${TARGET_ARCH}-strip
+fi
+
 makedirs
+
+if [ "$USE_NATIVE_BUILD" = "yes" ]; then
+
+    build_native_perl
+
+    exit 0
+fi
 
 build_sysroot_host
 
