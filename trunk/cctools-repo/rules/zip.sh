@@ -26,7 +26,7 @@ build_zip() {
 
     # Configure here
 
-    sh unix/configure "${TARGET_ARCH}-gcc" "-Wall -I. -DUNIX -DBIONIC_WCTOMB_FIX" || error "configure zip"
+    sh unix/configure "${TARGET_ARCH}-gcc" "-Wall -I. -DUNIX -DNO_UNICODE_SUPPORT" || error "configure zip"
 
     $MAKE -f unix/Makefile generic || error "build zip"
 
