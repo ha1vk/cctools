@@ -1,7 +1,7 @@
 build_busybox() {
     PKG=busybox
     PKG_VERSION=$busybox_version
-    PKG_SUBVERSION="-1"
+    PKG_SUBVERSION="-2"
     PKG_DESC="BusyBox provides several stripped-down Unix tools in a single executable."
     PKG_URL="http://busybox.net/downloads/busybox-$busybox_version.tar.bz2"
     O_FILE=$SRC_PREFIX/busybox/busybox-$busybox_version.tar.bz2
