@@ -440,6 +440,14 @@ build_netcat
 build_file_host
 build_file
 
+build_zip
+build_unzip
+
+# autotools utils
+build_m4
+build_autoconf
+#build_automake
+
 # Bug fixes for firmware
 build_acer_a200_ics403_libc_fix
 build_android_pre_233_libc_fix
