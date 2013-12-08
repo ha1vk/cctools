@@ -312,14 +312,31 @@ fix_bionic_shell() {
     if [ "x$p" = "x" ]; then
 	p="."
     fi
-#    find $p -name build-aux -a -type d -prune -o -print -a -type f | grep -v 'acinclude.m4\|aclocal.m4\|configure.ac\|lib-ld.m4\|lib-link.m4' | while read f; do
-#    find $p -name build-aux -a -type d -prune -o -print -a -type f | while read f; do
     find $p -type f | while read f; do
         if file $f | grep -q 'ASCII text'; then
 	    if cat $f | grep -q '/bin/sh'; then
 		echo "fix bionic shell in $f"
 		touch -r $f ${f}.timestamp
 		sed -i -e 's|/bin/sh|/system/bin/sh|' $f
+		touch -r ${f}.timestamp $f
+		rm -f ${f}.timestamp
+	    fi
+	fi
+    done
+}
+
+replace_string() {
+    local p="$1"
+    local f=""
+    if [ "x$p" = "x" ]; then
+	p="."
+    fi
+    find $p -type f | while read f; do
+        if file $f | grep -q 'ASCII text\|shell script'; then
+	    if cat $f | grep -q "$2"; then
+		echo "replace string in $f"
+		touch -r $f ${f}.timestamp
+		sed -i -e "s|$2|$3|" $f
 		touch -r ${f}.timestamp $f
 		rm -f ${f}.timestamp
 	    fi
