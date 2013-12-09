@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 
 import com.pdaxrom.utils.Utils;
@@ -18,8 +17,6 @@ public class ShellTermSession extends TermSession {
 	private int mProcId;
 	private FileDescriptor mFd;
     private Thread mWatcherThread;
-
-	private static final int PROCESS_EXITED = 1;
 
 /*
 	private Handler mMsgHandler = new Handler() {
@@ -64,10 +61,6 @@ public class ShellTermSession extends TermSession {
        mWatcherThread.setName("Process watcher");
 	}
 	
-	private void onProcessExit(int result) {
-//		finish();
-	}
-
 	@Override
 	public void finish() {
 		Log.i(TAG, "finish()");

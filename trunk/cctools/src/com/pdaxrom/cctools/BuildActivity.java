@@ -371,7 +371,6 @@ public class BuildActivity extends Activity {
     					"ANDROID_BOOTLOGO=1",				
     					"ANDROID_DATA=" + cctoolsDir + "/var/dalvik",
     					"ANDROID_ROOT=/system",
-    					"BOOTCLASSPATH=/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar",
     					"CCTOOLSDIR=" + getCacheDir().getParentFile().getAbsolutePath() + "/root" + "/cctools",
     					"CCTOOLSRES=" + getPackageResourcePath(),
     					"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
@@ -471,6 +470,7 @@ public class BuildActivity extends Activity {
 					        showTitle(getString(R.string.buildwindow_name_done) + " - " + fileName);
 
 						Log.e(TAG, "process exit code " + mExitCode);
+						procin.close();
         				procout.close();
         			} catch (IOException ie) {
         				Log.e(TAG, "exception " + ie);
@@ -535,6 +535,7 @@ public class BuildActivity extends Activity {
 			FileInputStream fin = new FileInputStream(fName);
 			byte[] buf = new byte[(int) (f.length() - 1)];
 			fin.read(buf);
+			fin.close();
 			f.delete();
 			return new String(buf, "UTF-8");
 		} catch (Exception e) {
