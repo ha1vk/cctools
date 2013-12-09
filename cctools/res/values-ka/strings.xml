@@ -2,9 +2,9 @@
 <resources>
     <string name="app_name">CCTools</string>
 
-    <string name="updating_caption">ინსტალაცია/string>
+    <string name="updating_caption">ინსტალაცია</string>
     <string name="removing_caption">დეინსტალაცია</string>
-    <string name="establishing_handshake_message">კავშირის დამყარება.\nგთხოვთ დაელოდოთ/string>
+    <string name="establishing_handshake_message">კავშირის დამყარება.\nგთხოვთ დაელოდოთ</string>
     <string name="wait_message">გთხოვთ დაელოდოთ...</string>
     <string name="download_cctools">ინსტრუმენტების გადმოწერა</string>
     <string name="received">მიღებულია\u0020</string>
@@ -25,7 +25,7 @@
 
     <string name="exit_dialog">გამოსვლის დადასტურება</string>
     <string name="exit_dialog_text">ტექსტი შეცვლილია, მაგრამ არ არის შენახული. გსურთ გამოსვლა?</string>
-    <string name="exit_dialog_yes">კი/string>
+    <string name="exit_dialog_yes">კი</string>
     <string name="exit_dialog_no">არა</string>
 
     <string name="save_warn_dialog">ყურადღება!</string>
