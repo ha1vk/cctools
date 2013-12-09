@@ -397,6 +397,8 @@ if [ "$USE_NATIVE_BUILD" = "yes" ]; then
     fi
 
     build_automake
+    build_bison
+    build_flex
 
     exit 0
 fi
