@@ -1046,6 +1046,10 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	
 	private void system(String cmdline) {
 		String cctoolsDir = toolchainDir + "/cctools";
+		String bootClassPath = getEnv(cctoolsDir, "BOOTCLASSPATH");
+		if (bootClassPath == null) {
+			bootClassPath = "/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar"; 
+		}
 		String[] envp = {
 				"TMPDIR=" + Environment.getExternalStorageDirectory().getPath(),
 				"PATH=" + cctoolsDir + "/bin:" + cctoolsDir + "/sbin:/sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin",
@@ -1054,7 +1058,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 				"ANDROID_DATA=" + cctoolsDir + "/var/dalvik",
 				"ANDROID_PROPERTY_WORKSPACE=" + getEnv(cctoolsDir, "ANDROID_PROPERTY_WORKSPACE"),
 				"ANDROID_ROOT=/system",
-				"BOOTCLASSPATH=/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar",
+				"BOOTCLASSPATH=" + bootClassPath,
 				"CCTOOLSDIR=" + cctoolsDir,
 				"CCTOOLSRES=" + getPackageResourcePath(),
 				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
@@ -1098,7 +1102,6 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 				"ANDROID_BOOTLOGO=1",				
 				"ANDROID_DATA=" + baseDir + "/var/dalvik",
 				"ANDROID_ROOT=/system",
-				"BOOTCLASSPATH=/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar",
 				"CCTOOLSDIR=" + baseDir,
 				"CCTOOLSRES=" + getPackageResourcePath(),
 				"LD_LIBRARY_PATH=" + baseDir + "/lib",

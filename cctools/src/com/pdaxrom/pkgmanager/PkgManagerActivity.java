@@ -40,7 +40,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -808,6 +807,10 @@ public class PkgManagerActivity extends SherlockListActivity {
 
 	private void system(String cmdline) {
 		String cctoolsDir = toolchainDir + "/cctools";
+		String bootClassPath = getEnv(cctoolsDir, "BOOTCLASSPATH");
+		if (bootClassPath == null) {
+			bootClassPath = "/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar"; 
+		}
 		String[] envp = {
 				"TMPDIR=" + Environment.getExternalStorageDirectory().getPath(),
 				"PATH=" + cctoolsDir + "/bin:" + cctoolsDir + "/sbin:/sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin",
@@ -816,7 +819,7 @@ public class PkgManagerActivity extends SherlockListActivity {
 				"ANDROID_DATA=" + cctoolsDir + "/var/dalvik",
 				"ANDROID_PROPERTY_WORKSPACE=" + getEnv(cctoolsDir, "ANDROID_PROPERTY_WORKSPACE"),
 				"ANDROID_ROOT=/system",
-				"BOOTCLASSPATH=/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar",
+				"BOOTCLASSPATH=" + bootClassPath,
 				"CCTOOLSDIR=" + cctoolsDir,
 				"CCTOOLSRES=" + getPackageResourcePath(),
 				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
@@ -845,7 +848,6 @@ public class PkgManagerActivity extends SherlockListActivity {
 				"ANDROID_BOOTLOGO=1",				
 				"ANDROID_DATA=" + baseDir + "/var/dalvik",
 				"ANDROID_ROOT=/system",
-				"BOOTCLASSPATH=/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar",
 				"CCTOOLSDIR=" + baseDir,
 				"CCTOOLSRES=" + getPackageResourcePath(),
 				"LD_LIBRARY_PATH=" + baseDir + "/lib",
