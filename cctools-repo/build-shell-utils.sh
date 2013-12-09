@@ -312,7 +312,9 @@ fix_bionic_shell() {
     if [ "x$p" = "x" ]; then
 	p="."
     fi
-    find $p -type f | while read f; do
+
+    local files=`find $p -type f`
+    for f in $files; do
         if file $f | grep -q 'ASCII text'; then
 	    if cat $f | grep -q '/bin/sh'; then
 		echo "fix bionic shell in $f"
@@ -323,6 +325,7 @@ fix_bionic_shell() {
 	    fi
 	fi
     done
+    echo "Fixed!"
 }
 
 replace_string() {
@@ -331,7 +334,9 @@ replace_string() {
     if [ "x$p" = "x" ]; then
 	p="."
     fi
-    find $p -type f | while read f; do
+
+    local files=`find $p -type f`
+    for f in $files; do
         if file $f | grep -q 'ASCII text\|shell script'; then
 	    if cat $f | grep -q "$2"; then
 		echo "replace string in $f"
@@ -342,6 +347,7 @@ replace_string() {
 	    fi
 	fi
     done
+    echo "Fixed!"
 }
 
 case $TARGET_ARCH in
