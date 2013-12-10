@@ -4,7 +4,7 @@ build_bison() {
     PKG_SUBVERSION=
     PKG_URL="http://ftp.gnu.org/gnu/bison/${PKG}-${PKG_VERSION}.tar.xz"
     PKG_DESC="YACC-compatible parser generator"
-    PKG_DEPS=""
+    PKG_DEPS="m4"
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.xz
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
     B_DIR=$build_dir/${PKG}
@@ -21,6 +21,12 @@ build_bison() {
 
     patchsrc $S_DIR $PKG $PKG_VERSION
 
+    fix_bionic_shell $S_DIR
+
+    cd $S_DIR
+
+    autoreconf || error "bison autoreconfiguration"
+
     mkdir -p $B_DIR
     cd $B_DIR
 
@@ -28,18 +34,18 @@ build_bison() {
 
     ${S_DIR}/configure	\
 			--host=${TARGET_ARCH} \
-                        --prefix=$TARGET_INSTALL_DIR \
+                        --prefix=$TARGET_INST_DIR \
 			|| error "Configure $PKG."
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
-    $MAKE install || error "make install"
-
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 
-    error "asd"
+    install -D -m 644 ${TMPINST_DIR}/${PKG}/cctools/lib/liby.a  ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib/liby.a
 
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/bin/*
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib
+
+    $STRIP ${TMPINST_DIR}/${PKG}/cctools/bin/bison
 
     local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "$PKG_DEPS"
