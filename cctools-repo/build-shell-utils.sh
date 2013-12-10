@@ -313,10 +313,9 @@ fix_bionic_shell() {
 	p="."
     fi
 
-    local files=`find $p -type f`
-    for f in $files; do
+    for f in $(find $p -type f); do
         if file $f | grep -q 'ASCII text'; then
-	    if cat $f | grep -q '/bin/sh'; then
+	    if grep -q '/bin/sh' $f; then
 		echo "fix bionic shell in $f"
 		touch -r $f ${f}.timestamp
 		sed -i -e 's|/bin/sh|/system/bin/sh|' $f
@@ -335,10 +334,9 @@ replace_string() {
 	p="."
     fi
 
-    local files=`find $p -type f`
-    for f in $files; do
+    for f in $(find $p -type f); do
         if file $f | grep -q 'ASCII text\|shell script'; then
-	    if cat $f | grep -q "$2"; then
+	    if grep -q "$2" $f; then
 		echo "replace string in $f"
 		touch -r $f ${f}.timestamp
 		sed -i -e "s|$2|$3|" $f
@@ -397,6 +395,12 @@ if [ "$USE_NATIVE_BUILD" = "yes" ]; then
     fi
 
     build_automake
+
+    if ! which automake 2>/dev/null >/dev/null; then
+	echo "Please install automake package and restart build."
+	exit 0
+    fi
+
     build_bison
     build_flex
 
