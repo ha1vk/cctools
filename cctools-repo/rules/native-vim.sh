@@ -1,7 +1,7 @@
 build_vim() {
     PKG=vim
     PKG_VERSION=7.4
-    PKG_SUBVERSION=
+    PKG_SUBVERSION=-1
     PKG_URL="ftp://ftp.vim.org/pub/vim/unix/${PKG}-${PKG_VERSION}.tar.bz2"
     PKG_DESC="Vi IMproved - enhanced vi editor"
     PKG_DEPS="libiconv"
@@ -39,6 +39,8 @@ build_vim() {
     $MAKE install || error "make install"
 
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
+
+    install -D -m 644 ${TMPINST_DIR}/${PKG}/cctools/share/vim/vim74/vimrc_example.vim ${TMPINST_DIR}/${PKG}/cctools/share/vim/vimrc
 
     $STRIP ${TMPINST_DIR}/${PKG}/cctools/bin/*
 
