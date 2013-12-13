@@ -1,7 +1,7 @@
 build_nano() {
     PKG=nano
     PKG_VERSION=2.2.6
-    PKG_SUBVERSION=
+    PKG_SUBVERSION=-1
     PKG_URL="http://www.nano-editor.org/dist/v2.2/${PKG}-${PKG_VERSION}.tar.gz"
     PKG_DESC="small, friendly text editor inspired by Pico"
     PKG_DEPS=""
@@ -38,6 +38,9 @@ build_nano() {
     $MAKE install || error "make install"
 
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
+
+    install -D -m 644 doc/nanorc.sample ${TMPINST_DIR}/${PKG}/cctools/etc/nanorc
+    sed -i -e "s|^# include |include |" ${TMPINST_DIR}/${PKG}/cctools/etc/nanorc
 
     $STRIP ${TMPINST_DIR}/${PKG}/cctools/bin/*
 
