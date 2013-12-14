@@ -3,16 +3,19 @@ package com.pdaxrom.pkgmanager;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.util.Log;
-
 public class InstallPackageInfo {
 	private static final String TAG = "InstallPackageInfo";
-
+	private static boolean	_debug = false;
+	
 	private String pkg = null;
 	private List<PackageInfo> list = null;
 	private int installSize = 0;
 	private int downloadSize = 0;
 	
+	public static void enableDebug(boolean debug) {
+		_debug = debug;
+	}
+
 	InstallPackageInfo() {
 		list = new ArrayList<PackageInfo>();
 	}
@@ -89,10 +92,14 @@ public class InstallPackageInfo {
 	
     private void getDepends(PackagesLists packagesLists, String packageWithVariants ,List<PackageInfo> list) {
     	String[] packageVariants = packageWithVariants.replace('|', ' ').split("\\s+");
-    	Log.i(TAG, "packageVariants = " + packageWithVariants.replace('|', ' '));
+    	if (_debug) {
+    		System.out.println(TAG + " packageVariants = " + packageWithVariants.replace('|', ' '));
+    	}
     	String firstPackage = packageVariants[0];
     	for (String packageVariant: packageVariants) {
-    		Log.i(TAG, "packageVariant = " + packageVariant);
+    		if (_debug) {
+    			System.out.println(TAG + " packageVariant = " + packageVariant);
+    		}
     		if (RepoUtils.isContainsPackage(list, packageVariant)) {
     			return;
     		}
@@ -105,11 +112,15 @@ public class InstallPackageInfo {
     	for (PackageInfo info: packagesLists.getAvailablePackages()) {
     		if (firstPackage.equals(info.getName())) {
     			String deps = info.getDepends();
-    			Log.i(TAG, "package deps = " + deps);
+    			if (_debug) {
+    				System.out.println(TAG + " package deps = " + deps);
+    			}
     			if (deps != null && !deps.equals("")) {
     				deps = deps.replaceAll("\\s+", " ");
     				for (String dep: deps.split("\\s+")) {
-    					Log.i(TAG, "check package = " + dep);
+    					if (_debug) {
+    						System.out.println(TAG + " check package = " + dep);
+    					}
     					getDepends(packagesLists, dep, list);
     				}
     			}
@@ -117,12 +128,16 @@ public class InstallPackageInfo {
     					packagesLists.getInstalledPackages(), firstPackage);
     			if (installedPackage != null) {
     				if (installedPackage.getVersion().equals(info.getVersion())) {
-    					Log.i(TAG, "the same version, skip package = " + firstPackage);
+    					if (_debug) {
+    						System.out.println(TAG + " the same version, skip package = " + firstPackage);
+    					}
     					break;
     				}
     			}
     			list.add(info);
-    			Log.i(TAG, "add package = " + firstPackage);
+    			if (_debug) {
+    				System.out.println(TAG + " add package = " + firstPackage);
+    			}
     			break;
     		}
     	}
