@@ -22,8 +22,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import android.util.Log;
-
 public class XMLParser {
 	private static final String TAG = "XMLParser";
 
@@ -47,7 +45,7 @@ public class XMLParser {
 			HttpResponse httpResponse = httpClient.execute(httpPost);
 			int status = httpResponse.getStatusLine().getStatusCode();
 			if (status != HttpStatus.SC_OK) {
-				Log.i(TAG, "Response: " + status);
+				System.err.println(TAG + " Response: " + status);
 				return null;
 			}
 			HttpEntity httpEntity = httpResponse.getEntity();
@@ -80,13 +78,13 @@ public class XMLParser {
 		        doc = db.parse(is); 
 
 			} catch (ParserConfigurationException e) {
-				Log.e(TAG, "Error: " + e.getMessage());
+				System.err.println(TAG + " Error: " + e.getMessage());
 				return null;
 			} catch (SAXException e) {
-				Log.e(TAG, "Error: " + e.getMessage());
+				System.err.println(TAG + " Error: " + e.getMessage());
 	            return null;
 			} catch (IOException e) {
-				Log.e(TAG, "Error: " + e.getMessage());
+				System.err.println(TAG + " Error: " + e.getMessage());
 				return null;
 			}
 
