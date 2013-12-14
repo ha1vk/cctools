@@ -8,13 +8,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import android.util.Log;
-
 public class Utils {
-	private static String TAG = "utils";
-
 	static {
-		System.loadLibrary("myutils");
+		final String[] libpaths = {
+			"/data/data/com.pdaxrom.cctools/lib/libmyutils.so",
+		};
+		boolean found = false;
+		for (String libpath: libpaths) {
+			if ((new File(libpath)).exists()) {
+				//System.out.println(TAG + " Found library " + libpath);
+				System.load(libpath);
+				found = true;
+			}
+		}
+		if (!found) {
+			System.loadLibrary("myutils");
+		}
 	}
 
 	public native static int chmod(String file, int attr);
@@ -44,7 +53,6 @@ public class Utils {
 	public static void copyDirectory(File sourceLocation , File targetLocation) throws IOException {
 	    if (sourceLocation.isDirectory()) {
 	        if (!targetLocation.exists()) {
-	        	Log.i(TAG, "Create directory " + targetLocation.getAbsolutePath());
 	            targetLocation.mkdir();
 	        }
 
@@ -54,7 +62,6 @@ public class Utils {
 	                    new File(targetLocation, children[i]));
 	        }
 	    } else {
-	    	Log.i(TAG, "Copy file " + sourceLocation.getAbsolutePath() + " to " + targetLocation.getAbsolutePath());
 	        InputStream in = new FileInputStream(sourceLocation);
 	        OutputStream out = new FileOutputStream(targetLocation);
 
@@ -73,7 +80,6 @@ public class Utils {
 		if (file.isDirectory()) {
 			if (file.list().length == 0) {
 				file.delete();
-				Log.i(TAG, "Directory is deleted " + file.getAbsolutePath());
 			} else {
 				String files[] = file.list();
 				for (String temp: files) {
@@ -82,12 +88,10 @@ public class Utils {
 				}
 				if (file.list().length == 0) {
 					file.delete();
-					Log.i(TAG, "Directory is deleted " + file.getAbsolutePath());
 				}
 			}
 		} else {
 			file.delete();
-			Log.i(TAG, "File is deleted " + file.getAbsolutePath());
 		}
 	}
 
