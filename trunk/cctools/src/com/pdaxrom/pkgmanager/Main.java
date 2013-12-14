@@ -54,13 +54,6 @@ class Main {
     	setupVersion();
     	URL = "http://cctools.info/packages/" + cpuAbi;
     	
-    	if (args.length == 0) {
-        	System.out.println("SDK " + sdkVersion + ", NKD " + ndkVersion + ", Arch " + ndkArch);
-        	System.out.println("URL " + URL);
-
-    		return;
-    	}
-    	
     	packagesLists.setInstalledPackages(RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR));
 		packagesLists.setAvailablePackages(RepoUtils.getRepoFromUrl(URL + "/Packages"));
 		
@@ -70,6 +63,22 @@ class Main {
 				packagesLists.getInstalledPackages() != null) {
 			packagesForUpdate = RepoUtils.checkingForUpdates(packagesLists);
 		}
+
+    	if (args.length == 0) {
+        	System.out.println("SDK " + sdkVersion + ", NKD " + ndkVersion + ", Arch " + ndkArch);
+        	System.out.println("URL " + URL);
+
+        	if (packagesForUpdate != null) {
+        		System.out.println();
+        		System.out.println("Available update for: ");
+        		for (PackageInfo pkg: packagesForUpdate) {
+        			System.out.print(pkg.getName() + " ");
+        		}
+        		System.out.println();
+        	}
+        	
+    		return;
+    	}
 
 		if (args[0].equals("list")) {
 			if (packagesLists.getAvailablePackages() != null) {
@@ -116,6 +125,17 @@ class Main {
 					System.err.println("Errors during installation.");
 				}
 			}
+		} else if (args[0].equals("upgrade")) {
+			if (packagesForUpdate != null) {
+	        	final InstallPackageInfo updateInfo = new InstallPackageInfo();
+
+				for (PackageInfo pkg: packagesForUpdate) {
+					updateInfo.addPackage(packagesLists, pkg.getName());
+				}
+				if (!installPackage(updateInfo)) {
+					System.err.println("Errors during upgrade.");
+				}				
+			}
 		} else if (args[0].equals("show")) {
 			if (packagesLists.getAvailablePackages() != null) {
 				if (args.length > 1) {
@@ -148,6 +168,19 @@ class Main {
 					}
 				}
 			}
+		} else {
+			System.out.println("CCTools console package manager");
+			System.out.println();
+			System.out.println("Usage:");
+			System.out.println("pkg                                     - summary about system and updates");
+			System.out.println("pkg list                                - show all packages");
+			System.out.println("pkg installed                           - show installed packages");
+			System.out.println("pkg search    <package> [<package> ...] - search package(s)");
+			System.out.println("pkg show      <package> [<package> ...] - show package(s) info");
+			System.out.println("pkg install   <package> [<package> ...] - install package(s)");
+			System.out.println("pkg uninstall <package> [<package> ...] - uninstall package(s)");
+			System.out.println("pkg upgrade                             - upgrade package(s)");
+			System.out.println();
 		}
     }
 
