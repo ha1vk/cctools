@@ -15,8 +15,6 @@ import org.w3c.dom.NodeList;
 
 import com.pdaxrom.utils.XMLParser;
 
-import android.util.Log;
-
 public class RepoUtils {
 	private static final String TAG = "RepoUtils";
 	
@@ -36,6 +34,12 @@ public class RepoUtils {
 	private static String	_ndkArch;
 	private static int		_ndkVersion;
 
+	private static boolean	_debug = false;
+	
+	public static void enableDebug(boolean debug) {
+		_debug = debug;
+	}
+	
 	public static void setVersion(String ndkArch, int ndkVersion) {
 		_ndkArch = ndkArch;
 		_ndkVersion = ndkVersion;
@@ -73,7 +77,9 @@ public class RepoUtils {
 			};
 
 			for (String filePath: dir.list(filter)) {
-				Log.i(TAG, "Read file " + filePath);
+				if (_debug) {
+					System.out.println(TAG + " Read file " + filePath);
+				}
 				File f = new File(path + "/" + filePath);
 				try {
 					FileInputStream fin = new FileInputStream(f);
@@ -84,11 +90,13 @@ public class RepoUtils {
 					}
 					reader.close();
 				} catch (IOException e) {
-					Log.e(TAG, "getRepoXmlFromDir() IO error " + e);
+					System.err.println(TAG + " getRepoXmlFromDir() IO error " + e);
 				}
 			}
 			sb.append("</repo>");
-			Log.i(TAG, "installed xml = " + replaceMacro(sb.toString()));
+			if (_debug) {
+				System.out.println(TAG + " installed xml = " + replaceMacro(sb.toString()));
+			}
 			return replaceMacro(sb.toString());
 		}
 		return null;
@@ -124,7 +132,9 @@ public class RepoUtils {
 	    		Element e = (Element) nl.item(i);
 	    		int size;
 	    		int filesize;
-	    		Log.i(TAG, "pkg [ " + parser.getValue(e, KEY_NAME) + " ][ " + parser.getValue(e, KEY_SIZE) + "]");
+	    		if (_debug) {
+	    			System.out.println(TAG + " pkg [ " + parser.getValue(e, KEY_NAME) + " ][ " + parser.getValue(e, KEY_SIZE) + "]");
+	    		}
 	    		if (parser.getValue(e, KEY_SIZE).length() > 0) {
 	    			size = Integer.valueOf(parser.getValue(e, KEY_SIZE).replaceAll("@SIZE@", "0"));
 	    		} else {
@@ -147,7 +157,9 @@ public class RepoUtils {
 	    				parser.getValue(e, KEY_ARCH),
 	    				parser.getValue(e, KEY_REPLACES));
 				list.add(packageInfo);
-				Log.i(TAG, "added pkg = " + packageInfo.getName());
+				if (_debug) {
+					System.out.println(TAG + " added pkg = " + packageInfo.getName());
+				}
 	    	}
 		}
 		return list;
