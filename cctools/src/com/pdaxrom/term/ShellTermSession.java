@@ -80,7 +80,16 @@ public class ShellTermSession extends TermSession {
 	
 	private void createSubProcess(String[] argv, String[] envp, String cwd) {
 		int[] pId = new int[1];
-		mFd = Utils.createSubProcess(cwd, argv[0], argv, envp, pId);
+		String cmd = argv[0];
+		/* detect shell login */
+		if (cmd.startsWith("-")) {
+			cmd = cmd.substring(1);
+			int lastSlash = cmd.lastIndexOf("/");
+			if (lastSlash > 0 && lastSlash < cmd.length() - 1) {
+				argv[0] = "-" + cmd.substring(lastSlash + 1);
+			}
+		}
+		mFd = Utils.createSubProcess(cwd, cmd, argv, envp, pId);
 		mProcId = pId[0];
 		if (mProcId > 0) {
 			setTermIn(new FileInputStream(mFd));
