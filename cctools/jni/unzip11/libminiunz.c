@@ -207,8 +207,8 @@ int do_list(uf)
     err = unzGetGlobalInfo64(uf,&gi);
     if (err!=UNZ_OK)
         printf("error %d with zipfile in unzGetGlobalInfo \n",err);
-    printf("  Length  Method     Size Ratio   Date    Time   CRC-32     Name\n");
-    printf("  ------  ------     ---- -----   ----    ----   ------     ----\n");
+    //printf("  Length  Method     Size Ratio   Date    Time   CRC-32     Name\n");
+    //printf("  ------  ------     ---- -----   ----    ----   ------     ----\n");
     for (i=0;i<gi.number_entry;i++)
     {
         char filename_inzip[256];
@@ -707,8 +707,8 @@ int get_unpacked_size(const char *filename)
         printf("error %d with zipfile in unzGetGlobalInfo \n",err);
 	goto err;
     }
-    printf("  Length  Method     Size Ratio   Date    Time   CRC-32     Name\n");
-    printf("  ------  ------     ---- -----   ----    ----   ------     ----\n");
+    //printf("  Length  Method     Size Ratio   Date    Time   CRC-32     Name\n");
+    //printf("  ------  ------     ---- -----   ----    ----   ------     ----\n");
     for (i=0;i<gi.number_entry;i++)
     {
         char filename_inzip[256];

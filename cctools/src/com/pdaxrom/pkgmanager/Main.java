@@ -283,7 +283,7 @@ class Main {
 		}
 
 		String tempPath = temp.getAbsolutePath();
-		System.out.println("Unpacking file " + tempPath + " to " + to);
+		//System.out.println("Unpacking file " + tempPath + " to " + to);
 		String logFile = log;
 		try {
 			int need_mem = Utils.unzippedSize(tempPath);
