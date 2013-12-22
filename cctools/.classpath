@@ -7,5 +7,7 @@
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/emulatorview"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/dx"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/javac"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
