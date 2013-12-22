@@ -429,6 +429,8 @@ public class CodeEditor extends EditText {
 	    		mSyntax = new MakeSyntax();
 	    	} else if (ext.contentEquals(".sh")) {
 	    		mSyntax = new ShellSyntax();
+	    	} else if (ext.equals(".pl") || ext.equals(".pm")) {
+	    		mSyntax = new PerlSyntax();
 	    	} else if (ext.contentEquals(".lua")) {
 	    		mSyntax = new LuaSyntax();
 	    	} else if (ext.contentEquals(".java")) {
