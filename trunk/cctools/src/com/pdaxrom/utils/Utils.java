@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -101,5 +102,34 @@ public class Utils {
 	    int exp = (int) (Math.log(bytes) / Math.log(unit));
 	    String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
 	    return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+	}
+	
+	public static String getBootClassPath() {
+		String classPath = null;
+		File dir = new File("/system/framework");
+		if (dir.exists() && dir.isDirectory()) {
+			FilenameFilter filter = new FilenameFilter() {
+				public boolean accept(File dir, String name) {
+					String lowercaseName = name.toLowerCase();
+					if (lowercaseName.endsWith(".jar")) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+			};
+
+			boolean first = true;
+			
+			for (String file: dir.list(filter)) {
+				if (!first) {
+					classPath += ":";
+				} else {
+					classPath = "";
+				}
+				classPath += "/system/framework/" + file;
+			}
+		}
+		return classPath;
 	}
 }

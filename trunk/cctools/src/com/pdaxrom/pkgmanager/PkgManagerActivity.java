@@ -809,6 +809,9 @@ public class PkgManagerActivity extends SherlockListActivity {
 		String cctoolsDir = toolchainDir + "/cctools";
 		String bootClassPath = getEnv(cctoolsDir, "BOOTCLASSPATH");
 		if (bootClassPath == null) {
+			bootClassPath = Utils.getBootClassPath();
+		}
+		if (bootClassPath == null) {
 			bootClassPath = "/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar"; 
 		}
 		String[] envp = {
