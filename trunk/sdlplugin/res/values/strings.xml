@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CCTools SDL Plugin</string>
+    <string name="about_dialog">About</string>
+    <string name="about_dialog_text">CCTools SDL plugin version</string> 
+    <string name="about_dialog_text1">Install CCTools</string>
+	<string name="about_dialog_text2">to use this plugin.</string>
+</resources>
