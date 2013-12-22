@@ -17,7 +17,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := native-loader
-LOCAL_SRC_FILES := main.c
+LOCAL_SRC_FILES := main.cpp
 LOCAL_CFLAGS    := -Wall
 LOCAL_LDLIBS    := -llog -landroid
 LOCAL_STATIC_LIBRARIES := android_native_app_glue
