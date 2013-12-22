@@ -579,6 +579,21 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		    		startActivity(intent);
 		    		return;					
 				}
+				if ((ext.equals(".pl") || ext.equals(".pm")) &&
+					(new File(toolchainDir + "/cctools/bin/perl")).exists()) {
+		    		Intent intent = new Intent(CCToolsActivity.this, LauncherConsoleActivity.class);
+		    		intent.putExtra("executable_file", toolchainDir + "/cctools/bin/perl " + fileName);
+		    		intent.putExtra("cctoolsdir", toolchainDir + "/cctools");
+		    		intent.putExtra("workdir", (new File(fileName)).getParentFile().getAbsolutePath());
+		    		SharedPreferences mPrefs = getSharedPreferences(CCToolsActivity.SHARED_PREFS_NAME, 0);
+		    		if (force) {
+		    			intent.putExtra("force", mPrefs.getBoolean("force_run", true));
+		    		} else {
+		    			intent.putExtra("force", false);
+		    		}
+		    		startActivity(intent);
+		    		return;					
+				}
 			}
 			Intent intent = new Intent(CCToolsActivity.this, BuildActivity.class);
 			intent.putExtra("filename", fileName);
@@ -850,7 +865,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     
     private void runTerminal() {
 		Intent myIntent = new Intent(this, TermActivity.class);
-		myIntent.putExtra("filename", getShell());
+		myIntent.putExtra("filename", "-" + getShell());
 		myIntent.putExtra("cctoolsdir", toolchainDir + "/cctools");
 		String workDir = toolchainDir + "/cctools/home";
 		if ((new File(fileName)).exists()) {
@@ -1047,6 +1062,9 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	private void system(String cmdline) {
 		String cctoolsDir = toolchainDir + "/cctools";
 		String bootClassPath = getEnv(cctoolsDir, "BOOTCLASSPATH");
+		if (bootClassPath == null) {
+			bootClassPath = Utils.getBootClassPath();
+		}
 		if (bootClassPath == null) {
 			bootClassPath = "/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar"; 
 		}
