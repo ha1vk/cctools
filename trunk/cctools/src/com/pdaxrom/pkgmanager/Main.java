@@ -17,9 +17,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.os.StatFs;
-import android.util.Log;
-
-import com.pdaxrom.cctools.R;
 import com.pdaxrom.utils.Utils;
 
 class Main {
