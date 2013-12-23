@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ndk_version="r9b"
+ndk_version="r9c"
 
 binutils_version="2.23"
 gcc_version="4.8"
