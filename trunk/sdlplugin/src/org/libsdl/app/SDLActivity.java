@@ -3,23 +3,17 @@ package org.libsdl.app;
 import java.io.File;
 import java.util.Arrays;
 
-import com.pdaxrom.cctools.sdlplugin.R;
 import com.pdaxrom.cctools.sdlplugin.Utils;
 
 import android.app.*;
 import android.content.*;
-import android.content.DialogInterface.OnCancelListener;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.view.*;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsoluteLayout;
-import android.widget.TextView;
 import android.os.*;
-import android.text.method.LinkMovementMethod;
-import android.text.util.Linkify;
 import android.util.Log;
 import android.graphics.*;
 import android.media.*;
@@ -30,7 +24,7 @@ import android.hardware.*;
     SDL Activity
 */
 public class SDLActivity extends Activity {
-    private static final String TAG = "CCTools SDL plugin";
+    private static final String TAG = "CCTools SDLActivity";
     
     private static final String CCTOOLS_URL="https://play.google.com/store/apps/details?id=com.pdaxrom.cctools";
 
@@ -39,7 +33,7 @@ public class SDLActivity extends Activity {
 
     // Main components
     protected static SDLActivity mSingleton;
-    protected static SDLSurface mSurface = null;
+    protected static SDLSurface mSurface;
     protected static View mTextEdit;
     protected static ViewGroup mLayout;
 
@@ -53,92 +47,63 @@ public class SDLActivity extends Activity {
     // Load the .so
     static {
         System.loadLibrary("SDL2");
-        //System.loadLibrary("SDL2_image");
-        //System.loadLibrary("SDL2_mixer");
-        //System.loadLibrary("SDL2_net");
-        //System.loadLibrary("SDL2_ttf");
+        System.loadLibrary("SDL2_image");
+        System.loadLibrary("mikmod");
+        System.loadLibrary("smpeg2");
+        System.loadLibrary("SDL2_mixer");
+        System.loadLibrary("SDL2_net");
+        System.loadLibrary("SDL2_ttf");
     }
 
     // Setup
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //Log.v("SDL", "onCreate()");
+        Log.v(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
         
         // So we can call stuff from static callbacks
         mSingleton = this;
 
-        if (getIntent().getExtras() == null) {
-        	aboutDialog();
-        	//System.loadLibrary("main");
-        } else {
-        	String sdlmain = getIntent().getExtras().getString("sdlmain");
-        	Log.e(TAG, "sdlmain is " + sdlmain);
+        if (!mIsPaused) {
+            if (getIntent().getExtras() == null) {
+            	return;
+            } else {
+            	String sdlmain = getIntent().getExtras().getString("sdlmain");
+            	Log.e(TAG, "sdlmain is " + sdlmain);
 
-        	String libDir = getCacheDir().getParentFile().getAbsolutePath() + "/mylib";
-			String libFile = libDir + "/" + (new File(sdlmain)).getName();
+            	String libDir = getCacheDir().getParentFile().getAbsolutePath() + "/mylib";
+    			String libFile = libDir + "/" + (new File(sdlmain)).getName();
 
-	        if ((new File(sdlmain)).exists()) {
-		        if (!(new File(libDir)).exists()) {
-		        	(new File(libDir)).mkdir();
-		        }
-		 
-				try {
-					Utils.copyDirectory(new File(sdlmain), new File(libFile));
-					Runtime.getRuntime().exec("chmod 755 " + libFile).waitFor();
-				} catch (Exception e) {
-					Log.e(TAG, "copy sdlmain failed " + e);
-					System.exit(RESULT_OK);
-				}
-				try {
-					System.load(libFile);
-			        // Set up the surface
-			        mSurface = new SDLSurface(getApplication());
-			    } catch (UnsatisfiedLinkError e) {
-			        Log.e(TAG, "Native code library failed to load.\n" + e);
-			        System.exit(RESULT_OK);
-			    }
-			}
+    	        if ((new File(sdlmain)).exists()) {
+    		        if (!(new File(libDir)).exists()) {
+    		        	(new File(libDir)).mkdir();
+    		        }
+    		 
+    				try {
+    					Utils.copyDirectory(new File(sdlmain), new File(libFile));
+    					Runtime.getRuntime().exec("chmod 755 " + libFile).waitFor();
+    				} catch (Exception e) {
+    					Log.e(TAG, "copy sdlmain failed " + e);
+    					System.exit(RESULT_OK);
+    				}
+    				try {
+    					System.load(libFile);
+    			        // Set up the surface
+    			    } catch (UnsatisfiedLinkError e) {
+    			        Log.e(TAG, "Native code library failed to load.\n" + e);
+    			        System.exit(RESULT_OK);
+    			    }
+    			}
+            }
         }
-
+        
+        mSurface = new SDLSurface(getApplication());
         mLayout = new AbsoluteLayout(this);
         if (mSurface != null) {
         	mLayout.addView(mSurface);
         }
 
         setContentView(mLayout);
-    }
-
-    private void aboutDialog() {
-    	String versionName;
-		try {
-			versionName = getPackageManager().getPackageInfo(getPackageName(), 0 ).versionName;
-		} catch (NameNotFoundException e) {
-			versionName = "1.0";
-		}
-		final TextView textView = new TextView(this);
-		textView.setAutoLinkMask(Linkify.WEB_URLS);
-		textView.setLinksClickable(true);
-		textView.setTextSize(16f);
-		textView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
-		textView.setText(getString(R.string.about_dialog_text) +
-									" " + 
-									versionName +
-									"\n" +
-									getString(R.string.about_dialog_text1) +
-									"\n" + CCTOOLS_URL + "\n" +
-									getString(R.string.about_dialog_text2));
-		textView.setMovementMethod(LinkMovementMethod.getInstance());
-		new AlertDialog.Builder(this)
-	    .setTitle(getString(R.string.about_dialog))
-	    .setView(textView)
-	    .setOnCancelListener(new OnCancelListener() {
-			@Override
-			public void onCancel(DialogInterface dialog) {
-				System.exit(RESULT_OK);
-			}
-	    })
-	    .show();
     }
 
     // Events
