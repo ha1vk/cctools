@@ -1,6 +1,7 @@
 build_llvm() {
     PKG=llvm
     PKG_VERSION=3.3
+    PKG_SUBVERSION="-1"
     PKG_URL="http://ya.ru/${PKG}-${PKG_VERSION}.tgz"
     PKG_DESC="Low-Level Virtual Machine (LLVM), runtime library"
     O_DIR=$SRC_PREFIX/${PKG}-${PKG_VERSION}
@@ -81,8 +82,8 @@ build_llvm() {
     #rm -f  ${TMPINST_DIR}/${PKG}/cctools/lib/*.a
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/share
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
@@ -160,8 +161,8 @@ EOF
 
     chmod 755 ${TMPINST_DIR}/${PKG}/prerm
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC" "libgcc-dev|libgcc-compact-dev libstdc++-dev|libstdc++-compact-dev"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "libgcc-dev|libgcc-compact-dev libstdc++-dev|libstdc++-compact-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
@@ -171,8 +172,8 @@ EOF
     mkdir -p ${TMPINST_DIR}/${PKG}/cctools/lib
     cp -f ${LLVMROOTDIR}/lib/libclang.so ${TMPINST_DIR}/${PKG}/cctools/lib/
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
@@ -184,8 +185,8 @@ EOF
     cp -f ${LLVMROOTDIR}/bin/${TARGET_ARCH}-clang-format ${TMPINST_DIR}/${PKG}/cctools/bin/clang-format
     cp -f ${LLVMROOTDIR}/bin/${TARGET_ARCH}-clang-tblgen ${TMPINST_DIR}/${PKG}/cctools/bin/clang-tblgen
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 

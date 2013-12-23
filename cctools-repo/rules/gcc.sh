@@ -1,6 +1,7 @@
 build_gcc() {
     PKG=gcc
     PKG_VERSION=$gcc_version
+    PKG_SUBVERSION="-1"
     PKG_DESC="The GNU C compiler"
     O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
@@ -222,8 +223,8 @@ EOF
 
     chmod 755 ${TMPINST_DIR}/${PKG}/prerm
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "libgcc-dev|libgcc-compact-dev libstdc++-dev|libstdc++-compact-dev"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "libgcc-dev|libgcc-compact-dev libstdc++-dev|libstdc++-compact-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
@@ -233,8 +234,8 @@ EOF
     PKG="gobjc"
     PKG_DESC="GNU Objective-C and Objective-C++ compilers"
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "gcc libobjc-dev|libobjc-compact-dev"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "gcc libobjc-dev|libobjc-compact-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
@@ -258,8 +259,8 @@ EOF
 
     chmod 755 ${TMPINST_DIR}/${PKG}/prerm
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "gcc libgfortran-dev|libgfortran-compact-dev"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "gcc libgfortran-dev|libgfortran-compact-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
@@ -270,14 +271,14 @@ EOF
     PKG="libgcc-dev"
     PKG_DESC="GCC support library (development files)"
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libgcc-compact-dev"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "" "libgcc-compact-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     # Cross package
-    local filename="${PKG}-${PKG_ARCH}_${PKG_VERSION}_all.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} $PKG_VERSION all "$PKG_DESC"
+    local filename="${PKG}-${PKG_ARCH}_${PKG_VERSION}${PKG_SUBVERSION}_all.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} ${PKG_VERSION}${PKG_SUBVERSION} all "$PKG_DESC"
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     if [ "$PKG_ARCH" = "armel" ]; then
@@ -321,8 +322,8 @@ EOF
 	;;
     esac
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libgcc-dev"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "" "libgcc-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
@@ -333,14 +334,14 @@ EOF
     PKG="libstdc++-dev"
     PKG_DESC="GNU Standard C++ Library v3 (development files)"
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libstdc++-compact-dev"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "" "libstdc++-compact-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     # Cross package
-    local filename="${PKG}-${PKG_ARCH}_${PKG_VERSION}_all.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} $PKG_VERSION all "$PKG_DESC"
+    local filename="${PKG}-${PKG_ARCH}_${PKG_VERSION}${PKG_SUBVERSION}_all.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} ${PKG_VERSION}${PKG_SUBVERSION} all "$PKG_DESC"
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     if [ "$PKG_ARCH" = "armel" ]; then
@@ -393,8 +394,8 @@ EOF
 	;;
     esac
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libstdc++-dev"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "" "libstdc++-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
@@ -406,14 +407,14 @@ EOF
     PKG="libgfortran-dev"
     PKG_DESC="Runtime library for GNU Fortran applications (development files)"
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libgfortran-compact-dev"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "" "libgfortran-compact-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     # Cross package
-    local filename="${PKG}-${PKG_ARCH}_${PKG_VERSION}_all.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} $PKG_VERSION all "$PKG_DESC"
+    local filename="${PKG}-${PKG_ARCH}_${PKG_VERSION}${PKG_SUBVERSION}_all.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} ${PKG_VERSION}${PKG_SUBVERSION} all "$PKG_DESC"
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     if [ "$PKG_ARCH" = "armel" ]; then
@@ -458,8 +459,8 @@ EOF
 	;;
     esac
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libgfortran-dev"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "" "libgfortran-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
@@ -470,14 +471,14 @@ EOF
     PKG="libobjc-dev"
     PKG_DESC="Runtime library for GNU Objective-C applications (development files)"
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libobjc-compact-dev"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "" "libobjc-compact-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     # Cross package
-    local filename="${PKG}-${PKG_ARCH}_${PKG_VERSION}_all.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} $PKG_VERSION all "$PKG_DESC"
+    local filename="${PKG}-${PKG_ARCH}_${PKG_VERSION}${PKG_SUBVERSION}_all.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} ${PKG_VERSION}${PKG_SUBVERSION} all "$PKG_DESC"
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     if [ "$PKG_ARCH" = "armel" ]; then
@@ -522,8 +523,8 @@ EOF
 	;;
     esac
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "" "libobjc-dev"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "" "libobjc-dev"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 

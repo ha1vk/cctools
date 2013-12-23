@@ -1,6 +1,7 @@
 build_gcc_avr() {
     PKG=gcc-avr
     PKG_VERSION=$gcc_avr_version
+    PKG_SUBVERSION="-1"
     PKG_DESC="The GNU C compiler (cross compiler for avr)"
     O_DIR=$SRC_PREFIX/gcc/gcc-${PKG_VERSION}
     S_DIR=$src_dir/gcc-${PKG_VERSION}
@@ -65,8 +66,8 @@ build_gcc_avr() {
 
     find ${TMPINST_DIR}/${PKG}/cctools/lib -type f -name "*.a" -exec avr-strip --strip-debug '{}' \;
 
-    local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
