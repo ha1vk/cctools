@@ -29,3 +29,8 @@ find obj -name "SDL_android_main.o" | while read f; do
     zip -9 ${TOPDIR}/assets/sdlmain-${arch}.zip SDL_android_main.o
     cd $TOPDIR
 done
+
+cd ${TOPDIR}
+
+rm -rf ${TOPDIR}/assets/examples.zip
+zip -r9 ${TOPDIR}/assets/examples.zip Examples

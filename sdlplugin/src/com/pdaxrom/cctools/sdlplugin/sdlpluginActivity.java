@@ -90,6 +90,12 @@ public class sdlpluginActivity extends SDLActivity {
 					Utils.unpackZip(is, sdCardDir + "/SDL");
 					is.close();
 				}
+				if (! (new File(sdCardDir + "/Examples/SDL").exists())) {
+					publishProgress(getString(R.string.update_install_examples));
+					InputStream is = getAssets().open("examples.zip");
+					Utils.unpackZip(is, sdCardDir);
+					is.close();
+				}
 			} catch (IOException e) {
 				Log.e(TAG, "Error installing dev files " + e);
 			}
