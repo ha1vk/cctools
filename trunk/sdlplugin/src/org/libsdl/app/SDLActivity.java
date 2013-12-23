@@ -204,6 +204,7 @@ public class SDLActivity extends Activity {
     static final int COMMAND_CHANGE_TITLE = 1;
     static final int COMMAND_UNUSED = 2;
     static final int COMMAND_TEXTEDIT_HIDE = 3;
+    static final int COMMAND_QUIT = 4;
 
     protected static final int COMMAND_USER = 0x8000;
 
@@ -249,6 +250,13 @@ public class SDLActivity extends Activity {
                 }
                 break;
 
+            case COMMAND_QUIT:
+            	if (context instanceof SDLActivity) {
+            		((Activity) context).finish();
+            		System.exit(RESULT_OK);
+            	}
+            	break;
+
             default:
                 if ((context instanceof SDLActivity) && !((SDLActivity) context).onUnhandledMessage(msg.arg1, msg.obj)) {
                     Log.e(TAG, "error handling message, command is " + msg.arg1);
@@ -268,6 +276,10 @@ public class SDLActivity extends Activity {
         return commandHandler.sendMessage(msg);
     }
 
+    public static void finishActivity() {
+    	mSingleton.sendCommand(COMMAND_QUIT, null);
+    }
+    
     // C functions we call
     public static native void nativeInit();
     public static native void nativeLowMemory();
@@ -455,7 +467,7 @@ class SDLMain implements Runnable {
     public void run() {
         // Runs SDL_main()
         SDLActivity.nativeInit();
-
+        SDLActivity.finishActivity();
         //Log.v("SDL", "SDL thread terminated");
     }
 }
