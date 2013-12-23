@@ -1,13 +1,20 @@
 package com.pdaxrom.cctools.sdlplugin;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import android.util.Log;
 
 public class Utils {
+	private static final String TAG = "CCTools SDL Utils";
+	
 	public static void copyDirectory(File sourceLocation , File targetLocation) throws IOException {
 	    if (sourceLocation.isDirectory()) {
 	        if (!targetLocation.exists()) {
@@ -51,5 +58,47 @@ public class Utils {
 		} else {
 			file.delete();
 		}
+	}
+	
+    /*
+    public int chmod(File path, int mode) throws Exception {
+    	Class fileUtils = Class.forName("android.os.FileUtils");
+    	Method setPermissions = fileUtils.getMethod("setPermissions", String.class, int.class, int.class, int.class);
+    	return (Integer) setPermissions.invoke(null, path.getAbsolutePath(), mode, -1, -1);
+    }
+    */
+    
+	public static boolean unpackZip(InputStream is, String to) {       
+	     ZipInputStream zis;
+	     try {
+	    	 zis = new ZipInputStream(new BufferedInputStream(is));          
+	         ZipEntry ze;
+	         byte[] buffer = new byte[1024];
+
+	         while ((ze = zis.getNextEntry()) != null) {
+	        	 Log.i(TAG, "Unzipping file " + ze.getName());
+	        	 
+	             if (ze.isDirectory()) {
+		                File fmd = new File(to + "/" + ze.getName());
+		                fmd.mkdirs();
+		                continue;
+	             }
+
+	             FileOutputStream fout = new FileOutputStream(to + "/" + ze.getName());
+
+	             for (int count = zis.read(buffer); count > 0; count = zis.read(buffer)) {
+	            	 fout.write(buffer, 0, count);
+	             }
+
+	             fout.close();               
+	             zis.closeEntry();
+	         }
+	         zis.close();
+	     } catch(IOException e) {
+	         e.printStackTrace();
+	         return false;
+	     }
+
+	    return true;
 	}
 }
