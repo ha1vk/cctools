@@ -88,6 +88,7 @@ public class SDLActivity extends Activity {
     				}
     				try {
     					System.load(libFile);
+    					(new File(libFile)).delete();
     					String pwd = new File(sdlmain).getParentFile().getAbsolutePath();
     					Log.i(TAG, "chdir to " + pwd);
     					Utils.chDir(pwd);
