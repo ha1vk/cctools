@@ -7,3 +7,4 @@ include SDL2_mixer/Android.mk
 include SDL2_net/Android.mk
 include SDL2_ttf/Android.mk
 include src/Android.mk
+include utils/Android.mk
