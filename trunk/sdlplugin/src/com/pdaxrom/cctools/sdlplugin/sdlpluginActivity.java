@@ -75,6 +75,8 @@ public class sdlpluginActivity extends SDLActivity {
 					new File(sdCardDir + "/SDL/lib").mkdirs();
 					Utils.copyDirectory(new File(getCacheDir().getParentFile().getAbsolutePath() + "/lib"),
 							new File(sdCardDir + "/SDL/lib"));
+					new File(sdCardDir + "/SDL/lib/libmain.so").delete();
+					new File(sdCardDir + "/SDL/lib/libccsdlplugin.so").delete();
 					String arch = Build.CPU_ABI;
 					if (arch.startsWith("mips")) {
 						arch = "mips";
