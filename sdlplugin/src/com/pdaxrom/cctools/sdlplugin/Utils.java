@@ -15,6 +15,15 @@ import android.util.Log;
 public class Utils {
 	private static final String TAG = "CCTools SDL Utils";
 	
+	static {
+		System.loadLibrary("ccsdlplugin");
+	}
+	
+	public static native int setEnv(String name, String value, boolean overwrite);
+	public static native int unSetEnv(String name);
+	public static native String getEnv(String name);
+	public static native int chDir(String path);
+	
 	public static void copyDirectory(File sourceLocation , File targetLocation) throws IOException {
 	    if (sourceLocation.isDirectory()) {
 	        if (!targetLocation.exists()) {

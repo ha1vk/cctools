@@ -88,7 +88,10 @@ public class SDLActivity extends Activity {
     				}
     				try {
     					System.load(libFile);
-    			        // Set up the surface
+    					String pwd = new File(sdlmain).getParentFile().getAbsolutePath();
+    					Log.i(TAG, "chdir to " + pwd);
+    					Utils.chDir(pwd);
+    					Utils.setEnv("PWD", pwd, true);
     			    } catch (UnsatisfiedLinkError e) {
     			        Log.e(TAG, "Native code library failed to load.\n" + e);
     			        System.exit(RESULT_OK);
@@ -99,9 +102,7 @@ public class SDLActivity extends Activity {
         
         mSurface = new SDLSurface(getApplication());
         mLayout = new AbsoluteLayout(this);
-        if (mSurface != null) {
-        	mLayout.addView(mSurface);
-        }
+        mLayout.addView(mSurface);
 
         setContentView(mLayout);
     }
