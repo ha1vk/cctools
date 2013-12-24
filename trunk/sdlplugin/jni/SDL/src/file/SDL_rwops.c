@@ -465,15 +465,12 @@ SDL_RWFromFile(const char *file, const char *mode)
 #if defined(ANDROID)
 #ifdef HAVE_STDIO_H
     /* Try to open the file on the filesystem first */
-    if (*file == '/') {
-        FILE *fp = fopen(file, mode);
-        if (fp) {
-            return SDL_RWFromFP(fp, 1);
-        }
+    FILE *fp = fopen(file, mode);
+    if (fp) {
+        return SDL_RWFromFP(fp, 1);
     } else {
         /* Try opening it from internal storage if it's a relative path */
         char *path;
-        FILE *fp;
 
         path = SDL_stack_alloc(char, PATH_MAX);
         if (path) {
