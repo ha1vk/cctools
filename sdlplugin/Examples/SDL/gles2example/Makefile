@@ -4,7 +4,7 @@
 # type clean to clean sources
 #
 
-TARGET = test2example
+TARGET = gles2example
 
 all: $(TARGET)
 
@@ -19,7 +19,7 @@ SDLRUN = am start $(shell am 2>&1| grep -q '\-\-user' && echo '--user 0') -n com
 OBJS = $(TARGET).o
 
 $(TARGET): $(OBJS)
-	$(CC) -o lib$@.so $^ $(LDFLAGS) -lstdc++
+	$(CC) -o lib$@.so $^ $(LDFLAGS)
 
 clean:
 		rm -f $(OBJS) lib$(TARGET).so
