@@ -1,6 +1,7 @@
 #
-# C console application example
-# type run to execute hello binary
+# SDL application Makefile
+# type without args to build
+# type run to execute
 # type clean to clean sources
 #
 

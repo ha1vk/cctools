@@ -5,13 +5,13 @@
 # type clean to clean sources
 #
 
-TARGET = testdraw2
+TARGET = playmus
 
 all: $(TARGET)
 
 CFLAGS = -Os -Wall -DANDROID -I${EXTERNAL_STORAGE}/CCTools/SDL/include
 
-LDFLAGS = -shared ${EXTERNAL_STORAGE}/CCTools/SDL/lib/SDL_android_main.o -L${EXTERNAL_STORAGE}/CCTools/SDL/lib -lSDL2 -lGLESv1_CM -llog -lm
+LDFLAGS = -shared ${EXTERNAL_STORAGE}/CCTools/SDL/lib/SDL_android_main.o -L${EXTERNAL_STORAGE}/CCTools/SDL/lib -lSDL2 -lSDL2_mixer -llog -lm
 
 SDLRUN = am start $(shell am 2>&1| grep -q '\-\-user' && echo '--user 0') -n com.pdaxrom.cctools.sdlplugin/.sdlpluginActivity -e sdlmain
 
