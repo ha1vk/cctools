@@ -3,6 +3,7 @@
 # type without args to build
 # type run to execute
 # type clean to clean sources
+# type log to check application log
 #
 
 TARGET = testgesture
@@ -25,3 +26,6 @@ clean:
 
 run: $(TARGET)
 		$(SDLRUN) $(PWD)/lib$(TARGET).so
+
+log:
+	logcat -d | grep SDL
