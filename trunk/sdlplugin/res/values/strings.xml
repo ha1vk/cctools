@@ -11,4 +11,9 @@
 	<string name="update_install_headers">Installing SDL headers&#8230;</string>
 	<string name="update_install_libs">Installing SDL libraries&#8230;</string>
 	<string name="update_install_examples">Installing SDL examples&#8230;</string>
+	<string name="sdl_version">SDL2 version</string>
+	<string name="sdl_image_version">SDL2_image version</string>
+	<string name="sdl_mixer_version">SDL2_mixer version</string>
+	<string name="sdl_net_version">SDL2_net version</string>
+	<string name="sdl_ttf_version">SDL2_ttf version</string>
 </resources>
