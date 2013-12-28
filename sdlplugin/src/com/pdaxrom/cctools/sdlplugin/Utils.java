@@ -15,14 +15,21 @@ import android.util.Log;
 public class Utils {
 	private static final String TAG = "CCTools SDL Utils";
 	
+	public static final int Lib_SDL			= 0;
+	public static final int Lib_SDL_image	= 1;
+	public static final int Lib_SDL_mixer	= 2;
+	public static final int Lib_SDL_net		= 3;
+	public static final int Lib_SDL_ttf		= 4;
+	
 	static {
 		System.loadLibrary("ccsdlplugin");
 	}
-	
+
 	public static native int setEnv(String name, String value, boolean overwrite);
 	public static native int unSetEnv(String name);
 	public static native String getEnv(String name);
 	public static native int chDir(String path);
+	public static native String getSDLVersion(int lib);
 	
 	public static void copyDirectory(File sourceLocation , File targetLocation) throws IOException {
 	    if (sourceLocation.isDirectory()) {

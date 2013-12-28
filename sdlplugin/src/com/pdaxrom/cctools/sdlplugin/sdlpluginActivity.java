@@ -134,11 +134,15 @@ public class sdlpluginActivity extends SDLActivity {
 									getString(R.string.about_dialog_text2));
 		} else {
 			textView.setText(getString(R.string.about_dialog_text) +
-					" " + 
-					versionName +
-					"\n" +
-					getString(R.string.about_dialog_text3) +
-					"\n" + CCTOOLS_URL);
+					" " + versionName + "\n" +
+					getString(R.string.sdl_version) + " " + Utils.getSDLVersion(Utils.Lib_SDL) + "\n" +
+					getString(R.string.sdl_image_version) + " " + Utils.getSDLVersion(Utils.Lib_SDL_image) + "\n" +
+					getString(R.string.sdl_mixer_version) + " " + Utils.getSDLVersion(Utils.Lib_SDL_mixer) + "\n" +
+					getString(R.string.sdl_net_version) + " " + Utils.getSDLVersion(Utils.Lib_SDL_net) + "\n" +
+					getString(R.string.sdl_ttf_version) + " " + Utils.getSDLVersion(Utils.Lib_SDL_ttf) + "\n\n" +
+					getString(R.string.about_dialog_text3) + "\n" +
+					CCTOOLS_URL + "\n"
+					);
 		}
 		textView.setMovementMethod(LinkMovementMethod.getInstance());
 		new AlertDialog.Builder(this)
