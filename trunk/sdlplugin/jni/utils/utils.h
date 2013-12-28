@@ -7,13 +7,23 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef com_pdaxrom_cctools_sdlplugin_Utils_Lib_SDL
+#define com_pdaxrom_cctools_sdlplugin_Utils_Lib_SDL 0L
+#undef com_pdaxrom_cctools_sdlplugin_Utils_Lib_SDL_image
+#define com_pdaxrom_cctools_sdlplugin_Utils_Lib_SDL_image 1L
+#undef com_pdaxrom_cctools_sdlplugin_Utils_Lib_SDL_mixer
+#define com_pdaxrom_cctools_sdlplugin_Utils_Lib_SDL_mixer 2L
+#undef com_pdaxrom_cctools_sdlplugin_Utils_Lib_SDL_net
+#define com_pdaxrom_cctools_sdlplugin_Utils_Lib_SDL_net 3L
+#undef com_pdaxrom_cctools_sdlplugin_Utils_Lib_SDL_ttf
+#define com_pdaxrom_cctools_sdlplugin_Utils_Lib_SDL_ttf 4L
 /*
  * Class:     com_pdaxrom_cctools_sdlplugin_Utils
  * Method:    setEnv
  * Signature: (Ljava/lang/String;Ljava/lang/String;Z)I
  */
 JNIEXPORT jint JNICALL Java_com_pdaxrom_cctools_sdlplugin_Utils_setEnv
-  (JNIEnv *, jobject, jstring, jstring, jboolean);
+  (JNIEnv *, jclass, jstring, jstring, jboolean);
 
 /*
  * Class:     com_pdaxrom_cctools_sdlplugin_Utils
@@ -21,7 +31,7 @@ JNIEXPORT jint JNICALL Java_com_pdaxrom_cctools_sdlplugin_Utils_setEnv
  * Signature: (Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_com_pdaxrom_cctools_sdlplugin_Utils_unSetEnv
-  (JNIEnv *, jobject, jstring);
+  (JNIEnv *, jclass, jstring);
 
 /*
  * Class:     com_pdaxrom_cctools_sdlplugin_Utils
@@ -29,7 +39,7 @@ JNIEXPORT jint JNICALL Java_com_pdaxrom_cctools_sdlplugin_Utils_unSetEnv
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_com_pdaxrom_cctools_sdlplugin_Utils_getEnv
-  (JNIEnv *, jobject, jstring);
+  (JNIEnv *, jclass, jstring);
 
 /*
  * Class:     com_pdaxrom_cctools_sdlplugin_Utils
@@ -37,7 +47,15 @@ JNIEXPORT jstring JNICALL Java_com_pdaxrom_cctools_sdlplugin_Utils_getEnv
  * Signature: (Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_com_pdaxrom_cctools_sdlplugin_Utils_chDir
-  (JNIEnv *, jobject, jstring);
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     com_pdaxrom_cctools_sdlplugin_Utils
+ * Method:    getSDLVersion
+ * Signature: (I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_pdaxrom_cctools_sdlplugin_Utils_getSDLVersion
+  (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus
 }
