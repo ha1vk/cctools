@@ -1,8 +1,8 @@
 build_subversion() {
     PKG=subversion
-    PKG_VERSION=1.7.13
+    PKG_VERSION=1.7.14
     PKG_DESC="Subversion exists to be universally recognized and adopted as an open-source, centralized version control system characterized by its reliability as a safe haven for valuable data; the simplicity of its model and usage; and its ability to support the needs of a wide variety of users and projects, from individuals to large-scale enterprise operations."
-    PKG_URL=http://mirrors.besplatnyeprogrammy.ru/apache/$PKG/$PKG-$PKG_VERSION.tar.bz2
+    PKG_URL=http://www.eu.apache.org/dist/$PKG/$PKG-$PKG_VERSION.tar.bz2
     O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.gz
     S_DIR=$src_dir/$PKG-$PKG_VERSION
     B_DIR=$build_dir/$PKG
