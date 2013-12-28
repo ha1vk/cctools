@@ -11,6 +11,12 @@
 #include <unistd.h>
 #include <utime.h>
 
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_mixer.h>
+#include <SDL_net.h>
+#include <SDL_ttf.h>
+
 #include "utils.h"
 
 #define  LOG_TAG    "ccsdlplugin"
@@ -73,4 +79,38 @@ JNIEXPORT jint JNICALL Java_com_pdaxrom_cctools_sdlplugin_Utils_chDir
 {
     const char *_path = (*env)->GetStringUTFChars(env, path, 0);
     return chdir(_path);
+}
+
+/*
+ * Class:     com_pdaxrom_cctools_sdlplugin_Utils
+ * Method:    getSDLVersion
+ * Signature: (I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_pdaxrom_cctools_sdlplugin_Utils_getSDLVersion
+  (JNIEnv *env, jclass this, jint lib)
+{
+    char buf[256];
+    SDL_version version;
+
+    switch(lib) {
+    case 1:
+	SDL_IMAGE_VERSION(&version);
+	break;
+    case 2:
+	SDL_MIXER_VERSION(&version);
+	break;
+    case 3:
+	SDL_NET_VERSION(&version);
+	break;
+    case 4:
+	SDL_TTF_VERSION(&version);
+	break;
+    default:
+	SDL_GetVersion(&version);
+	break;
+    }
+
+    snprintf(buf, sizeof(buf), "%d.%d.%d", version.major, version.minor, version.patch);
+
+    return (*env)->NewStringUTF(env, buf);
 }
