@@ -6,7 +6,7 @@
 # type log to check application log
 #
 
-TARGET = testdrawchessboard
+TARGET = drawchessboard
 
 all: $(TARGET)
 
