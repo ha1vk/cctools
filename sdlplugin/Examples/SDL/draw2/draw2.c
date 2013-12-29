@@ -1,4 +1,8 @@
 /*
+  CCTools SDL plugin example
+
+  Derived from testdraw2:
+
   Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
@@ -16,11 +20,10 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "SDL_test_common.h"
+#include <SDL.h>
 
 #define NUM_OBJECTS 100
 
-static SDLTest_CommonState *state;
 static int num_objects;
 static SDL_bool cycle_color;
 static SDL_bool cycle_alpha;
@@ -172,72 +175,47 @@ DrawRects(SDL_Renderer * renderer)
 int
 main(int argc, char *argv[])
 {
-    int i, done;
+    int done;
     SDL_Event event;
     Uint32 then, now, frames;
+    SDL_Window *window;
+    SDL_Surface *surface;
+    SDL_Renderer *renderer;
+    SDL_DisplayMode mode;
 
-	/* Enable standard application logging */
-	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
+    /* Enable standard application logging */
+    SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
     /* Initialize parameters */
     num_objects = NUM_OBJECTS;
 
-    /* Initialize test framework */
-    state = SDLTest_CommonCreateState(argv, SDL_INIT_VIDEO);
-    if (!state) {
-        return 1;
-    }
-    for (i = 1; i < argc;) {
-        int consumed;
-
-        consumed = SDLTest_CommonArg(state, i);
-        if (consumed == 0) {
-            consumed = -1;
-            if (SDL_strcasecmp(argv[i], "--blend") == 0) {
-                if (argv[i + 1]) {
-                    if (SDL_strcasecmp(argv[i + 1], "none") == 0) {
-                        blendMode = SDL_BLENDMODE_NONE;
-                        consumed = 2;
-                    } else if (SDL_strcasecmp(argv[i + 1], "blend") == 0) {
-                        blendMode = SDL_BLENDMODE_BLEND;
-                        consumed = 2;
-                    } else if (SDL_strcasecmp(argv[i + 1], "add") == 0) {
-                        blendMode = SDL_BLENDMODE_ADD;
-                        consumed = 2;
-                    } else if (SDL_strcasecmp(argv[i + 1], "mod") == 0) {
-                        blendMode = SDL_BLENDMODE_MOD;
-                        consumed = 2;
-                    }
-                }
-            } else if (SDL_strcasecmp(argv[i], "--cyclecolor") == 0) {
-                cycle_color = SDL_TRUE;
-                consumed = 1;
-            } else if (SDL_strcasecmp(argv[i], "--cyclealpha") == 0) {
-                cycle_alpha = SDL_TRUE;
-                consumed = 1;
-            } else if (SDL_isdigit(*argv[i])) {
-                num_objects = SDL_atoi(argv[i]);
-                consumed = 1;
-            }
-        }
-        if (consumed < 0) {
-            SDL_Log("Usage: %s %s [--blend none|blend|add|mod] [--cyclecolor] [--cyclealpha]\n",
-                    argv[0], SDLTest_CommonUsage(state));
-            return 1;
-        }
-        i += consumed;
-    }
-    if (!SDLTest_CommonInit(state)) {
-        return 2;
+    /* Initialize SDL */
+    if(SDL_Init(SDL_INIT_VIDEO) != 0)
+    {
+	SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Init fail : %s\n", SDL_GetError());
+	return 1;
     }
 
-    /* Create the windows and initialize the renderers */
-    for (i = 0; i < state->num_windows; ++i) {
-        SDL_Renderer *renderer = state->renderers[i];
-        SDL_SetRenderDrawBlendMode(renderer, blendMode);
-        SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
-        SDL_RenderClear(renderer);
+    SDL_GetDesktopDisplayMode(0, &mode);
+
+    /* Create window and renderer for given surface */
+    window = SDL_CreateWindow("Draw2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, mode.w, mode.h, SDL_WINDOW_SHOWN);
+    if(!window)
+    {
+	SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Window creation fail : %s\n",SDL_GetError());
+	return 1;
+    }	
+    surface = SDL_GetWindowSurface(window);
+    renderer = SDL_CreateSoftwareRenderer(surface);
+    if(!renderer)
+    {
+	SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Render creation for surface fail : %s\n",SDL_GetError());
+	return 1;
     }
+
+    SDL_SetRenderDrawBlendMode(renderer, blendMode);
+    SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
+    SDL_RenderClear(renderer);
 
     srand((unsigned int)time(NULL));
 
@@ -253,24 +231,34 @@ main(int argc, char *argv[])
                     event.key.keysym.scancode == SDL_SCANCODE_AC_BACK) {
                 done = 1;
             }
-            SDLTest_CommonEvent(state, &event, &done);
-        }
-        for (i = 0; i < state->num_windows; ++i) {
-            SDL_Renderer *renderer = state->renderers[i];
-            if (state->windows[i] == NULL)
-                continue;
-            SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
-            SDL_RenderClear(renderer);
 
-            DrawRects(renderer);
-            DrawLines(renderer);
-            DrawPoints(renderer);
-
-            SDL_RenderPresent(renderer);
+            if (event.type == SDL_WINDOWEVENT &&
+                event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                SDL_Log("update screen size");
+                SDL_DestroyRenderer(renderer);
+                surface = SDL_GetWindowSurface(window);
+                renderer = SDL_CreateSoftwareRenderer(surface);
+                if(!renderer) {
+                    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Render creation for surface fail : %s\n",SDL_GetError());
+                    done = 1;
+                    break;
+                }
+                SDL_SetRenderDrawBlendMode(renderer, blendMode);
+                SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
+                SDL_RenderClear(renderer);
+            }
         }
+
+        SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
+        SDL_RenderClear(renderer);
+
+        DrawRects(renderer);
+        DrawLines(renderer);
+        DrawPoints(renderer);
+
+        SDL_RenderPresent(renderer);
+        SDL_UpdateWindowSurface(window);
     }
-
-    SDLTest_CommonQuit(state);
 
     /* Print out some timing information */
     now = SDL_GetTicks();
@@ -278,7 +266,8 @@ main(int argc, char *argv[])
         double fps = ((double) frames * 1000) / (now - then);
         SDL_Log("%2.2f frames per second\n", fps);
     }
+
+    SDL_Quit();
+
     return 0;
 }
-
-/* vi: set ts=4 sw=4 expandtab: */

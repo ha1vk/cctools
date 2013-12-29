@@ -6,7 +6,7 @@
 # type log to check application log
 #
 
-TARGET = testdraw2
+TARGET = draw2
 
 all: $(TARGET)
 
