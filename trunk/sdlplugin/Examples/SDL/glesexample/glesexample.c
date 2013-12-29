@@ -111,7 +111,7 @@ main(int argc, char *argv[])
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
 
     // Create our window centered
-    window = SDL_CreateWindow("Simple texture moving", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+    window = SDL_CreateWindow("GLES example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 	mode.w, mode.h, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN);
     if (!window) {
 	// Die if creation failed
