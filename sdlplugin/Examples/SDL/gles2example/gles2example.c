@@ -81,8 +81,8 @@ GLuint load_shader(const char  *shader_source, GLenum type)
 }
 
 SDL_DisplayMode	mode;
-SDL_Window	*egl_window;
-SDL_GLContext	egl_context;
+SDL_Window	*window;
+SDL_GLContext	context;
 
 GLfloat
     norm_x    =  0.0,
@@ -148,7 +148,7 @@ void  render()
     glEnableVertexAttribArray ( position_loc );
     glDrawArrays ( GL_TRIANGLE_STRIP, 0, 5 );
 
-    SDL_GL_SwapWindow(egl_window);
+    SDL_GL_SwapWindow(window);
 }
 
 int  main()
@@ -164,22 +164,22 @@ int  main()
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
 
     // Create our window centered
-    egl_window = SDL_CreateWindow("Simple texture moving", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+    window = SDL_CreateWindow("Simple texture moving", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 	mode.w, mode.h, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN);
-    if (!egl_window) {
+    if (!window) {
 	// Die if creation failed
 	SDL_Log("Unable to create window");
 	return 1;
     }
 
     // Create our opengl context and attach it to our window
-    egl_context = SDL_GL_CreateContext(egl_window);
-    if (!egl_context) {
+    context = SDL_GL_CreateContext(window);
+    if (!context) {
 	SDL_Log("Unable to create GL context");
 	return 1;
     }
 
-    SDL_GL_MakeCurrent(egl_window, egl_context);
+    SDL_GL_MakeCurrent(window, context);
 
    ///////  the openGL part  ///////////////////////////////////////////////////////////////
 
@@ -242,8 +242,8 @@ int  main()
 //      usleep( 1000*10 );
     }
 
-    SDL_GL_DeleteContext(egl_context);
-    SDL_DestroyWindow(egl_window);
+    SDL_GL_DeleteContext(context);
+    SDL_DestroyWindow(window);
     SDL_Quit();
 
    return 0;
