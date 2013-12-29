@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "SDL.h"
+#include <SDL.h>
 
 void
 DrawChessBoard(SDL_Renderer * renderer)
@@ -53,9 +53,10 @@ main(int argc, char *argv[])
 	SDL_Window *window;
 	SDL_Surface *surface;
 	SDL_Renderer *renderer;
+	SDL_DisplayMode mode;
 
-    /* Enable standard application logging */
-    SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
+	/* Enable standard application logging */
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
 	/* Initialize SDL */
 	if(SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -64,9 +65,10 @@ main(int argc, char *argv[])
 		return 1;
 	}
 
+	SDL_GetDesktopDisplayMode(0, &mode);
 
 	/* Create window and renderer for given surface */
-	window = SDL_CreateWindow("Chess Board", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
+	window = SDL_CreateWindow("Chess Board", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, mode.w, mode.h, SDL_WINDOW_SHOWN);
 	if(!window)
 	{
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Window creation fail : %s\n",SDL_GetError());
