@@ -151,7 +151,7 @@ void  render()
     SDL_GL_SwapWindow(window);
 }
 
-int  main()
+int main(int argc, char *argv[])
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) { /* Initialize SDL's Video subsystem */
         SDL_Log("Unable to initialize SDL");
