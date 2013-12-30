@@ -365,12 +365,19 @@ public class PkgManagerActivity extends SherlockListActivity {
 	        }
 	        hideProgress();
        		
+	        if (packagesLists.getAvailablePackages() == null && activityCmd == null) {
+	        	showError(getString(R.string.pkg_repounavailable));
+	        	return;
+	        }
+	        
        		if (activityCmd != null && activityCmd.equals(CMD_INSTALL)) {
        			if (packagesLists.getAvailablePackages() != null) {
        				(new PrepareToInstallTask()).execute(activityData);
        			} else {
-       				setResult(RESULT_CANCELED);
-       				finish();
+       				showError(getString(R.string.pkg_repounavailable) +
+       						"\n" +
+       						getString(R.string.pkg_packageforinstall) +
+       						activityData);
        			}
        			return;
        		}

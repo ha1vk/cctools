@@ -48,15 +48,16 @@ public class XMLParser {
 				System.err.println(TAG + " Response: " + status);
 				return null;
 			}
+			System.err.println(TAG + " Response: " + status);
 			HttpEntity httpEntity = httpResponse.getEntity();
 			xml = EntityUtils.toString(httpEntity);
 
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			System.err.println(TAG + " error: " + e);
 		} catch (ClientProtocolException e) {
-			e.printStackTrace();
+			System.err.println(TAG + " error: " + e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println(TAG + " error: " + e);
 		}
 		// return XML
 		return xml;
