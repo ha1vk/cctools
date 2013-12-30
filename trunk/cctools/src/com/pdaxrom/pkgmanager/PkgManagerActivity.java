@@ -159,6 +159,7 @@ public class PkgManagerActivity extends SherlockListActivity {
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle(getString(R.string.pkg_selected) + name)
                     .setMessage(getString(R.string.pkg_alreadyinstalled))
+                    .setCancelable(false)
                     .setNeutralButton(getString(R.string.cancel), null);
                 	dialog.setNegativeButton(getString(R.string.pkg_uninstall), new DialogInterface.OnClickListener() {
                     	public void onClick(DialogInterface dialog, int which) {
@@ -405,14 +406,7 @@ public class PkgManagerActivity extends SherlockListActivity {
 		            		+ "\u0020"
 		            		+ getString(R.string.pkg_selected3)
 		            		+ Utils.humanReadableByteCount(updateInfo.getInstallSize(), false))
-		            .setOnCancelListener(new DialogInterface.OnCancelListener() {
-						public void onCancel(DialogInterface dialog) {
-							if (activityCmd != null && activityCmd.equals(CMD_UPDATE)) {
-								setResult(RESULT_CANCELED);
-		        				finish();
-							}
-						}
-					})
+		            .setCancelable(false)
 		            .setNeutralButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
 							if (activityCmd != null && activityCmd.equals(CMD_UPDATE)) {
@@ -463,14 +457,7 @@ public class PkgManagerActivity extends SherlockListActivity {
             		+ "\u0020"
             		+ getString(R.string.pkg_selected3)
             		+ Utils.humanReadableByteCount(info.getInstallSize(), false))
-            .setOnCancelListener(new DialogInterface.OnCancelListener() {
-				public void onCancel(DialogInterface dialog) {
-					if (activityCmd != null) {
-						setResult(RESULT_CANCELED);
-		        		finish();
-					}
-				}
-			})
+            .setCancelable(false)
             .setNeutralButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 		    		if (activityCmd != null) {
@@ -677,15 +664,7 @@ public class PkgManagerActivity extends SherlockListActivity {
 	    		}
 			}
 		})
-		.setOnCancelListener(new DialogInterface.OnCancelListener() {
-			public void onCancel(DialogInterface dialog) {
-	    		if (activityCmd != null) {
-	    			setResult(RESULT_CANCELED);
-	    			finish();
-	    			return;
-	    		}
-			}
-		})
+		.setCancelable(false)
 		.setIcon(android.R.drawable.ic_dialog_alert)
 		.show();
     }
