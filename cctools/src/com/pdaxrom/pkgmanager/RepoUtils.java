@@ -121,9 +121,10 @@ public class RepoUtils {
     }
     
     private static List<PackageInfo> parseRepoXml(String repo) {
-		List<PackageInfo> list = new ArrayList<PackageInfo>();
+		List<PackageInfo> list = null;
 		
 		if (repo != null) {
+			list = new ArrayList<PackageInfo>();
 			XMLParser parser = new XMLParser();
 	        Document doc = parser.getDomElement(repo); // getting DOM element
 	        NodeList nl = doc.getElementsByTagName(KEY_PACKAGE);
