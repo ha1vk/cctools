@@ -884,7 +884,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	    	if (getPrefString("versionCode").equals(String.valueOf(versionCode))) {
 	    		installOrUpgradeToolchain();
 	    	} else {
-	    		//setPrefString("versionCode", String.valueOf(versionCode));
+	    		setPrefString("versionCode", String.valueOf(versionCode));
 	    		String language = getResources().getConfiguration().locale.getLanguage();
 	    		
 	    		InputStream stream = null;
