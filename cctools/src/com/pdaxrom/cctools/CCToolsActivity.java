@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.BindException;
 import java.net.InetSocketAddress;
@@ -16,6 +17,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.droidparts.widget.ClearableEditText;
 
@@ -33,6 +35,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -175,7 +178,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
         		newTitle(fileName);
         	}
         } else {
-        	installOrUpgradeToolchain();
+        	showInfoAndCheckToolchain();
         	
 			newTitle(getString(R.string.new_file));
 			fileName = "";
@@ -875,6 +878,73 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		startActivity(myIntent);
     }
     
+    private void showInfoAndCheckToolchain() {
+    	PackageInfo packageInfo;
+		try {
+			packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+	    	int versionCode = packageInfo.versionCode;
+	    	if (getPrefString("versionCode").equals(String.valueOf(versionCode))) {
+	    		installOrUpgradeToolchain();
+	    	} else {
+	    		//setPrefString("versionCode", String.valueOf(versionCode));
+	    		String language = getResources().getConfiguration().locale.getLanguage();
+	    		
+	    		InputStream stream = null;
+	    		try {
+					stream = getAssets().open("whatsnew-" + language);
+				} catch (IOException e) {
+					Log.e(TAG, "Assets file whatsnew" + language + " not found");
+					stream = null;
+				}
+	    		if (stream == null) {
+		    		try {
+						stream = getAssets().open("whatsnew");
+					} catch (IOException e) {
+						Log.e(TAG, "Assets file whatsnew not found");
+						installOrUpgradeToolchain();
+						return;
+					}
+	    		}
+
+	    		StringBuilder buf = new StringBuilder();
+	    		BufferedReader in = new BufferedReader(new InputStreamReader(stream));
+	    		String str;
+	    		String message = "";
+	    		
+	    		try {
+					while((str = in.readLine()) != null) {
+						buf.append(str + "\n");
+					}
+					in.close();
+					message = buf.toString();
+				} catch (IOException e) {
+					Log.e(TAG, "Error reading whatsnew file");
+				}
+	    		
+	    		final TextView textView = new TextView(this);
+	    		textView.setAutoLinkMask(Linkify.WEB_URLS);
+	    		textView.setLinksClickable(true);
+	    		textView.setMovementMethod(LinkMovementMethod.getInstance());
+	    		textView.setText(message);
+	    		
+	    		new AlertDialog.Builder(this)
+	    		.setIcon(android.R.drawable.ic_dialog_info)
+	    		.setTitle(getString(R.string.whatisnew))
+	    		.setView(textView)
+	    		.setNeutralButton(getString(R.string.button_continue), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+			    		installOrUpgradeToolchain();
+					}
+	    		})
+				.setCancelable(false)
+				.show();
+	    		
+	    	}
+		} catch (NameNotFoundException e) {
+			Log.e(TAG, "Package name not found: " + e);
+		}
+    }
+    
     private void installOrUpgradeToolchain() {
 		if (!getPrefString("use_package_manager").equals("yes")) {
 			(new RemoveOldToolchainTask()).execute((Void)null);
@@ -931,6 +1001,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	        	startActivity(intent);
 			}
 		})
+		.setCancelable(false)
 		.show();
     }
     
