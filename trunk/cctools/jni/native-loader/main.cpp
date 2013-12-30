@@ -75,14 +75,17 @@ void android_main(struct android_app* state) {
 
     jstring jsParam1 = (jstring) env->CallObjectMethod(intent, gseid, env->NewStringUTF("nativeApp"));
 
-    const char *param1 = env->GetStringUTFChars(jsParam1, 0);
+    if (jsParam1) {
+	const char *param1 = env->GetStringUTFChars(jsParam1, 0);
 
-    LOGI("nativeApp=%s\n", param1);
-    if (param1) {
-    	nativeApp = strdup(param1);
+	LOGI("nativeApp=%s\n", param1);
+
+	if (param1) {
+	    nativeApp = strdup(param1);
+	}
+
+	env->ReleaseStringUTFChars(jsParam1, param1);
     }
-
-    env->ReleaseStringUTFChars(jsParam1, param1);
 
     state->activity->vm->DetachCurrentThread();
 

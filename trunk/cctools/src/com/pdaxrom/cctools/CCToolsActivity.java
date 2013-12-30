@@ -875,7 +875,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		myIntent.putExtra("workdir", workDir);
 		startActivity(myIntent);
     }
-    
+
     private void showInfoAndCheckToolchain() {
     	PackageInfo packageInfo;
 		try {
