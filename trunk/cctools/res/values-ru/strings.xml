@@ -167,4 +167,6 @@
     <string name="pkg_searchHint">Поиск пакета</string>
 
     <string name="pkgUpdateButton">Проверить обновления</string>
+    
+	<string name="whatisnew">Что нового</string>
 </resources>
