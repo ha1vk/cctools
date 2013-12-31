@@ -1,3 +1,4 @@
+- READ_LOGS permission disabled by default, download enabled version from http://cctools.info
 - Fixed wrong environent variables for shell session.
 - Terminal shell running as login shell.
 - Added error message if remote repository offline.
