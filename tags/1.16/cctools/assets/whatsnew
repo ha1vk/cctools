@@ -1,0 +1,6 @@
+- READ_LOGS permission disabled by default, download enabled version from http://cctools.info
+- Fixed wrong environent variables for shell session.
+- Terminal shell running as login shell.
+- Added error message if remote repository offline.
+- Added "What's new" window.
+- SDL plugin and examples available for CCTools! Check it on GooglePlay or CCTools http://cctools.info
