@@ -61,6 +61,7 @@
     <string name="unsupported_device">This device is not supported yet</string>
     <string name="filebrowser_name">Filebrowser</string>
     <string name="newButton">New</string>
+    <string name="closeButton">Close</string>
     <string name="saveButton">Save</string>
     <string name="saveAsButton">Save as</string>
     <string name="buildButton">Build</string>

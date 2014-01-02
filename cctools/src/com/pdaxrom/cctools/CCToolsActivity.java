@@ -19,6 +19,11 @@ import java.util.HashMap;
 import java.util.List;
 import org.droidparts.widget.ClearableEditText;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.Tab;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.pdaxrom.editor.CodeEditor;
 import com.pdaxrom.pkgmanager.PkgManagerActivity;
 import com.pdaxrom.utils.FileDialog;
@@ -40,6 +45,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
 import android.text.InputType;
 import android.text.method.LinkMovementMethod;
@@ -48,9 +54,7 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -64,8 +68,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.BufferType;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
-public class CCToolsActivity extends Activity implements OnSharedPreferenceChangeListener {
+public class CCToolsActivity extends SherlockActivity implements ActionBar.TabListener, OnSharedPreferenceChangeListener {
 	private Context context = this;
 	public static final String SHARED_PREFS_NAME = "cctoolsSettings";
 	private static final String SHARED_PREFS_FILES_EDITPOS = "FilesPosition";
@@ -78,7 +83,6 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	private String tmpDir;
 	private String filesDir;
 	private String serviceDir;
-	private String fileName;
 	private String buildBaseDir; // Project base directory
 	private boolean buildAfterSave = false;
 	private boolean buildAfterLoad = false;
@@ -93,7 +97,12 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	private ImageButton undoButton;
 	private ImageButton redoButton;
 	private View buttBar;
+	
+	private ViewFlipper flipper;
+	private List<CodeEditor> editors = null;	
 	private CodeEditor codeEditor;
+	
+	
 	private static final int REQUEST_OPEN = 1;
 	private static final int REQUEST_SAVE = 2;
 	
@@ -102,6 +111,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	private static final int WARN_SAVE_AND_LOAD_POS = 3;
 	private static final int WARN_SAVE_AND_BUILD = 4;
 	private static final int WARN_SAVE_AND_BUILD_FORCE = 5;
+	private static final int WARN_SAVE_AND_CLOSE = 6;
 	
 	private static final int TEXT_GOTO = Menu.CATEGORY_CONTAINER + 1;
 	private static final int TEXT_FIND = Menu.CATEGORY_CONTAINER + 2;
@@ -126,6 +136,10 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         sdCardDir = Environment.getExternalStorageDirectory().getPath() + "/CCTools";
         tmpDir = sdCardDir + "/tmp";
@@ -164,9 +178,17 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
         
         mPrefs = getSharedPreferences(SHARED_PREFS_NAME, 0);
 
-        codeEditor = (CodeEditor) findViewById(R.id.codeEditor);
-        registerForContextMenu(codeEditor);
+        //TODO:
+        editors = new ArrayList<CodeEditor>();
+        flipper = (ViewFlipper) findViewById(R.id.flipper);
+
+        int tabsLoaded = loadTabs();
         
+        if (tabsLoaded == 0) {
+        	newFile();
+        }
+
+/*
         if (savedInstanceState != null) {
         	fileName = savedInstanceState.getString("filename");
         	
@@ -181,6 +203,8 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 			newTitle(getString(R.string.new_file));
 			fileName = "";
         }
+ */
+    	showInfoAndCheckToolchain();
 
         newButton = (ImageButton) findViewById(R.id.newButton);
         newButton.setOnClickListener(new OnClickListener() {
@@ -268,24 +292,35 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
         	 type != null) {
             if (type.startsWith("text/")) {
             	Uri uri = intent.getData();
-            	fileName = uri.getPath();
+            	String fileName = uri.getPath();
             	Log.i(TAG, "Load external file " + fileName);
-            	if (codeEditor.loadFile(fileName)) {
-    				loadFileEditPos(fileName);
-    				newTitle(fileName);
+            	if (!findAndShowEditorTab(fileName)) {
+                	if (tabsLoaded != 0) {
+                		addEditorTab();
+                	}
+                	if (codeEditor.loadFile(fileName)) {
+        				loadFileEditPos(codeEditor);
+        				newTitle(new File(fileName).getName());
+                	}
             	}
             }
         }
     }
     
+    private void updateEditorPrefs(SharedPreferences prefs, CodeEditor editor) {
+		editor.setTextSize(Float.valueOf(prefs.getString("fontsize", "12")));
+		editor.showSyntax(prefs.getBoolean("syntax", true));
+		editor.drawLineNumbers(prefs.getBoolean("drawLineNumbers", true));
+		editor.drawGutterLine(prefs.getBoolean("drawLineNumbers", true));
+		editor.setAutoPair(prefs.getBoolean("autopair", true));
+		editor.setAutoIndent(prefs.getBoolean("autoindent", true));    	
+    }
+    
 	public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
 		Log.i(TAG, "onSharedPreferenceChanged()");
-		codeEditor.setTextSize(Float.valueOf(prefs.getString("fontsize", "12")));
-		codeEditor.showSyntax(prefs.getBoolean("syntax", true));
-		codeEditor.drawLineNumbers(prefs.getBoolean("drawLineNumbers", true));
-		codeEditor.drawGutterLine(prefs.getBoolean("drawLineNumbers", true));
-		codeEditor.setAutoPair(prefs.getBoolean("autopair", true));
-		codeEditor.setAutoIndent(prefs.getBoolean("autoindent", true));
+		for (CodeEditor editor: editors) {
+			updateEditorPrefs(prefs, editor);
+		}
 		if (prefs.getBoolean("showToolBar", true)) {
 			buttBar.setVisibility(View.VISIBLE);
 		} else {
@@ -293,16 +328,17 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		}
 	}
 
+	//FIXME
+	/*
     protected void onSaveInstanceState(Bundle saveState) {
     	super.onSaveInstanceState(saveState);
     	saveState.putString("filename", fileName);
     	saveState.putBoolean("hasChanged", codeEditor.hasChanged());
     }
-
+	*/
+	
 	protected void onDestroy() {
-		if (fileName != null) {
-			setLastOpenedDir((new File (fileName)).getParent());				
-		}
+		saveTabs();
         serviceStartStop(SERVICE_STOP);
 
         if (dialogServiceThread.isAlive()) {
@@ -324,7 +360,13 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	}
 
 	public void onBackPressed() {
-		if (codeEditor.hasChanged()) {
+		boolean hasChanged = false;
+		for (int i = 0; i < flipper.getChildCount(); i++) {
+			if (((CodeEditor) flipper.getChildAt(i).findViewById(R.id.codeEditor)).hasChanged()) {
+				hasChanged = true;
+			}
+		}
+		if (hasChanged) {
 			exitDialog();
 		} else {
 			super.onBackPressed();
@@ -332,6 +374,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 	}
 	
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		//TODO: 
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
 			menu.add(0, TEXT_GOTO, 0, getString(R.string.menu_goto));
 			menu.add(0, TEXT_FIND, 0, getString(R.string.menu_search));
@@ -341,7 +384,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		super.onCreateContextMenu(menu, v, menuInfo);
 	}
 
-	public boolean onContextItemSelected(MenuItem item) {
+	public boolean onContextItemSelected(android.view.MenuItem item) {
 		switch (item.getItemId()) {
 		case TEXT_GOTO:
 			gotoDialog();
@@ -361,15 +404,16 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		return true;
 	}
 	
+	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
-    	MenuInflater inflater = getMenuInflater();
-    	inflater.inflate(R.menu.menu, menu);
-    	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+		getSupportMenuInflater().inflate(R.menu.menu, menu);
+		//TODO:
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			menu.add(0, TEXT_UNDO, 0, getString(R.string.menu_undo)).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 			menu.add(0, TEXT_REDO, 0, getString(R.string.menu_redo)).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 			menu.add(0, TEXT_GOTO, 0, getString(R.string.menu_goto)).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 			menu.add(0, TEXT_FIND, 0, getString(R.string.menu_search)).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-    	}
+		}
     	return true;
     }
     
@@ -386,6 +430,9 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
         		break;
         	case R.id.item_saveas:
         		saveAsFile();
+        		break;
+        	case R.id.item_close:
+        		warnSaveDialog(WARN_SAVE_AND_CLOSE);
         		break;
         	case R.id.item_run:
         		warnSaveDialog(WARN_SAVE_AND_BUILD_FORCE);
@@ -424,6 +471,17 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
         return true;
     }
 
+	public void onTabSelected(Tab tab, FragmentTransaction ft) {
+		flipper.setDisplayedChild(tab.getPosition());
+        codeEditor = (CodeEditor) flipper.getChildAt(tab.getPosition()).findViewById(R.id.codeEditor);
+	}
+
+	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+	}
+
+	public void onTabReselected(Tab tab, FragmentTransaction ft) {
+	}
+
     private String getPrefString(String key) {
 	    SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
 		return settings.getString(key, Environment.getExternalStorageDirectory().getPath() + "/CCTools/Examples");    	
@@ -436,6 +494,86 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		editor.commit();
     }
     
+    private int loadTabs() {
+	    SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
+	    int total = settings.getInt("TabsCount", 0);
+	    int skipped = 0;
+	    
+	    if (total > 0) {
+	    	for (int i = 0; i < total; i++) {
+	    		String fileName = settings.getString("TabN" + i, "");
+	    		if (fileName == "") {
+	    			newFile();
+	    		} else {
+	    			if (new File(fileName).exists()) {
+		    			addEditorTab();
+		            	if (codeEditor.loadFile(fileName)) {
+		    				loadFileEditPos(codeEditor);
+		    				newTitle(new File(fileName).getName());
+		            	} else {
+		            		newTitle(getString(R.string.new_file));
+		            	}
+	    			} else {
+	    				skipped++;
+	    			}
+	    		}
+	    	}
+	    	int currentTab = settings.getInt("CurrentTab", 0);
+	    	if (skipped > 0 && currentTab > flipper.getChildCount() - 1) {
+	    		currentTab = 0;
+	    	}
+    		getSupportActionBar().setSelectedNavigationItem(currentTab);
+	    	
+	    }
+	    
+	    return total - skipped;
+    }
+    
+    private void saveTabs() {
+		SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putInt("TabsCount", flipper.getChildCount());
+		if (flipper.getChildCount() > 0) {
+			editor.putInt("CurrentTab", flipper.getDisplayedChild());
+		}
+		for (int i = 0; i < flipper.getChildCount(); i++) {
+			CodeEditor ce = ((CodeEditor) flipper.getChildAt(i).findViewById(R.id.codeEditor));
+			String fileName = ce.getFileName();
+			if (fileName == null) {
+				fileName = "";
+			} else {
+				saveFileEditPos(ce);				
+			}
+			editor.putString("TabN" + i, fileName);
+		}
+		editor.commit();
+    }
+    
+    private boolean findAndShowEditorTab(String filename) {
+    	for (int i = 0; i < flipper.getChildCount(); i++) {
+    		CodeEditor e = (CodeEditor) flipper.getChildAt(i).findViewById(R.id.codeEditor);
+    		String name = e.getFileName();
+    		if (name != null && name.equals(filename)) {
+    			getSupportActionBar().setSelectedNavigationItem(i);
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
+    private void addEditorTab() {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);        
+        flipper.addView(inflater.inflate(R.layout.editor, null));
+        codeEditor = (CodeEditor) flipper.getChildAt(flipper.getChildCount() - 1).findViewById(R.id.codeEditor);
+        updateEditorPrefs(mPrefs, codeEditor);
+        editors.add(codeEditor);
+        registerForContextMenu(codeEditor);  
+        ActionBar.Tab tab = getSupportActionBar().newTab();
+        tab.setTabListener(this);
+        getSupportActionBar().addTab(tab);
+        getSupportActionBar().selectTab(tab);
+    }
+    
     private String getLastOpenedDir() {
     	return getPrefString("lastdir");
     }
@@ -445,26 +583,27 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     }
     
     private void newTitle(String title) {
-    	setTitle("CCTools - " + title);
+    	getSupportActionBar().getSelectedTab().setText(title);
     }
     
     private void newFile() {
+    	addEditorTab();
 		newTitle(getString(R.string.new_file));
 		buildAfterSave = false;
 		buildAfterLoad = false;
-		fileName = "";
 		codeEditor.newFile();
 		Toast.makeText(getBaseContext(), getString(R.string.new_file), Toast.LENGTH_SHORT).show();    	
     }
     
     private void loadFile() {
 		Intent intent = new Intent(getBaseContext(), FileDialog.class);
-		String dir = Environment.getExternalStorageDirectory().getPath();
-		if (fileName != null) {
+		String dir = getLastOpenedDir();
+		String fileName = codeEditor.getFileName();
+		if (fileName != null && new File(fileName).getParentFile().exists()) {
 			dir = (new File(fileName)).getParent();
 		}
-		if (dir == null) {
-			dir = getLastOpenedDir();
+		if (dir == null || !new File(dir).exists()) {
+			dir = Environment.getExternalStorageDirectory().getPath();
 		}
 		
 		intent.putExtra(FileDialog.START_PATH, dir);
@@ -474,13 +613,14 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     }
     
     private void saveFile() {
-		if (fileName.contentEquals("") || fileName == null) {
-			String dir = Environment.getExternalStorageDirectory().getPath();
-			if (fileName != null) {
+    	String fileName = codeEditor.getFileName();
+		if (fileName == null || fileName.equals("")) {
+			String dir = getLastOpenedDir();
+			if (fileName != null && new File(dir).getParentFile().exists()) {
 				dir = (new File(fileName)).getParent();
 			}
-			if (dir == null) {
-				dir = getLastOpenedDir();
+			if (dir == null || !new File(dir).exists()) {
+				dir = Environment.getExternalStorageDirectory().getPath();
 			}
     		Intent intent = new Intent(getBaseContext(), FileDialog.class);
     		intent.putExtra(FileDialog.START_PATH, dir);
@@ -489,7 +629,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     		startActivityForResult(intent, REQUEST_SAVE);
 		} else {
 			if (codeEditor.saveFile(fileName)) {
-				saveFileEditPos(fileName);
+				saveFileEditPos(codeEditor);
 				Toast.makeText(getBaseContext(), getString(R.string.file_saved), Toast.LENGTH_SHORT).show();
 				setLastOpenedDir((new File (fileName)).getParent());
 			} else {
@@ -504,12 +644,13 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     
     private void saveAsFile() {
 		Intent intent = new Intent(getBaseContext(), FileDialog.class);
-		String dir = Environment.getExternalStorageDirectory().getPath();
-		if (fileName != null) {
+		String dir = getLastOpenedDir();
+		String fileName = codeEditor.getFileName();
+		if (fileName != null && new File(fileName).getParentFile().exists()) {
 			dir = (new File(fileName)).getParent();
 		}
-		if (dir == null) {
-			dir = getLastOpenedDir();
+		if (dir == null || !new File(dir).exists()) {
+			dir = Environment.getExternalStorageDirectory().getPath();
 		}
 		intent.putExtra(FileDialog.START_PATH, dir);
 		intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
@@ -517,17 +658,17 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		startActivityForResult(intent, REQUEST_SAVE);    	
     }
     
-    private void saveFileEditPos(String file) {
+    private void saveFileEditPos(CodeEditor ce) {
     	SharedPreferences settings = getSharedPreferences(SHARED_PREFS_FILES_EDITPOS, 0);
     	SharedPreferences.Editor editor = settings.edit();
-    	editor.putInt(file, codeEditor.getSelectionStart());
+    	editor.putInt(ce.getFileName(), ce.getSelectionStart());
     	editor.commit();
     }
 
-    private void loadFileEditPos(String file) {
+    private void loadFileEditPos(CodeEditor ce) {
     	SharedPreferences settings = getSharedPreferences(SHARED_PREFS_FILES_EDITPOS, 0);
-    	if (codeEditor.getText().toString().length() >= settings.getInt(file, 0)) {
-    		codeEditor.setSelection(settings.getInt(file, 0));
+    	if (ce.getText().toString().length() >= settings.getInt(ce.getFileName(), 0)) {
+    		ce.setSelection(settings.getInt(ce.getFileName(), 0));
     	}
     }
 
@@ -538,7 +679,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 //			forceTmpVal = force;
 //			saveFile();
 //		} else 
-		if (fileName.contentEquals("") || fileName == null) {
+		if (codeEditor.getFileName() == null || codeEditor.getFileName().equals("")) {
 			buildAfterLoad = true;
 			forceTmpVal = force;
 			loadFile();
@@ -547,6 +688,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     }
     
     private void buildFile(boolean force) {
+    	String fileName = codeEditor.getFileName();
 		Log.i(TAG, "build activity " + fileName);
 		if ((new File(fileName)).exists()) {
 			buildBaseDir = (new File(fileName)).getParentFile().getAbsolutePath();
@@ -665,7 +807,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 					name = buildBaseDir + "/" + name;
 				}
 				
-				if (!(new File(fileName)).getAbsolutePath().contentEquals((new File(name)).getAbsolutePath())) {
+				if (!(new File(codeEditor.getFileName())).getAbsolutePath().contentEquals((new File(name)).getAbsolutePath())) {
 					alertDialog.cancel();
 					showFileName = name;
 					showFileLine = line;
@@ -692,11 +834,13 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
     	super.onActivityResult(requestCode, resultCode, data);
+    	String fileName;
 		if (resultCode == RESULT_OK) {
 			if (requestCode == REQUEST_SAVE) {
     			fileName = data.getStringExtra(FileDialog.RESULT_PATH);
+    			setLastOpenedDir((new File (fileName)).getParent());
     			if (codeEditor.saveFile(fileName)) {
-    				saveFileEditPos(fileName);
+    				saveFileEditPos(codeEditor);
     				Toast.makeText(getBaseContext(), getString(R.string.file_saved), Toast.LENGTH_SHORT).show();
     				if (buildAfterSave) {
     					buildAfterSave = false;
@@ -706,21 +850,25 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     				Toast.makeText(getBaseContext(), getString(R.string.file_not_saved), Toast.LENGTH_SHORT).show();
     				buildAfterSave = false;
     			}
-				newTitle(fileName);
+				newTitle(new File(fileName).getName());
 			} else if (requestCode == REQUEST_OPEN) {
     			fileName = data.getStringExtra(FileDialog.RESULT_PATH);
-    			if (codeEditor.loadFile(fileName)) {
-    				loadFileEditPos(fileName);
-    				Toast.makeText(getBaseContext(), getString(R.string.file_loaded), Toast.LENGTH_SHORT).show();
-    				if (buildAfterLoad) {
-    					buildAfterLoad = false;
-    					buildFile(forceTmpVal);
-    				}
-    			} else {
-    				Toast.makeText(getBaseContext(), getString(R.string.file_not_loaded), Toast.LENGTH_SHORT).show();
-    				buildAfterLoad = false;
+    			setLastOpenedDir((new File (fileName)).getParent());
+    			if (!findAndShowEditorTab(fileName)) {
+        			addEditorTab();
+        			if (codeEditor.loadFile(fileName)) {
+        				loadFileEditPos(codeEditor);
+        				Toast.makeText(getBaseContext(), getString(R.string.file_loaded), Toast.LENGTH_SHORT).show();
+        				if (buildAfterLoad) {
+        					buildAfterLoad = false;
+        					buildFile(forceTmpVal);
+        				}
+        			} else {
+        				Toast.makeText(getBaseContext(), getString(R.string.file_not_loaded), Toast.LENGTH_SHORT).show();
+        				buildAfterLoad = false;
+        			}
+        			newTitle(new File(fileName).getName());
     			}
-    			newTitle(fileName);
     		}
     	}
     }
@@ -740,19 +888,26 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
     }
 
     private void loadAndShowLinePos() {
-		if (codeEditor.loadFile(showFileName)) {
-			Toast.makeText(getBaseContext(), getString(R.string.file_loaded), Toast.LENGTH_SHORT).show();
+    	if (findAndShowEditorTab(showFileName)) {
 			if (showFilePos > 0) {
 				codeEditor.goToLinePos(showFileLine, showFilePos);
 			} else {
 				codeEditor.goToLine(showFileLine);
-			}
-			fileName = showFileName;
-			newTitle(fileName);
-		} else {
-			Toast.makeText(getBaseContext(), getString(R.string.file_not_loaded), Toast.LENGTH_SHORT).show();
-		}
-		
+			}    		
+    	} else {
+        	addEditorTab();
+    		if (codeEditor.loadFile(showFileName)) {
+    			Toast.makeText(getBaseContext(), getString(R.string.file_loaded), Toast.LENGTH_SHORT).show();
+    			if (showFilePos > 0) {
+    				codeEditor.goToLinePos(showFileLine, showFilePos);
+    			} else {
+    				codeEditor.goToLine(showFileLine);
+    			}
+    			newTitle(new File(showFileName).getName());
+    		} else {
+    			Toast.makeText(getBaseContext(), getString(R.string.file_not_loaded), Toast.LENGTH_SHORT).show();
+    		}
+    	}
     }
     
 	private void warnSaveRequest(int req) {
@@ -771,6 +926,14 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 			break;
 		case WARN_SAVE_AND_BUILD_FORCE:
 			build(true);
+			break;
+		case WARN_SAVE_AND_CLOSE:
+			int i = flipper.getDisplayedChild();
+			flipper.removeViewAt(i);
+			getSupportActionBar().removeTabAt(i);				
+			if (flipper.getChildCount() == 0) {
+				finish();
+			}
 			break;
 		}
 	}
@@ -869,7 +1032,8 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		myIntent.putExtra("filename", "-" + getShell());
 		myIntent.putExtra("cctoolsdir", toolchainDir + "/cctools");
 		String workDir = toolchainDir + "/cctools/home";
-		if ((new File(fileName)).exists()) {
+		String fileName = codeEditor.getFileName();
+		if (fileName != null && (new File(fileName)).exists()) {
 			workDir = (new File(fileName)).getParentFile().getAbsolutePath();
 		}
 		myIntent.putExtra("workdir", workDir);
@@ -957,8 +1121,7 @@ public class CCToolsActivity extends Activity implements OnSharedPreferenceChang
 		}
     }
 
-    //FIXME
-	int toolchainPackageToInstall = 0;
+	private int toolchainPackageToInstall = 0;
     private void installToolchainPackage() {
     	final String[] toolchainPackage = {
     			"build-essential-clang-compact",
