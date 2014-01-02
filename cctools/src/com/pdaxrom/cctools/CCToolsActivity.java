@@ -25,6 +25,7 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.pdaxrom.editor.CodeEditor;
+import com.pdaxrom.editor.CodeEditorInterface;
 import com.pdaxrom.pkgmanager.PkgManagerActivity;
 import com.pdaxrom.utils.FileDialog;
 import com.pdaxrom.utils.LogItem;
@@ -70,7 +71,7 @@ import android.widget.TextView.BufferType;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-public class CCToolsActivity extends SherlockActivity implements ActionBar.TabListener, OnSharedPreferenceChangeListener {
+public class CCToolsActivity extends SherlockActivity implements ActionBar.TabListener, OnSharedPreferenceChangeListener, CodeEditorInterface {
 	private Context context = this;
 	public static final String SHARED_PREFS_NAME = "cctoolsSettings";
 	private static final String SHARED_PREFS_FILES_EDITPOS = "FilesPosition";
@@ -209,7 +210,8 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
         newButton = (ImageButton) findViewById(R.id.newButton);
         newButton.setOnClickListener(new OnClickListener() {
         	public void onClick(View v) {
-        		warnSaveDialog(WARN_SAVE_AND_NEW);
+        		//warnSaveDialog(WARN_SAVE_AND_NEW);
+        		newFile();
         	}
         });
         openButton = (ImageButton) findViewById(R.id.pathButton);
@@ -420,7 +422,8 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         	case R.id.item_new:
-        		warnSaveDialog(WARN_SAVE_AND_NEW);
+        		//warnSaveDialog(WARN_SAVE_AND_NEW);
+        		newFile();
         		break;
         	case R.id.item_open:
         		warnSaveDialog(WARN_SAVE_AND_LOAD);
@@ -480,6 +483,21 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
 	}
 
 	public void onTabReselected(Tab tab, FragmentTransaction ft) {
+	}
+
+	public void textHasChanged(boolean hasChanged) {
+		if (getSupportActionBar().getSelectedTab().getText() == null) {
+			return;
+		}
+		String title = getSupportActionBar().getSelectedTab().getText().toString();
+		if (title != null) {
+			if (!hasChanged && title.startsWith("*")) {
+				title = title.substring(1);
+			} else if (hasChanged && !title.startsWith("*")) {
+				title = "*" + title;
+			}
+			getSupportActionBar().getSelectedTab().setText(title);
+		}
 	}
 
     private String getPrefString(String key) {
@@ -566,9 +584,12 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
         flipper.addView(inflater.inflate(R.layout.editor, null));
         codeEditor = (CodeEditor) flipper.getChildAt(flipper.getChildCount() - 1).findViewById(R.id.codeEditor);
         updateEditorPrefs(mPrefs, codeEditor);
+        codeEditor.setCodeEditorInterface(this);
         editors.add(codeEditor);
         registerForContextMenu(codeEditor);  
         ActionBar.Tab tab = getSupportActionBar().newTab();
+        //RelativeLayout view = (RelativeLayout) getLayoutInflater().inflate(R.layout.tablabel, null);
+        //tab.setCustomView(view);
         tab.setTabListener(this);
         getSupportActionBar().addTab(tab);
         getSupportActionBar().selectTab(tab);
@@ -583,6 +604,7 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
     }
     
     private void newTitle(String title) {
+    	//((TextView) ((RelativeLayout)getSupportActionBar().getSelectedTab().getCustomView()).findViewById(R.id.title)).setText(title);
     	getSupportActionBar().getSelectedTab().setText(title);
     }
     

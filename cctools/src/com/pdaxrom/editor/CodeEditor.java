@@ -38,6 +38,7 @@ public class CodeEditor extends EditText {
 	
 	private		String		m_FileName = null;
 	private 	boolean 	m_textHasChanged;
+	private		boolean		m_textHasChangedPrev;
 	private		boolean		m_drawLineNumbers;
 	private		boolean		m_drawGutterLine;
 	private		boolean		m_highlightText;
@@ -57,6 +58,8 @@ public class CodeEditor extends EditText {
 	
 	private		boolean		m_useAutoPair;
 	private		boolean		m_useAutoIndent;
+	
+	private		CodeEditorInterface m_codeEditorInterface = null;
 	
 	public CodeEditor(Context context) {
 		super(context);
@@ -128,6 +131,10 @@ public class CodeEditor extends EditText {
 					int count) {
 				//Log.i(TAG, "onTextChanged " + start + " " + before + " " + count + " " + s.length() + "[" + s.subSequence(start, start + count) + "]");
 				m_textHasChanged = true;
+				if (m_codeEditorInterface != null && m_textHasChanged != m_textHasChangedPrev) {
+					m_codeEditorInterface.textHasChanged(m_textHasChanged);
+				}
+				m_textHasChangedPrev = m_textHasChanged;
 
 				if (!m_IsUndoOrRedo) {
 					mmAfterChange = s.subSequence(start, start + count);
@@ -245,6 +252,10 @@ public class CodeEditor extends EditText {
 
     private void resetTriggers() {
 		m_textHasChanged = false;
+		if (m_codeEditorInterface != null && m_textHasChanged != m_textHasChangedPrev) {
+			m_codeEditorInterface.textHasChanged(m_textHasChanged);
+		}
+		m_textHasChangedPrev = m_textHasChanged;
 		m_lastSearchPos = 0;		
 	}
 
@@ -269,6 +280,10 @@ public class CodeEditor extends EditText {
 		super.setTextSize(size);
 		m_gutterTextPaint.setTextSize(getTextSize());
 		fm = m_gutterTextPaint.getFontMetrics();
+	}
+	
+	public void setCodeEditorInterface(CodeEditorInterface codeEditorInterface) {
+		m_codeEditorInterface = codeEditorInterface;
 	}
 	
 	public boolean hasChanged() {
@@ -513,7 +528,11 @@ public class CodeEditor extends EditText {
 		m_IsUndoOrRedo = false;
 		setSelection(edit.mmBefore == null ? start : (start + edit.mmBefore.length()));
 		if (m_History.getPosition() == 0) {
-			m_textHasChanged = false;			
+			m_textHasChanged = false;
+			if (m_codeEditorInterface != null && m_textHasChanged != m_textHasChangedPrev) {
+				m_codeEditorInterface.textHasChanged(m_textHasChanged);
+			}
+			m_textHasChangedPrev = m_textHasChanged;
 		}
 	}
 
