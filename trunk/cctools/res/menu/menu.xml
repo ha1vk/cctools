@@ -11,6 +11,9 @@
     <item android:id="@+id/item_saveas"
         android:icon="@drawable/document_save_as"
         android:title="@string/saveAsButton" />
+    <item android:id="@+id/item_close"
+        android:icon="@drawable/document_close"
+        android:title="@string/closeButton"/>
     <item android:id="@+id/item_run"
         android:icon="@drawable/play"
         android:title="@string/playButton" />

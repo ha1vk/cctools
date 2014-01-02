@@ -61,6 +61,7 @@
     <string name="unsupported_device">Версия этого устройства еще не поддерживается</string>
     <string name="filebrowser_name">Файловый менеджер</string>
     <string name="newButton">Новый</string>
+    <string name="closeButton">Закрыть</string>
     <string name="saveButton">Сохранить</string>
     <string name="saveAsButton">Сохранить как</string>
     <string name="buildButton">Собрать</string>

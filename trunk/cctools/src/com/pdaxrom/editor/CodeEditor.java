@@ -35,6 +35,8 @@ import com.pdaxrom.cctools.R;
 public class CodeEditor extends EditText {
 	private final static String TAG = "cctools-codeEditor";
 	private		int			TYPE_DELAY = 200;
+	
+	private		String		m_FileName = null;
 	private 	boolean 	m_textHasChanged;
 	private		boolean		m_drawLineNumbers;
 	private		boolean		m_drawGutterLine;
@@ -389,12 +391,6 @@ public class CodeEditor extends EditText {
 		if (isDrawingGutterLine() || isDrawingLineNumbers()) {
 			int lineCount = 0;
 			
-//			canvas.getClipBounds(originalClipRect);
-//			drawingRect.set(originalClipRect);
-//			drawingRect.bottom -= 5;
-//			drawingRect.top += 5;
-//			canvas.clipRect(drawingRect, Op.REPLACE);
-
 			int horisontalScrollOffset = this.computeHorizontalScrollOffset();
 			
 			if (isDrawingGutterLine()) {
@@ -411,7 +407,6 @@ public class CodeEditor extends EditText {
 
 				}
 			}
-//			canvas.clipRect(originalClipRect, Op.REPLACE);
 		}
 		
 		super.onDraw(canvas);
@@ -456,9 +451,11 @@ public class CodeEditor extends EditText {
 		setText("");
 		resetTriggers();
 		resetHistory();
+		m_FileName = null;
 	}
 	
 	public boolean loadFile(String file) {
+		m_FileName = file;
 		mSyntax = null;
 		FileInputStream fis;
 		try {
@@ -482,6 +479,7 @@ public class CodeEditor extends EditText {
 	}
 	
 	public boolean saveFile(String file) {
+		m_FileName = file;
 		FileOutputStream fout;
 		try {
 			fout = new FileOutputStream(file);
@@ -496,6 +494,10 @@ public class CodeEditor extends EditText {
 			Log.i(TAG, "Error " + e);
 		}
 		return false;
+	}
+	
+	public String getFileName() {
+		return m_FileName;
 	}
 	
 	public void undo() {
