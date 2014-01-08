@@ -506,3 +506,13 @@ build_unzip
 # Bug fixes for firmware
 build_acer_a200_ics403_libc_fix
 build_android_pre_233_libc_fix
+
+# MinGW
+build_binutils_mingw32_host i686-w64-mingw32
+#build_binutils_mingw32_host x86_64-w64-mingw32
+build_gcc_mingw32_host i686-w64-mingw32
+#build_gcc_mingw32_host x86_64-w64-mingw32
+build_binutils_mingw32 i686-w64-mingw32
+build_gcc_mingw32 i686-w64-mingw32
+build_mingw_w64_examples
+build_build_essential_mingw_w64
