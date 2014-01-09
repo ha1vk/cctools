@@ -24,7 +24,7 @@ Win32App.exe: ${OBJS}
 	${CC} -o "$@" ${OBJS} ${LDFLAGS}
 
 clean:
-	del obj\*.o "Win32App.exe"
+	rm -f obj/*.o "Win32App.exe"
 
 obj/%.o: src/%.c ${HEADERS}
 	${CC} ${CFLAGS} ${INCLUDE_DIRS} -c $< -o $@
