@@ -1150,6 +1150,7 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
     			"build-essential-gcc-compact",
     			"build-essential-fortran-compact",
     			"build-essential-gcc-avr",
+    			"build-essential-mingw-w64",
     			"build-essential-luajit"
     	};
     	
