@@ -516,3 +516,5 @@ build_binutils_mingw32 i686-w64-mingw32
 build_gcc_mingw32 i686-w64-mingw32
 build_mingw_w64_examples
 build_build_essential_mingw_w64
+
+build_sdktools
