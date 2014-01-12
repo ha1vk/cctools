@@ -41,7 +41,8 @@ LDFLAGS = \
 	-Landroidfw \
 	-Llibutils \
 	-Llibcutils \
-	-Lliblog
+	-Lliblog \
+	-Llibpng
 
 LDFLAGS += $(EXTRA_LDFLAGS)
 
@@ -59,7 +60,8 @@ EXTLIBS = \
 	liblog/liblog.a \
 	libutils/libutils.a \
 	androidfw/libandroidfw.a \
-	libcutils/libcutils.a
+	libcutils/libcutils.a \
+	libpng/libpng.a
 
 all: $(EXTLIBS) $(TARGETS)
 
@@ -102,9 +104,13 @@ androidfw/libandroidfw.a:
 libcutils/libcutils.a:
 	make -C libcutils CC=$(CC) CXX=$(CXX) CPU=$(CPU)
 
+libpng/libpng.a:
+	make -C libpng CC=$(CC) CXX=$(CXX) CPU=$(CPU)
+
 clean:
 	rm -f $(OBJS) $(TARGETS) ZipAlign.o
 	make -C liblog clean
 	make -C libutils clean
 	make -C androidfw clean
 	make -C libcutils clean
+	make -C libpng clean
