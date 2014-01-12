@@ -30,14 +30,18 @@ OBJS = \
 CFLAGS = \
 	-O2 \
 	-Wall \
-	-DOS_PATH_SEPARATOR=\'/\' \
-	-DFAKE_LOG_DEVICE=1 \
-	-DHAVE_PTHREADS \
-	-DHAVE_OFF64_T \
-	-DHAVE_ENDIAN_H \
 	-DHAVE_SYS_UIO_H \
+	-DHAVE_PTHREADS \
+	-DHAVE_SCHED_H \
+	-DHAVE_SYS_UIO_H \
+	-DHAVE_IOCTL \
+	-DHAVE_TM_GMTOFF \
+	-DANDROID_SMP=0  \
+	-DHAVE_ENDIAN_H \
 	-DHAVE_POSIX_FILEMAP \
-	-I../include
+	-DHAVE_OFF64_T
+
+CFLAGS += -I../include
 
 ifeq (mips, $(CPU))
 CFLAGS += -DALIGN_DOUBLE
@@ -46,6 +50,12 @@ endif
 ifeq (arm,$(CPU))
 CFLAGS += -march=armv6
 endif
+
+ifeq (x86, $(CPU))
+CFLAGS += -m32
+endif
+
+CFLAGS += -g
 
 CXXFLAGS = $(CFLAGS)
 

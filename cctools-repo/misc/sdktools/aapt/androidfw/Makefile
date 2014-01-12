@@ -14,7 +14,6 @@ OBJS = \
 CFLAGS = \
 	-O2 \
 	-Wall \
-	-DOS_PATH_SEPARATOR=\'/\' \
 	-DFAKE_LOG_DEVICE=1 \
 	-DHAVE_PTHREADS \
 	-DHAVE_OFF64_T \
@@ -27,6 +26,12 @@ CFLAGS = \
 ifeq (arm,$(CPU))
 CFLAGS += -march=armv6
 endif
+
+ifeq (x86, $(CPU))
+CFLAGS += -m32
+endif
+
+CFLAGS += -g
 
 CXXFLAGS = $(CFLAGS)
 

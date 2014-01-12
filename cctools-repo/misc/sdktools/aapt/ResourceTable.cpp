@@ -2820,8 +2820,11 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
             // that resource is invalid; validResources[i] represents
             // the item at t->getOrderedConfigs().itemAt(i).
             Vector<bool> validResources;
-            validResources.insertAt(false, 0, N);
-            
+//FIXME: sashz
+// Crash if N == 0
+//            validResources.insertAt(false, 0, N);
+            validResources.insertAt(false, 0, N ? N : 1);
+
             // First write the typeSpec chunk, containing information about
             // each resource entry in this type.
             {

@@ -11,14 +11,23 @@
 #include <androidfw/ResourceTypes.h>
 #include <utils/ByteOrder.h>
 
+#include <zlib.h>
 #include <png.h>
 
 #define NOISY(x) //x
 
+#if PNG_LIBPNG_VER >= 10400
+#define png_sizeof(x) sizeof(x)
+#endif
+
 static void
 png_write_aapt_file(png_structp png_ptr, png_bytep data, png_size_t length)
 {
+#if PNG_LIBPNG_VER >= 10400
+    status_t err = ((AaptFile*)png_get_io_ptr(png_ptr))->writeData(data, length);
+#else
     status_t err = ((AaptFile*)png_ptr->io_ptr)->writeData(data, length);
+#endif
     if (err != NO_ERROR) {
         png_error(png_ptr, "Write Error");
     }
@@ -90,7 +99,11 @@ static void read_png(const char* imageName,
         png_set_palette_to_rgb(read_ptr);
 
     if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
+#if PNG_LIBPNG_VER >= 10400
+        png_set_expand_gray_1_2_4_to_8(read_ptr);
+#else
         png_set_gray_1_2_4_to_8(read_ptr);
+#endif
 
     if (png_get_valid(read_ptr, read_info, PNG_INFO_tRNS)) {
         //printf("Has PNG_INFO_tRNS!\n");
