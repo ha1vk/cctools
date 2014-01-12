@@ -13,6 +13,8 @@
 #include "CacheUpdater.h"
 #include "CrunchCache.h"
 
+#define OS_PATH_SEPARATOR '/'
+
 using namespace android;
 
 CrunchCache::CrunchCache(String8 sourcePath, String8 destPath, FileFinder* ff)

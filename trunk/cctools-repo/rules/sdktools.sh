@@ -26,14 +26,44 @@ build_sdktools() {
 	;;
     esac
 
-    make -C aapt CC=${TARGET_ARCH}-gcc CXX=${TARGET_ARCH}-g++ ${OPTS} || error "build aapt and zipalign"
-    make -C aidl CC=${TARGET_ARCH}-gcc CXX=${TARGET_ARCH}-g++ ${OPTS} || error "build aapt and zipalign"
+    make -C aapt CC=${TARGET_ARCH}-gcc CXX=${TARGET_ARCH}-g++ ${OPTS} EXTRA_CFLAGS="-I${TMPINST_DIR}/include" EXTRA_LDFLAGS="-L${TMPINST_DIR}/lib" || error "build aapt and zipalign"
+    make -C aidl CC=${TARGET_ARCH}-gcc CXX=${TARGET_ARCH}-g++ ${OPTS} EXTRA_CFLAGS="-I${TMPINST_DIR}/include" EXTRA_LDFLAGS="-L${TMPINST_DIR}/lib" || error "build aapt and zipalign"
 
     install -D -m 755 aapt/aapt     ${TMPINST_DIR}/${PKG}/cctools/bin/aapt
     install -D -m 755 aapt/zipalign ${TMPINST_DIR}/${PKG}/cctools/bin/zipalign
     install -D -m 755 aidl/aidl     ${TMPINST_DIR}/${PKG}/cctools/bin/aidl
 
     $STRIP ${TMPINST_DIR}/${PKG}/cctools/bin/*
+
+    cat > ${TMPINST_DIR}/${PKG}/cctools/bin/javac << EOF
+#!/system/bin/sh
+exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES com.sun.tools.javac.Main \$@
+EOF
+    chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/javac
+
+    cat > ${TMPINST_DIR}/${PKG}/cctools/bin/dx << EOF
+#!/system/bin/sh
+exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES com.android.dx.command.Main \$@
+EOF
+    chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/dx
+
+    cat > ${TMPINST_DIR}/${PKG}/cctools/bin/apkbuilder << EOF
+#!/system/bin/sh
+exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES com.android.sdklib.build.ApkBuilderMain \$@
+EOF
+    chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/apkbuilder
+
+    cat > ${TMPINST_DIR}/${PKG}/cctools/bin/apksigner << EOF
+#!/system/bin/sh
+exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES com.pdaxrom.cmdline.ApkSigner \$@
+EOF
+    chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/apksigner
+
+    cat > ${TMPINST_DIR}/${PKG}/cctools/bin/proguard << EOF
+#!/system/bin/sh
+exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES proguard.ProGuard \$@
+EOF
+    chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/proguard
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"

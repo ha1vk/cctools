@@ -170,7 +170,11 @@ download() {
     if [ ! -e $2 ]; then
 	mkdir -p `dirname $2`
 	echo "Downloading..."
-	wget $1 -O $2 || error "download $PKG_URL"
+	if wget $1 -O $2 ; then
+	    return
+	fi
+	rm -f $2
+	error "download $PKG_URL"
     fi
 }
 
@@ -517,4 +521,5 @@ build_gcc_mingw32 i686-w64-mingw32
 build_mingw_w64_examples
 build_build_essential_mingw_w64
 
+build_libpng
 build_sdktools

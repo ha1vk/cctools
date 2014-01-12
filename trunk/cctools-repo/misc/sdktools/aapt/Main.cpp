@@ -15,6 +15,8 @@
 #include <getopt.h>
 #include <assert.h>
 
+#define OS_PATH_SEPARATOR '/'
+
 using namespace android;
 
 static const char* gProgName = "aapt";

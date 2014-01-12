@@ -24,6 +24,8 @@
 
 #include <ctype.h>
 
+#define OS_PATH_SEPARATOR '/'
+
 /*
  * Functions outside android is below the namespace android, since they use
  * functions and constants in android namespace.
