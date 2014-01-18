@@ -705,9 +705,9 @@ public class PkgManagerActivity extends SherlockListActivity {
     		}
     		
     		updateProgressTitle(getString(R.string.pkg_installpackagetask) + " " + packageInfo.getName());
-    		String file = packageInfo.getFile();
+
     		Log.i(TAG, "Install " + packageInfo.getName() + " -> " + packageInfo.getFile());
-			if (!downloadAndUnpack(file, URL, toolchainDir, 
+			if (!downloadAndUnpack(packageInfo.getFile(), packageInfo.getUrl(), toolchainDir, 
 					toolchainDir + "/" + PKGS_LISTS_DIR + "/" + packageInfo.getName() + ".list")) {
 				if (errorString != null) {
 					errorString += "\u0020" + info.getName();
