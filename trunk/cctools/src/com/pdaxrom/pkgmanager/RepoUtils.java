@@ -46,11 +46,11 @@ public class RepoUtils {
 	}
 	
 	public static List<PackageInfo> getRepoFromUrl(String url) {
-        return parseRepoXml(getRepoXmlFromUrl(url)); // getting DOM element
+        return parseRepoXml(getRepoXmlFromUrl(url), url); // getting DOM element
 	}
 	
 	public static List<PackageInfo> getRepoFromDir(String path) {
-		return parseRepoXml(getRepoXmlFromDir(path));
+		return parseRepoXml(getRepoXmlFromDir(path), path);
 	}
 	
 	public static String getRepoXmlFromUrl(String url) {
@@ -120,7 +120,7 @@ public class RepoUtils {
     	return null;    	
     }
     
-    private static List<PackageInfo> parseRepoXml(String repo) {
+    private static List<PackageInfo> parseRepoXml(String repo, String url) {
 		List<PackageInfo> list = null;
 		
 		if (repo != null) {
@@ -159,7 +159,8 @@ public class RepoUtils {
 	    				parser.getValue(e, KEY_DESC),
 	    				parser.getValue(e, KEY_DEPENDS),
 	    				parser.getValue(e, KEY_ARCH),
-	    				parser.getValue(e, KEY_REPLACES));
+	    				parser.getValue(e, KEY_REPLACES),
+	    				url);
 				list.add(packageInfo);
 				if (_debug) {
 					System.out.println(TAG + " added pkg = " + packageInfo.getName());
