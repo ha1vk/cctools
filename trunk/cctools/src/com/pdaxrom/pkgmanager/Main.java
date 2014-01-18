@@ -38,7 +38,7 @@ class Main {
     static private String ndkArch;
     static private String cpuAbi;
 
-    static private String URL;
+    static private String URL = "http://mirror.cctools.info/packages";
     
     private static final String toolchainDir = "/data/data/com.pdaxrom.cctools/root";
     private static final String sdCardDir = "/sdcard/";
@@ -49,10 +49,9 @@ class Main {
 
     public static void main(String[] args) {
     	setupVersion();
-    	URL = "http://cctools.info/packages/" + cpuAbi;
     	
     	packagesLists.setInstalledPackages(RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR));
-		packagesLists.setAvailablePackages(RepoUtils.getRepoFromUrl(URL + "/Packages"));
+		packagesLists.setAvailablePackages(RepoUtils.getRepoFromUrl(getReposList()));
 		
 		List<PackageInfo> packagesForUpdate = null;
 		
@@ -62,8 +61,16 @@ class Main {
 		}
 
     	if (args.length == 0) {
-        	System.out.println("SDK " + sdkVersion + ", NKD " + ndkVersion + ", Arch " + ndkArch);
-        	System.out.println("URL " + URL);
+        	System.out.println("SDK " + sdkVersion + 
+        						", NKD " + ndkVersion + 
+        						", Arch " + ndkArch + 
+        						", CPU ABI " + cpuAbi);
+        	List<String> list = getReposList();
+        	if (list != null) {
+        		for (String url: list) {
+        			System.out.println("Repo " + url);
+        		}
+        	}
 
         	if (packagesForUpdate != null) {
         		System.out.println();
@@ -209,7 +216,7 @@ class Main {
         	}
         }
 
-        RepoUtils.setVersion(ndkArch, ndkVersion);
+        RepoUtils.setVersion(cpuAbi, ndkArch, ndkVersion);
     }
 
     private static String getProperties(String prop) {
@@ -423,6 +430,40 @@ class Main {
 			
 		}
 		return true;
+	}
+
+	private static List<String> getReposList() {
+		List<String> list = null;
+		String reposListFile = toolchainDir + "/cctools/etc/repos.list"; 
+		if (new File(reposListFile).exists()) {
+			try {
+				FileInputStream fin = new FileInputStream(reposListFile);
+				DataInputStream in = new DataInputStream(fin);
+				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+				String line = "";
+				while ((line = reader.readLine()) != null) {
+					if (list == null) {
+						list = new ArrayList<String>();
+					}
+					line = line.trim();
+					if (line.length() > 0) {
+						if (line.startsWith("#") || line.startsWith(";")) {
+							continue;
+						}
+						list.add(line);
+					}
+				}
+				in.close();
+			} catch (Exception e) {
+				System.err.println("Error read repos list: " + e);
+			}
+		}
+
+		if (list == null) {
+			list = new ArrayList<String>();
+			list.add(URL);
+		}
+		return list;
 	}
 
 	private static void system(String cmdline) {

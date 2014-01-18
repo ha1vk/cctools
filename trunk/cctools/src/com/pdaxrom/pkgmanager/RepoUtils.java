@@ -31,6 +31,7 @@ public class RepoUtils {
     static public final String KEY_REPLACES = "replaces";
     static public final String KEY_STATUS	= "status";
 
+    private static String	_buildAbi;
 	private static String	_ndkArch;
 	private static int		_ndkVersion;
 
@@ -40,7 +41,8 @@ public class RepoUtils {
 		_debug = debug;
 	}
 	
-	public static void setVersion(String ndkArch, int ndkVersion) {
+	public static void setVersion(String buildAbi, String ndkArch, int ndkVersion) {
+		_buildAbi = buildAbi;
 		_ndkArch = ndkArch;
 		_ndkVersion = ndkVersion;
 	}
@@ -52,6 +54,7 @@ public class RepoUtils {
 	public static List<PackageInfo> getRepoFromUrl(List<String> urls) {
 		List<PackageInfo> list = null;
 		for (String url: urls) {
+			url = url + "/" + _buildAbi;
 			list = parseRepoXml(list, getRepoXmlFromUrl(url), url); // getting DOM element
 		}
 		return list;

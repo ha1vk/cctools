@@ -48,7 +48,7 @@ import android.widget.TextView;
 
 public class PkgManagerActivity extends SherlockListActivity {
 	private static final String TAG = "PkgMgrActivity";
-	private static final String URL = "http://cctools.info/packages/" + Build.CPU_ABI;
+	private static final String URL = "http://mirror.cctools.info/packages";
 	//private static final String URL = "http://sashz-laptop/cctools/packages/" + Build.CPU_ABI;
 	//private static final String URL = "http://192.168.0.106/cctools/packages/" + Build.CPU_ABI;
 
@@ -131,7 +131,7 @@ public class PkgManagerActivity extends SherlockListActivity {
         		activityData = getIntent().getExtras().getString(INTENT_DATA);
         	}
         	
-            (new DownloadRepoTask()).execute(URL);
+            (new DownloadRepoTask()).execute(getReposList());
             
             return;
         } else {
@@ -140,7 +140,7 @@ public class PkgManagerActivity extends SherlockListActivity {
 
             inputSearch = (ClearableEditText) findViewById(R.id.inputSearch);
             
-            (new DownloadRepoTask()).execute(URL);
+            (new DownloadRepoTask()).execute(getReposList());
         }
          
         // selecting single ListView item
@@ -216,7 +216,7 @@ public class PkgManagerActivity extends SherlockListActivity {
         switch (item.getItemId()) {
         	case R.id.item_update:
         		fCheckedUpdatesAtStartup = false;
-                (new DownloadRepoTask()).execute(URL);
+                (new DownloadRepoTask()).execute(getReposList());
         		break;
         	case R.id.item_mirrors:
         		editReposList();
@@ -280,7 +280,7 @@ public class PkgManagerActivity extends SherlockListActivity {
         	}
         }
         
-        RepoUtils.setVersion(ndkArch, ndkVersion);
+        RepoUtils.setVersion(Build.CPU_ABI, ndkArch, ndkVersion);
     }
     
     void showPackages(List<PackageInfo> repo) {
@@ -345,14 +345,14 @@ public class PkgManagerActivity extends SherlockListActivity {
         
     }
     
-    private class DownloadRepoTask extends AsyncTask<String, Void, List<PackageInfo>> {
+    private class DownloadRepoTask extends AsyncTask<List<String>, Void, List<PackageInfo>> {
     	protected void onPreExecute() {
         	super.onPreExecute();
         	showProgress(getString(R.string.pkg_repoupdatetask), 
         			getString(R.string.pkg_repodownloading));
         }
 
-		protected List<PackageInfo> doInBackground(String... params) {
+		protected List<PackageInfo> doInBackground(List<String>... params) {
 			packagesLists.setInstalledPackages(RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR));
 			packagesLists.setAvailablePackages(RepoUtils.getRepoFromUrl(params[0]));
 			if (packagesLists.getAvailablePackages() == null ||
