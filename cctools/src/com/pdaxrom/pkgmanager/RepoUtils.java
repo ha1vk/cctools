@@ -124,10 +124,13 @@ public class RepoUtils {
 		List<PackageInfo> list = null;
 		
 		if (repo != null) {
-			list = new ArrayList<PackageInfo>();
 			XMLParser parser = new XMLParser();
 	        Document doc = parser.getDomElement(repo); // getting DOM element
+	        if (doc == null) {
+	        	return list;
+	        }
 	        NodeList nl = doc.getElementsByTagName(KEY_PACKAGE);
+			list = new ArrayList<PackageInfo>();
 
 	    	for (int i = 0; i < nl.getLength(); i++) {
 	    		Element e = (Element) nl.item(i);
