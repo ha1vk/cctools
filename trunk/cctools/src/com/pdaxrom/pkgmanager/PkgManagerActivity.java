@@ -40,6 +40,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -48,8 +49,8 @@ import android.widget.TextView;
 public class PkgManagerActivity extends SherlockListActivity {
 	private static final String TAG = "PkgMgrActivity";
 	private static final String URL = "http://cctools.info/packages/" + Build.CPU_ABI;
-	//private static final String URL = "http://192.168.111.1/cctools/packages/" + Build.CPU_ABI;
 	//private static final String URL = "http://sashz-laptop/cctools/packages/" + Build.CPU_ABI;
+	//private static final String URL = "http://192.168.0.106/cctools/packages/" + Build.CPU_ABI;
 
 	private Context context = this;
 	private static final String PKGS_LISTS_DIR	= "/installed/";
@@ -217,6 +218,9 @@ public class PkgManagerActivity extends SherlockListActivity {
         		fCheckedUpdatesAtStartup = false;
                 (new DownloadRepoTask()).execute(URL);
         		break;
+        	case R.id.item_mirrors:
+        		editReposList();
+        		break;
         }
         return true;
     }
@@ -350,7 +354,7 @@ public class PkgManagerActivity extends SherlockListActivity {
 
 		protected List<PackageInfo> doInBackground(String... params) {
 			packagesLists.setInstalledPackages(RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR));
-			packagesLists.setAvailablePackages(RepoUtils.getRepoFromUrl(params[0] + "/Packages"));
+			packagesLists.setAvailablePackages(RepoUtils.getRepoFromUrl(params[0]));
 			if (packagesLists.getAvailablePackages() == null ||
 				packagesLists.getInstalledPackages() == null) {
 				return null;
@@ -628,6 +632,9 @@ public class PkgManagerActivity extends SherlockListActivity {
 	}
 
 	private void showProgress(String title, String message) {
+		if (pd != null && pd.isShowing()) {
+			pd.dismiss();
+		}
 		pd = ProgressDialog.show(context, title, message, true);
 	}
 	
@@ -791,6 +798,72 @@ public class PkgManagerActivity extends SherlockListActivity {
 		return true;
 	}
 
+	private List<String> getReposList() {
+		List<String> list = null;
+		String reposListFile = toolchainDir + "/cctools/etc/repos.list"; 
+		if (new File(reposListFile).exists()) {
+			try {
+				FileInputStream fin = new FileInputStream(reposListFile);
+				DataInputStream in = new DataInputStream(fin);
+				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+				String line = "";
+				while ((line = reader.readLine()) != null) {
+					if (list == null) {
+						list = new ArrayList<String>();
+					}
+					line = line.trim();
+					if (line.length() > 0) {
+						if (line.startsWith("#") || line.startsWith(";")) {
+							continue;
+						}
+						list.add(line);
+					}
+				}
+				in.close();
+			} catch (Exception e) {
+				Log.e(TAG, "Read repos list: " + e);
+			}
+		}
+
+		if (list == null) {
+			list = new ArrayList<String>();
+			list.add(URL);
+		}
+		return list;
+	}
+	
+	private void editReposList() {
+		final EditText ed = new EditText(this);
+		ed.setSingleLine(false);
+		List<String> list = getReposList();
+		for (String url: list) {
+			if (ed.getText().toString().length() > 0) {
+				ed.setText(ed.getText().toString() + "\n");
+			}
+			ed.setText(ed.getText().toString() + url);
+		}
+		new AlertDialog.Builder(this)
+		.setTitle(getString(R.string.pkgMirrorsButton))
+		.setView(ed)
+		.setPositiveButton(getString(R.string.button_continue), new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				String reposListFile = toolchainDir + "/cctools/etc/repos.list"; 
+				try {
+					FileOutputStream fos = new FileOutputStream(reposListFile);
+					fos.write(ed.getText().toString().getBytes());
+					fos.close();
+				} catch (Exception e) {
+					Log.e(TAG, "Write repos list (" + reposListFile + "): " + e);
+				}
+			}
+		})
+		.setNegativeButton(getString(R.string.button_cancel), new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		})
+		.show();		
+	}
+	
 	private void system(String cmdline) {
 		String cctoolsDir = toolchainDir + "/cctools";
 		String bootClassPath = getEnv(cctoolsDir, "BOOTCLASSPATH");
