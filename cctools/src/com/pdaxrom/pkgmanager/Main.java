@@ -340,9 +340,9 @@ class Main {
 				}
     		}
     		
-    		String file = packageInfo.getFile();
     		System.out.println("Installing package " + packageInfo.getName());
-			if (!downloadAndUnpack(file, URL, toolchainDir, 
+
+    		if (!downloadAndUnpack(packageInfo.getFile(), packageInfo.getUrl(), toolchainDir, 
 					toolchainDir + "/" + PKGS_LISTS_DIR + "/" + packageInfo.getName() + ".list")) {
 				return false;
 			}
