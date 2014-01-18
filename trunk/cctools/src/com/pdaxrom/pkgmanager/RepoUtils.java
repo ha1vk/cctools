@@ -46,13 +46,29 @@ public class RepoUtils {
 	}
 	
 	public static List<PackageInfo> getRepoFromUrl(String url) {
-        return parseRepoXml(getRepoXmlFromUrl(url), url); // getting DOM element
+        return parseRepoXml(null, getRepoXmlFromUrl(url), url); // getting DOM element
+	}
+
+	public static List<PackageInfo> getRepoFromUrl(List<String> urls) {
+		List<PackageInfo> list = null;
+		for (String url: urls) {
+			list = parseRepoXml(list, getRepoXmlFromUrl(url), url); // getting DOM element
+		}
+		return list;
 	}
 	
 	public static List<PackageInfo> getRepoFromDir(String path) {
-		return parseRepoXml(getRepoXmlFromDir(path), path);
+		return parseRepoXml(null, getRepoXmlFromDir(path), path);
 	}
-	
+
+	public static List<PackageInfo> getRepoFromDir(List<String> paths) {
+		List<PackageInfo> list = null;
+		for (String path: paths) {
+			list = parseRepoXml(list, getRepoXmlFromDir(path), path);
+		}
+		return list;
+	}
+
 	public static String getRepoXmlFromUrl(String url) {
 		XMLParser parser = new XMLParser();
 		String xml = parser.getXmlFromUrl(url + "/Packages");
@@ -111,6 +127,16 @@ public class RepoUtils {
     	return false;
     }
 
+    public static boolean isContainsPackage(List<PackageInfo> repo, String pkg, String version) {
+    	for (PackageInfo packageInfo: repo) {
+    		if (packageInfo.getName().equals(pkg) &&
+    				packageInfo.getVersion().equals(version)) {
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+
     public static PackageInfo getPackageByName(List<PackageInfo> repo, String pkg) {
     	for (PackageInfo packageInfo: repo) {
     		if (packageInfo.getName().equals(pkg)) {
@@ -119,10 +145,18 @@ public class RepoUtils {
     	}
     	return null;    	
     }
-    
-    private static List<PackageInfo> parseRepoXml(String repo, String url) {
-		List<PackageInfo> list = null;
-		
+
+    public static PackageInfo getPackage(List<PackageInfo> repo, String pkg, String version) {
+    	for (PackageInfo packageInfo: repo) {
+    		if (packageInfo.getName().equals(pkg) &&
+    				packageInfo.getVersion().equals(version)) {
+    			return packageInfo;
+    		}
+    	}
+    	return null;    	
+    }
+
+    private static List<PackageInfo> parseRepoXml(List<PackageInfo> list, String repo, String url) {
 		if (repo != null) {
 			XMLParser parser = new XMLParser();
 	        Document doc = parser.getDomElement(repo); // getting DOM element
@@ -130,7 +164,9 @@ public class RepoUtils {
 	        	return list;
 	        }
 	        NodeList nl = doc.getElementsByTagName(KEY_PACKAGE);
-			list = new ArrayList<PackageInfo>();
+	        if (list == null) {
+	        	list = new ArrayList<PackageInfo>();
+	        }
 
 	    	for (int i = 0; i < nl.getLength(); i++) {
 	    		Element e = (Element) nl.item(i);
@@ -149,6 +185,12 @@ public class RepoUtils {
 	    		} else {
 	    			// old format of packages not included unpacked size
 	    			filesize = size;
+	    		}
+	    		if (isContainsPackage(list, parser.getValue(e, KEY_NAME), parser.getValue(e, KEY_VERSION))) {
+	    			if (_debug) {
+	    				System.out.println(TAG + "skip exists pkg" + parser.getValue(e, KEY_NAME));
+	    			}
+	    			continue;
 	    		}
 	    		PackageInfo packageInfo = new PackageInfo(
 	    				parser.getValue(e, KEY_NAME),
