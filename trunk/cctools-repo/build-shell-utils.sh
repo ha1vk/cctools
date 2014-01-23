@@ -117,7 +117,7 @@ banner() {
 
 trap "banner ''" 2
 
-if ! which bash ; then
+if ! $SHELL -c 'pushd .; popd' 2>&1 >/dev/null ; then
 alias pushd='ASHDIRSTACK="$PWD
 $ASHDIRSTACK"; cd'
 alias popd='ASHDIRSLINE=`echo "\$ASHDIRSTACK" | sed -ne "1p"`;[ "$ASHDIRSLINE" != "" ] && cd $ASHDIRSLINE; ASHDIRSTACK=`echo "\$ASHDIRSTACK" | sed -e "1d"`'
@@ -170,7 +170,13 @@ download() {
     if [ ! -e $2 ]; then
 	mkdir -p `dirname $2`
 	echo "Downloading..."
-	if wget $1 -O $2 ; then
+	local opt
+	case $1 in
+	https*)
+	    opt="--no-check-certificate"
+	    ;;
+	esac
+	if wget $opt $1 -O $2 ; then
 	    return
 	fi
 	rm -f $2
@@ -192,6 +198,9 @@ unpack() {
 	;;
     *.tar.xz)
 	cmd="tar Jxf $2 -C $1"
+	;;
+    *.zip)
+	cmd="unzip $2 -d $1"
 	;;
     *)
 	error "Unknown archive type."
@@ -389,7 +398,6 @@ makedirs
 if [ "$USE_NATIVE_BUILD" = "yes" ]; then
 
     build_native_perl
-
     build_m4
     build_autoconf
 
