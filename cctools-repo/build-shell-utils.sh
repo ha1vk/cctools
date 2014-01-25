@@ -531,3 +531,4 @@ build_build_essential_mingw_w64
 
 build_libpng
 build_sdktools
+build_pkgman
