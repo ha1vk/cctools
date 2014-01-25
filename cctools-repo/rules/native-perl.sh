@@ -1,11 +1,11 @@
 build_native_perl() {
     PKG=perl
-    PKG_VERSION=5.18.2
-    PKG_URL="https://github.com/dex4er/perl5/archive/dexter/android/v${PKG_VERSION}.zip"
+    PKG_VERSION=5.18.1
+    PKG_URL="http://www.cpan.org/src/5.0/${PKG}-${PKG_VERSION}.tar.gz"
     PKG_DESC="Larry Wall's Practical Extraction and Report Language"
     PKG_DEPS=""
-    O_FILE=$SRC_PREFIX/${PKG}/perl5-dexter-android-v${PKG_VERSION}.zip
-    S_DIR=$src_dir/perl5-dexter-android-v${PKG_VERSION}
+    O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.gz
+    S_DIR=$src_dir/${PKG}-${PKG_VERSION}
     B_DIR=$build_dir/${PKG}
 
     c_tag native-${PKG} && return
@@ -26,10 +26,7 @@ build_native_perl() {
 
     # Configure here
 
-    ash ./Configure -des \
-	-Dlibpth="/system/lib ${TARGET_INST_DIR}/lib ${TARGET_INST_DIR}/${TARGET_ARCH}/lib" \
-	-Dusrinc=${TARGET_INST_DIR}/${TARGET_ARCH}/include \
-	-Dprefix=${TARGET_INST_DIR} || error "Configure"
+    ash ./Configure -Uafs -Ud_csh -Duseshrplib -Uusethreads -Ui_db -Ui_gdbm -Ui_ndbm -Ui_dbm -Ui_sdbm -Duseopcode -Dman1dir=none -Dman3dir=none -Dsiteman1=none -Dsiteman3=none -Dvendorman1=none -Dvendorman3=none -des -Accflags=-DNO_LOCALE -Uinstallusrbinperl -Dprefix=$TARGET_INST_DIR
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
