@@ -167,6 +167,7 @@
     <string name="pkg_notinstalled">Not installed</string>
     <string name="pkg_searchHint">Search package</string>
 
+    <string name="pkgMirrorsButton">Repos list</string>
     <string name="pkgUpdateButton">Check updates</string>
     
     <string name="whatisnew">What\'s new</string>

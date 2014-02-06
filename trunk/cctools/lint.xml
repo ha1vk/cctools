@@ -5,5 +5,6 @@
         <ignore path="src/com/pdaxrom/cctools/BuildActivity.java" />
         <ignore path="src/com/pdaxrom/cctools/CCToolsActivity.java" />
         <ignore path="src/com/pdaxrom/cctools/LauncherNativeActivity.java" />
+        <ignore path="src/com/pdaxrom/pkgmanager/Main.java" />
     </issue>
 </lint>

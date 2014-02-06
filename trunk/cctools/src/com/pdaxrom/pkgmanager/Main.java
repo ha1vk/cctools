@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.os.StatFs;
 import com.pdaxrom.utils.Utils;
 
 class Main {
@@ -41,14 +40,21 @@ class Main {
     static private String URL = "http://mirror.cctools.info/packages";
     
     private static final String toolchainDir = "/data/data/com.pdaxrom.cctools/root";
-    private static final String sdCardDir = "/sdcard/";
-    private static final String filesDir = "/sdcard/CCTools/backup";
+    private static String sdCardDir;
+    private static String filesDir;
     private static final String PKGS_LISTS_DIR	= "/installed/";
 
     private static PackagesLists packagesLists = new PackagesLists();
 
     public static void main(String[] args) {
     	setupVersion();
+    	sdCardDir = getEnv(toolchainDir + "/cctools", "EXTERNAL_STORAGE");
+    	if (!new File(sdCardDir).exists()) {
+    		System.err.println("Error: Can not find internal SD card path.");
+    		return;
+    	}
+    	sdCardDir = sdCardDir + "/CCTools";
+    	filesDir = sdCardDir + "/backup";
     	
     	packagesLists.setInstalledPackages(RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR));
 		packagesLists.setAvailablePackages(RepoUtils.getRepoFromUrl(getReposList()));
@@ -176,14 +182,14 @@ class Main {
 			System.out.println("CCTools console package manager");
 			System.out.println();
 			System.out.println("Usage:");
-			System.out.println("pkg                                     - summary about system and updates");
-			System.out.println("pkg list                                - show all packages");
-			System.out.println("pkg installed                           - show installed packages");
-			System.out.println("pkg search    <package> [<package> ...] - search package(s)");
-			System.out.println("pkg show      <package> [<package> ...] - show package(s) info");
-			System.out.println("pkg install   <package> [<package> ...] - install package(s)");
-			System.out.println("pkg uninstall <package> [<package> ...] - uninstall package(s)");
-			System.out.println("pkg upgrade                             - upgrade package(s)");
+			System.out.println("pkgman                                     - summary about system and updates");
+			System.out.println("pkgman list                                - show all packages");
+			System.out.println("pkgman installed                           - show installed packages");
+			System.out.println("pkgman search    <package> [<package> ...] - search package(s)");
+			System.out.println("pkgman show      <package> [<package> ...] - show package(s) info");
+			System.out.println("pkgman install   <package> [<package> ...] - install package(s)");
+			System.out.println("pkgman uninstall <package> [<package> ...] - uninstall package(s)");
+			System.out.println("pkgman upgrade                             - upgrade package(s)");
 			System.out.println();
 		}
     }
@@ -249,13 +255,15 @@ class Main {
 				cn.setReadTimeout(3 * 60 * 1000); // timeout 3 minutes
 				cn.connect();
 				int file_size = cn.getContentLength();
-				StatFs stat = new StatFs(filesDir);
-				int sdAvailSize = stat.getAvailableBlocks();// * stat.getBlockSize();
-				int need_mem = file_size / stat.getBlockSize();
-				if (sdAvailSize < need_mem) {
-					temp.delete();
-					System.err.println("Can't download, need " + Utils.humanReadableByteCount(need_mem, false) + " on SD");
-					return false;
+				if (sdkVersion >= 9) {
+					File partition = new File(filesDir);
+					if (partition.getUsableSpace() < file_size) {
+						temp.delete();
+						System.err.println("Can't download, need " + 
+								Utils.humanReadableByteCount(file_size - partition.getUsableSpace(), false) + 
+								" on SD");
+						return false;
+					}
 				}
 				InputStream stream = cn.getInputStream();
 				if (stream == null) {
@@ -294,12 +302,14 @@ class Main {
 			if (need_mem < 0) {
 				throw new RuntimeException("bad archive");
 			}
-			StatFs stat = new StatFs(to);
-			double cacheAvailSize = stat.getAvailableBlocks();
-			cacheAvailSize *= stat.getBlockSize();
-			if (cacheAvailSize < need_mem) {
-				System.err.println("Need " + Utils.humanReadableByteCount(need_mem, false) + " but " + 
-						Utils.humanReadableByteCount((int)cacheAvailSize, false) + " available");
+			
+			File partition = new File(to);			
+			if (partition.getUsableSpace() < need_mem) {
+				System.err.println("Need " + 
+					Utils.humanReadableByteCount(need_mem, false) + 
+					" but " + 
+					Utils.humanReadableByteCount(partition.getUsableSpace(), false) + 
+					" available");
 				return false;
 			}
 			if (logFile == null) {

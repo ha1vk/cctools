@@ -167,6 +167,7 @@
     <string name="pkg_notinstalled">Не установлен</string>
     <string name="pkg_searchHint">Поиск пакета</string>
 
+    <string name="pkgMirrorsButton">Список репозиториев</string>
     <string name="pkgUpdateButton">Проверить обновления</string>
     
 	<string name="whatisnew">Что нового</string>
