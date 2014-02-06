@@ -118,7 +118,7 @@ public class FileDialog extends SherlockListActivity {
 		setResult(RESULT_CANCELED, getIntent());
 
 		setContentView(R.layout.file_dialog_main);
-		
+
 		myPath = (TextView) findViewById(R.id.path);
 		myPath.setSelected(true);
 		//myPath.setEllipsize(TruncateAt.MARQUEE);
@@ -321,7 +321,7 @@ public class FileDialog extends SherlockListActivity {
 			path.add(ROOT);
 
 			item.add("../");
-			addItem("../", R.drawable.folder);
+			addItem("..", R.drawable.folder);
 			path.add(f.getParent());
 			parentPath = f.getParent();
 
