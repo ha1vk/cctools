@@ -127,6 +127,8 @@
     <string name="newDirectory">Новая папка</string>
     <string name="create_new">Создать:</string>
     <string name="cannot_create">Невозможно создать!</string>
+    <string name="homeDirectory">Домашняя директория</string>
+    <string name="sdDirectory">SD карта</string>
 
     <string name="pkgmgrButton">Дополнения</string>
     <string name="pkgmgr_name">Управление пакетами дополнений</string>

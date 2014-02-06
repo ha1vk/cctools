@@ -127,6 +127,8 @@
     <string name="newDirectory">New folder</string>
     <string name="create_new">Create:</string>
     <string name="cannot_create">Cannot create!</string>
+    <string name="homeDirectory">Home directory</string>
+    <string name="sdDirectory">SD card</string>
 
     <string name="pkgmgrButton">Add-ons</string>
     <string name="pkgmgr_name">Add-ons manager</string>

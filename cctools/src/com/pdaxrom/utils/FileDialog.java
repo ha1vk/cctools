@@ -6,19 +6,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.pdaxrom.cctools.R;
 
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.InputType;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
@@ -35,7 +35,7 @@ import android.widget.TextView;
  * @author android
  * 
  */
-public class FileDialog extends ListActivity {
+public class FileDialog extends SherlockListActivity {
 	/**
 	 * Chave de um item da lista de paths.
 	 */
@@ -104,6 +104,9 @@ public class FileDialog extends ListActivity {
 	private HashMap<String, Integer> lastPositions = new HashMap<String, Integer>();
 
 	private Context context = this;
+	
+	private String homeDirectory = "";
+	private String sdDirectory = "";
 	
 	/**
 	 * Called when the activity is first created. Configura todos os parametros
@@ -197,25 +200,51 @@ public class FileDialog extends ListActivity {
 			selectedFile = file;
 			selectButton.setEnabled(true);
 		}
+		
+		homeDirectory = getCacheDir().getParentFile().getAbsolutePath() + "/root/cctools/home";
+		sdDirectory = Environment.getExternalStorageDirectory().getPath();
+		
 		getDir(startPath);
 	}
 
-	
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-    	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-    		menu.add(0, R.id.new_folder, 0, getString(R.string.newDirectory)).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-    	} else {
-    		MenuInflater inflater = getMenuInflater();
-    		inflater.inflate(R.menu.file_dialog_menu, menu);
-    	}
+    	menu.add(0, R.id.home_folder, 0, getString(R.string.homeDirectory))
+    		.setIcon(R.drawable.folder_home)
+    		.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+
+    	menu.add(0, R.id.sd_folder, 0, getString(R.string.sdDirectory))
+			.setIcon(R.drawable.media_memory_sd)
+			.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+    			
+    	menu.add(0, R.id.new_folder, 0, getString(R.string.newDirectory))
+    		.setIcon(R.drawable.folder_new)
+    		.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
     	return true;
     }
-
+    
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        	case R.id.new_folder:
-        		newDir();
-        		break;
+        case R.id.home_folder:
+        	if (currentPath.startsWith(Environment.getExternalStorageDirectory().getPath())) {
+        		sdDirectory = currentPath;
+        	}
+        	if (!currentPath.startsWith(getCacheDir().getParentFile().getAbsolutePath())) {
+        		getDir(homeDirectory);
+        	}
+        	break;
+        case R.id.sd_folder:
+        	if (currentPath.startsWith(getCacheDir().getParentFile().getAbsolutePath())) {
+        		homeDirectory = currentPath;
+        	}
+        	if (!currentPath.startsWith(Environment.getExternalStorageDirectory().getPath())) {
+            	getDir(sdDirectory);
+        	}
+        	break;
+        case R.id.new_folder:
+        	newDir();
+        	break;
         }
         return true;
     }
