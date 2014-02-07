@@ -548,7 +548,7 @@ public class FileDialog extends SherlockListActivity {
 						if (new File(currentPath + "/" + (new File(file).getName())).getCanonicalPath()
 								.startsWith(new File(file).getCanonicalPath())) {
 							Log.e(TAG, "Cannot copy a directory, '" + file + "', into itself.");
-							return false;
+							continue;
 						}
 						Utils.copyDirectory(new File(file), new File(currentPath + "/" + (new File(file).getName())));
 					}
