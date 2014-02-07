@@ -14,6 +14,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.pdaxrom.cctools.R;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
@@ -79,6 +80,8 @@ public class FileDialog extends SherlockListActivity {
 	private ActionMode mMode;
 	private List<String> actionFiles = null;
 	private int actionOp = 0;
+	
+    private ProgressDialog progressDialog;
 	
 	/**
 	 * Called when the activity is first created. Configura todos os parametros
@@ -498,6 +501,7 @@ public class FileDialog extends SherlockListActivity {
 		public void onDestroyActionMode(ActionMode mode) {
 		    canSelectDir = false;
 		    getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		    getDir(currentPath);
 		}
 
 		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
@@ -507,15 +511,35 @@ public class FileDialog extends SherlockListActivity {
 		}
 	}
 	
-	private class ActionFiles extends AsyncTask<List<String>, Void, Boolean> {
+	private class ActionFiles extends AsyncTask<List<String>, String, Boolean> {
     	protected void onPreExecute() {
     		super.onPreExecute();
+    		progressDialog = new ProgressDialog(context);
+    		progressDialog.setMessage("...");
+    		progressDialog.show();
     	}
     	
-		@Override
+    	protected void onProgressUpdate(String... value) {
+    		super.onProgressUpdate(value);
+    		String message = "";
+    		switch (actionOp) {
+    		case R.id.file_copy:
+    			message = getString(R.string.message_file_copy);
+    			break;
+    		case R.id.file_cut:
+    			message = getString(R.string.message_file_move);
+    			break;
+    		case R.id.file_delete:
+    			message = getString(R.string.message_file_delete);
+    			break;
+    		}
+    		progressDialog.setMessage(message + " " + (new File(value[0])).getName());
+    	}
+    	
 		protected Boolean doInBackground(List<String>... params) {
 			for (String file: params[0]) {
 				try {
+					publishProgress(file);
 					if (actionOp == R.id.file_copy || actionOp == R.id.file_cut) {
 						Log.i(TAG, "Copy " + file + " to " + currentPath);
 						if (new File(currentPath + "/" + (new File(file).getName())).getCanonicalPath()
@@ -540,7 +564,9 @@ public class FileDialog extends SherlockListActivity {
 		protected void onPostExecute(final Boolean result) {
 			actionOp = 0;
 			actionFiles = null;
-		    getDir(currentPath);
+		    if (progressDialog.isShowing()) {
+		    	progressDialog.dismiss();
+		    }
 		    mMode.finish();
 		}
 	}
