@@ -134,6 +134,10 @@
     <string name="file_cut">Cut</string>
     <string name="file_paste">Paste</string>
     <string name="file_delete">Delete</string>
+    
+    <string name="message_file_copy">Copying</string>
+    <string name="message_file_move">Moving</string>
+    <string name="message_file_delete">Deleting</string>
 
     <string name="pkgmgrButton">Add-ons</string>
     <string name="pkgmgr_name">Add-ons manager</string>
