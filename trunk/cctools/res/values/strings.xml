@@ -129,6 +129,11 @@
     <string name="cannot_create">Cannot create!</string>
     <string name="homeDirectory">Home directory</string>
     <string name="sdDirectory">SD card</string>
+    
+    <string name="file_copy">Copy</string>
+    <string name="file_cut">Cut</string>
+    <string name="file_paste">Paste</string>
+    <string name="file_delete">Delete</string>
 
     <string name="pkgmgrButton">Add-ons</string>
     <string name="pkgmgr_name">Add-ons manager</string>

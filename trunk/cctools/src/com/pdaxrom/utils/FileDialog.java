@@ -1,12 +1,14 @@
 package com.pdaxrom.utils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
 import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.pdaxrom.cctools.R;
@@ -14,14 +16,18 @@ import com.pdaxrom.cctools.R;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.InputType;
+import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -29,57 +35,19 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-/**
- * Activity para escolha de arquivos/diretorios.
- * 
- * @author android
- * 
- */
 public class FileDialog extends SherlockListActivity {
-	/**
-	 * Chave de um item da lista de paths.
-	 */
-	private static final String ITEM_KEY = "key";
+	private static final String TAG				= "FileDialog";
+	
+	private static final String ITEM_KEY		= "key";
+	private static final String ITEM_IMAGE		= "image";
 
-	/**
-	 * Imagem de um item da lista de paths (diretorio ou arquivo).
-	 */
-	private static final String ITEM_IMAGE = "image";
+	private static final String ROOT			= "/";
 
-	/**
-	 * Diretorio raiz.
-	 */
-	private static final String ROOT = "/";
-
-	/**
-	 * Parametro de entrada da Activity: path inicial. Padrao: ROOT.
-	 */
-	public static final String START_PATH = "START_PATH";
-
-	/**
-	 * Parametro de entrada da Activity: filtro de formatos de arquivos. Padrao:
-	 * null.
-	 */
-	public static final String FORMAT_FILTER = "FORMAT_FILTER";
-
-	/**
-	 * Parametro de saida da Activity: path escolhido. Padrao: null.
-	 */
-	public static final String RESULT_PATH = "RESULT_PATH";
-
-	/**
-	 * Parametro de entrada da Activity: tipo de selecao: pode criar novos paths
-	 * ou nao. Padrao: nao permite.
-	 * 
-	 * @see {@link SelectionMode}
-	 */
-	public static final String SELECTION_MODE = "SELECTION_MODE";
-
-	/**
-	 * Parametro de entrada da Activity: se e permitido escolher diretorios.
-	 * Padrao: falso.
-	 */
-	public static final String CAN_SELECT_DIR = "CAN_SELECT_DIR";
+	public static final String START_PATH		= "START_PATH";
+	public static final String FORMAT_FILTER	= "FORMAT_FILTER";
+	public static final String RESULT_PATH		= "RESULT_PATH";
+	public static final String SELECTION_MODE	= "SELECTION_MODE";
+	public static final String CAN_SELECT_DIR	= "CAN_SELECT_DIR";
 
 	private List<String> path = null;
 	private TextView myPath;
@@ -107,6 +75,10 @@ public class FileDialog extends SherlockListActivity {
 	
 	private String homeDirectory = "";
 	private String sdDirectory = "";
+	
+	private ActionMode mMode;
+	private List<String> actionFiles = null;
+	private int actionOp = 0;
 	
 	/**
 	 * Called when the activity is first created. Configura todos os parametros
@@ -193,6 +165,14 @@ public class FileDialog extends SherlockListActivity {
 			}
 		});
 
+		getListView().setLongClickable(true);
+		getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+		    public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
+		        onLongListItemClick(v, pos, id);
+		        return true;
+		    }
+		});
+		
 		String startPath = getIntent().getStringExtra(START_PATH);
 		startPath = startPath != null ? startPath : ROOT;
 		if (canSelectDir) {
@@ -209,17 +189,7 @@ public class FileDialog extends SherlockListActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-    	menu.add(0, R.id.home_folder, 0, getString(R.string.homeDirectory))
-    		.setIcon(R.drawable.folder_home)
-    		.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-
-    	menu.add(0, R.id.sd_folder, 0, getString(R.string.sdDirectory))
-			.setIcon(R.drawable.media_memory_sd)
-			.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-    			
-    	menu.add(0, R.id.new_folder, 0, getString(R.string.newDirectory))
-    		.setIcon(R.drawable.folder_new)
-    		.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+    	getSupportMenuInflater().inflate(R.menu.file_dialog_menu, menu);
     	return true;
     }
     
@@ -316,9 +286,9 @@ public class FileDialog extends SherlockListActivity {
 
 		if (!currentPath.equals(ROOT)) {
 
-			item.add(ROOT);
-			addItem(ROOT, R.drawable.folder);
-			path.add(ROOT);
+			//item.add(ROOT);
+			//addItem(ROOT, R.drawable.folder);
+			//path.add(ROOT);
 
 			item.add("../");
 			addItem("..", R.drawable.folder);
@@ -389,12 +359,11 @@ public class FileDialog extends SherlockListActivity {
 		mList.add(item);
 	}
 
-	/**
-	 * Quando clica no item da lista, deve-se: 1) Se for diretorio, abre seus
-	 * arquivos filhos; 2) Se puder escolher diretorio, define-o como sendo o
-	 * path escolhido. 3) Se for arquivo, define-o como path escolhido. 4) Ativa
-	 * botao de selecao.
-	 */
+	protected void onLongListItemClick(View v, int pos, long id) {
+	    Log.i(TAG, "onLongListItemClick id=" + id);
+	    mMode = startActionMode(new FileActionMode());
+	}
+	
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 
@@ -405,12 +374,13 @@ public class FileDialog extends SherlockListActivity {
 		if (file.isDirectory()) {
 			selectButton.setEnabled(false);
 			if (file.canRead()) {
-				lastPositions.put(currentPath, position);
-				getDir(path.get(position));
 				if (canSelectDir) {
 					selectedFile = file;
-					v.setSelected(true);
+					mFileName.setText(file.getName());
 					selectButton.setEnabled(true);
+				} else {
+					lastPositions.put(currentPath, position);
+					getDir(path.get(position));					
 				}
 			} else {
 				new AlertDialog.Builder(this).setIcon(R.drawable.ic_launcher)
@@ -425,7 +395,6 @@ public class FileDialog extends SherlockListActivity {
 		} else {
 			selectedFile = file;
 			mFileName.setText(file.getName());
-			v.setSelected(true);
 			selectButton.setEnabled(true);
 		}
 	}
@@ -473,4 +442,107 @@ public class FileDialog extends SherlockListActivity {
 			return R.drawable.text_x_make;
 		return R.drawable.application_octet_stream;
 	}
+	
+	private final class FileActionMode implements ActionMode.Callback {
+		private List<String> getSelectedFiles() {
+			List<String> files = new ArrayList<String>();
+			SparseBooleanArray checked = getListView().getCheckedItemPositions();
+			
+			for (int i = 0; i < checked.size(); i++) {
+				if (checked.valueAt(i)) {
+					HashMap <String, Object> item = (HashMap<String, Object>) getListView().getAdapter().getItem(checked.keyAt(i));
+					if (((String) item.get(ITEM_KEY)).equals("..")) {
+						continue;
+					}
+					files.add(currentPath + "/" + (String) item.get(ITEM_KEY));
+				}
+			}
+			
+			return files;
+		}
+		
+		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+			switch(item.getItemId()) {
+			case R.id.file_delete:
+				List<String>files = getSelectedFiles();
+				if (files.size() > 0) {
+					actionOp = item.getItemId();
+					new ActionFiles().execute(files);
+				}
+				break;
+			case R.id.file_copy:
+			case R.id.file_cut:
+				actionFiles = getSelectedFiles();
+				if (actionFiles.size() > 0) {
+					actionOp = item.getItemId();
+				    mode.finish();
+				}
+				break;
+			case R.id.file_paste:
+				if (actionOp == R.id.file_copy || actionOp == R.id.file_cut) {
+					new ActionFiles().execute(actionFiles);
+				}
+				break;
+			}
+			return true;
+		}
+
+		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+			getSupportMenuInflater().inflate(R.menu.file_action_menu, menu);
+			if (actionOp == 0) {
+				menu.findItem(R.id.file_paste).setVisible(false);
+			}
+			return true;
+		}
+
+		public void onDestroyActionMode(ActionMode mode) {
+		    canSelectDir = false;
+		    getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		}
+
+		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+			canSelectDir = true;
+		    getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+			return false;
+		}
+	}
+	
+	private class ActionFiles extends AsyncTask<List<String>, Void, Boolean> {
+    	protected void onPreExecute() {
+    		super.onPreExecute();
+    	}
+    	
+		@Override
+		protected Boolean doInBackground(List<String>... params) {
+			for (String file: params[0]) {
+				try {
+					if (actionOp == R.id.file_copy || actionOp == R.id.file_cut) {
+						Log.i(TAG, "Copy " + file + " to " + currentPath);
+						if (new File(currentPath + "/" + (new File(file).getName())).getCanonicalPath()
+								.startsWith(new File(file).getCanonicalPath())) {
+							Log.e(TAG, "Cannot copy a directory, '" + file + "', into itself.");
+							return false;
+						}
+						Utils.copyDirectory(new File(file), new File(currentPath + "/" + (new File(file).getName())));
+					}
+					if (actionOp == R.id.file_cut || actionOp == R.id.file_delete) {
+						Log.i(TAG, "Delete " + file);
+						Utils.deleteDirectory(new File(file));
+					}
+				} catch (IOException e) {
+					Log.e(TAG, "IOException " + e);
+					return false;
+				}
+			}
+			return true;
+		}
+
+		protected void onPostExecute(final Boolean result) {
+			actionOp = 0;
+			actionFiles = null;
+		    getDir(currentPath);
+		    mMode.finish();
+		}
+	}
+
 }
