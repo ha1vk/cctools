@@ -77,7 +77,7 @@ public class FileDialog extends SherlockListActivity {
 	private String homeDirectory = "";
 	private String sdDirectory = "";
 	
-	private ActionMode mMode;
+	private ActionMode mMode = null;
 	private List<String> actionFiles = null;
 	private int actionOp = 0;
 	
@@ -373,14 +373,16 @@ public class FileDialog extends SherlockListActivity {
 		File file = new File(path.get(position));
 
 		hideKeyboard(v);
+		selectButton.setEnabled(false);
 
 		if (file.isDirectory()) {
-			selectButton.setEnabled(false);
 			if (file.canRead()) {
-				if (canSelectDir) {
+				if (canSelectDir || mMode != null) {
 					selectedFile = file;
 					mFileName.setText(file.getName());
-					selectButton.setEnabled(true);
+					if (mMode == null) {
+						selectButton.setEnabled(true);
+					}
 				} else {
 					lastPositions.put(currentPath, position);
 					getDir(path.get(position));					
@@ -398,7 +400,9 @@ public class FileDialog extends SherlockListActivity {
 		} else {
 			selectedFile = file;
 			mFileName.setText(file.getName());
-			selectButton.setEnabled(true);
+			if (mMode == null) {
+				selectButton.setEnabled(true);
+			}
 		}
 	}
 
@@ -478,7 +482,6 @@ public class FileDialog extends SherlockListActivity {
 				actionFiles = getSelectedFiles();
 				if (actionFiles.size() > 0) {
 					actionOp = item.getItemId();
-				    mode.finish();
 				}
 				break;
 			case R.id.file_paste:
@@ -487,6 +490,7 @@ public class FileDialog extends SherlockListActivity {
 				}
 				break;
 			}
+			mode.finish();
 			return true;
 		}
 
@@ -499,13 +503,12 @@ public class FileDialog extends SherlockListActivity {
 		}
 
 		public void onDestroyActionMode(ActionMode mode) {
-		    canSelectDir = false;
 		    getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		    getDir(currentPath);
+		    mMode = null;
 		}
 
 		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-			canSelectDir = true;
 		    getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 			return false;
 		}
@@ -567,7 +570,14 @@ public class FileDialog extends SherlockListActivity {
 		    if (progressDialog.isShowing()) {
 		    	progressDialog.dismiss();
 		    }
-		    mMode.finish();
+		    try {
+		    	if (mMode != null) {
+		    		mMode.wait();
+		    	}
+			} catch (InterruptedException e) {
+				Log.e(TAG, "ActionFiles onPostExecute Interrupted Exception " + e);
+			}
+		    getDir(currentPath);
 		}
 	}
 
