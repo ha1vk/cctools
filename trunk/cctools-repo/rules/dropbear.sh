@@ -2,7 +2,7 @@ dropbear_version=0.52
 build_dropbear() {
     PKG=dropbear
     PKG_VERSION=$dropbear_version
-    PKG_SUBVERSION="-1"
+    PKG_SUBVERSION="-2"
     PKG_DESC="Dropbear is a software package written by Matt Johnston that provides a Secure Shell-compatible server and client. It is designed as a replacement for standard OpenSSH for environments with low memory and processor resources, such as embedded systems."
     PKG_URL="http://matt.ucc.asn.au/dropbear/releases/dropbear-$dropbear_version.tar.gz"
     O_FILE=$SRC_PREFIX/dropbear/dropbear-$dropbear_version.tar.gz
@@ -109,7 +109,7 @@ ok)
     ;;
 esac
 
-iface=\`ip r l | grep default | awk '{ for (i = 1; \$i != ""; i++) { if (\$i == "dev") print \$(i + 1) } }'\`
+iface=\`ip r l | grep default | head -n1 | awk '{ for (i = 1; \$i != ""; i++) { if (\$i == "dev") print \$(i + 1) } }'\`
 ip=\`ifconfig \$iface | grep 'inet addr:' | cut -d: -f2 | awk '{ print \$1}'\`
 adialog --msgbox --title "Dropbear SSH server" --message "SSH access to CCTools shell: ssh -p 22022 alpine@\${ip}" --text "Use dropbearpasswd to change SSH password from console."
 
