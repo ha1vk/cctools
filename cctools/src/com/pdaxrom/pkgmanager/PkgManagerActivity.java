@@ -20,6 +20,7 @@ import org.droidparts.widget.ClearableEditText;
 import com.actionbarsherlock.app.SherlockListActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.pdaxrom.cctools.R;
 import com.pdaxrom.utils.Utils;
 
@@ -83,7 +84,7 @@ public class PkgManagerActivity extends SherlockListActivity {
     private String homeDir;
 
 	final Handler handler = new Handler();
-    private ProgressDialog pd;    
+    private ProgressDialog progressDialog;    
     
     String errorString = null;
     
@@ -106,6 +107,11 @@ public class PkgManagerActivity extends SherlockListActivity {
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        if (getIntent().getExtras() != null) {
+        	requestWindowFeature(Window.FEATURE_NO_TITLE);
+        }
+    	
+    	super.onCreate(savedInstanceState);
         
         setupDirs();
         setupVersion();
@@ -113,9 +119,6 @@ public class PkgManagerActivity extends SherlockListActivity {
         activityCmd = null;
         activityData = null;
         if (getIntent().getExtras() != null) {
-        	setTheme(android.R.style.Theme_Translucent_NoTitleBar);
-        	super.onCreate(savedInstanceState);
-        	        	
         	String cmd = getIntent().getExtras().getString(INTENT_CMD);
         	
         	Log.i(TAG, "External command " + cmd);
@@ -135,7 +138,6 @@ public class PkgManagerActivity extends SherlockListActivity {
             
             return;
         } else {
-        	super.onCreate(savedInstanceState);
             setContentView(R.layout.pkgmgr_main);
 
             inputSearch = (ClearableEditText) findViewById(R.id.inputSearch);
@@ -348,13 +350,14 @@ public class PkgManagerActivity extends SherlockListActivity {
     private class DownloadRepoTask extends AsyncTask<List<String>, Void, List<PackageInfo>> {
     	protected void onPreExecute() {
         	super.onPreExecute();
-        	showProgress(getString(R.string.pkg_repoupdatetask), 
-        			getString(R.string.pkg_repodownloading));
+        	showProgress(R.string.pkg_repoupdatetask, R.string.pkg_repodownloading);
         }
 
 		protected List<PackageInfo> doInBackground(List<String>... params) {
 			packagesLists.setInstalledPackages(RepoUtils.getRepoFromDir(toolchainDir + "/" + PKGS_LISTS_DIR));
+			updateProgress(30);
 			packagesLists.setAvailablePackages(RepoUtils.getRepoFromUrl(params[0]));
+			updateProgress(60);
 			if (packagesLists.getAvailablePackages() == null ||
 				packagesLists.getInstalledPackages() == null) {
 				return null;
@@ -363,13 +366,12 @@ public class PkgManagerActivity extends SherlockListActivity {
 		}
 
 		protected void onPostExecute(List<PackageInfo> result) {
-			super.onPostExecute(result);
+			updateProgress(100);
 	        if (packagesLists.getAvailablePackages() != null && activityCmd == null) {
 		        Log.i(TAG, "Downloaded repo with " + packagesLists.getAvailablePackages().size() + " packages.");
 	        	showPackages(packagesLists.getAvailablePackages());
 	        }
 	        hideProgress();
-       		
 	        if (packagesLists.getAvailablePackages() == null && activityCmd == null) {
 	        	showError(getString(R.string.pkg_repounavailable));
 	        	return;
@@ -438,8 +440,7 @@ public class PkgManagerActivity extends SherlockListActivity {
     private class PrepareToInstallTask extends AsyncTask<String, Void, InstallPackageInfo> {
     	protected void onPreExecute() {
         	super.onPreExecute();
-        	showProgress(getString(R.string.pkg_prepareinstalltask),
-        			getString(R.string.pkg_prepareinstall));
+        	showProgress(R.string.pkg_prepareinstalltask, R.string.pkg_prepareinstall);
         }
 
 		@Override
@@ -451,7 +452,7 @@ public class PkgManagerActivity extends SherlockListActivity {
     	
 		protected void onPostExecute(final InstallPackageInfo info) {
 			hideProgress();
-        	Builder dialog = new AlertDialog.Builder(context)
+			Builder dialog = new AlertDialog.Builder(context)
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setTitle(getString(R.string.pkg_selected) + info.getName())
             .setMessage(getString(R.string.pkg_selected1) + info.getPackagesStrings()
@@ -483,8 +484,7 @@ public class PkgManagerActivity extends SherlockListActivity {
     private class InstallPackagesTask extends AsyncTask<InstallPackageInfo, Void, Boolean> {
     	protected void onPreExecute() {
     		super.onPreExecute();
-    		showProgress(getString(R.string.pkg_installpackagetask),
-    				getString(R.string.pkg_installpackage));
+    		showProgress(R.string.pkg_installpackagetask, R.string.pkg_installpackage);
     	}
     	
 		protected Boolean doInBackground(InstallPackageInfo... params) {
@@ -492,7 +492,6 @@ public class PkgManagerActivity extends SherlockListActivity {
 		}
     	
 		protected void onPostExecute(Boolean result) {
-			super.onPostExecute(result);
 			hideProgress();
 			if (result) {
 	    		if (activityCmd != null && 
@@ -512,9 +511,8 @@ public class PkgManagerActivity extends SherlockListActivity {
 
     private class UninstallPackagesTask extends AsyncTask<String, Void, Boolean> {
     	protected void onPreExecute() {
-    		super.onPreExecute();
-    		showProgress(getString(R.string.pkg_uninstallpackagetask),
-    				getString(R.string.pkg_uninstallpackage));
+    		super.onPreExecute();    	
+    		showProgress(R.string.pkg_uninstallpackagetask, R.string.pkg_uninstallpackage);
     	}
     	
 		protected Boolean doInBackground(String... params) {
@@ -522,7 +520,6 @@ public class PkgManagerActivity extends SherlockListActivity {
 		}
     	
 		protected void onPostExecute(Boolean result) {
-			super.onPostExecute(result);
 			hideProgress();
 			if (activityCmd != null && activityCmd.equals(CMD_UNINSTALL)) {
 				setResult(RESULT_OK);
@@ -533,6 +530,45 @@ public class PkgManagerActivity extends SherlockListActivity {
 			showPackages(packagesLists.getAvailablePackages());
 		}
     }
+
+    private void showProgress(int title, int message) {
+		progressDialog = new ProgressDialog(context);
+		progressDialog.setTitle(getString(title));
+		progressDialog.setMessage(getString(message));
+		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		progressDialog.setCancelable(false);
+		progressDialog.show();    	
+    }
+    
+    private void hideProgress() {
+		if (progressDialog != null && progressDialog.isShowing()) {
+			progressDialog.dismiss();
+		}    	
+    }
+
+	private void updateProgress(final int progress) {
+		handler.post(new Runnable() {
+			public void run() {
+				progressDialog.setProgress(progress);
+			}
+		});
+	}
+
+	private void updateProgress(final String progress) {
+		handler.post(new Runnable() {
+			public void run() {
+				progressDialog.setMessage(progress);
+			}
+		});
+	}
+
+	private void updateProgressTitle(final String out) {
+		handler.post(new Runnable() {
+			public void run() {
+				progressDialog.setTitle(out);
+			}
+		});
+	}
     
 	private boolean downloadAndUnpack(String file, String from, String to, String log) {
 		updateProgress(getString(R.string.download_file) + " " + file + "...");
@@ -576,6 +612,11 @@ public class PkgManagerActivity extends SherlockListActivity {
 					out.write(buf, 0, numread);
 					totalread += numread;
 					updateProgress(getString(R.string.received) + " " + totalread + " " + getString(R.string.from) + " " + file_size + " " + getString(R.string.bytes));
+					if (file_size > 20 * 1024 * 1024) {
+						updateProgress(totalread / (file_size / 100));
+					} else {
+						updateProgress(totalread * 100 / file_size);
+					}
 				} while (true);
 				stream.close();
 				out.close();
@@ -591,6 +632,8 @@ public class PkgManagerActivity extends SherlockListActivity {
 		} else
 			Log.i(TAG, "Use file " + temp.getAbsolutePath());
 
+		updateProgress(100);
+		
 		String tempPath = temp.getAbsolutePath();
 		updateProgress(getString(R.string.unpacking_file) + " " + file + "...");
 		Log.i(TAG, "Unpack file " + tempPath + " to " + to);
@@ -629,33 +672,6 @@ public class PkgManagerActivity extends SherlockListActivity {
 			return false;
 		}
 		return true;
-	}
-
-	private void showProgress(String title, String message) {
-		if (pd != null && pd.isShowing()) {
-			pd.dismiss();
-		}
-		pd = ProgressDialog.show(context, title, message, true);
-	}
-	
-	private void updateProgress(final String out) {
-		handler.post(new Runnable() {
-			public void run() {
-				pd.setMessage(out);
-			}
-		});
-	}
-
-	private void updateProgressTitle(final String out) {
-		handler.post(new Runnable() {
-			public void run() {
-				pd.setTitle(out);
-			}
-		});
-	}
-
-	private void hideProgress() {
-		pd.dismiss();
 	}
 	
     private void showError(String message) {
@@ -764,6 +780,7 @@ public class PkgManagerActivity extends SherlockListActivity {
 		if (name != null) {
 			updateProgressTitle(getString(R.string.pkg_uninstallpackagetask) + " " + name);
 			updateProgress(getString(R.string.wait_message));
+			updateProgress(0);
 			String prermFile = toolchainDir + "/" + PKGS_LISTS_DIR + "/" + name + ".prerm";
 			if ((new File(prermFile)).exists()) {
 				Log.i(TAG, "Execute prerm script " + prermFile);
@@ -771,14 +788,17 @@ public class PkgManagerActivity extends SherlockListActivity {
 				system(prermFile);
 				(new File(prermFile)).delete();
 			}
+			updateProgress(25);
 			String descFile = toolchainDir + "/" + PKGS_LISTS_DIR + "/" + name + ".pkgdesc";
 			if ((new File(descFile)).exists()) {
 				(new File(descFile)).delete();
 			}
 			String logFile = toolchainDir + "/" + PKGS_LISTS_DIR + "/" + name + ".list";
 			if (!(new File(logFile)).exists()) {
+				updateProgress(100);
 				return false;
 			}
+			updateProgress(50);
 			try {
 				FileInputStream fin = new FileInputStream(logFile);
 				DataInputStream in = new DataInputStream(fin);
@@ -793,7 +813,7 @@ public class PkgManagerActivity extends SherlockListActivity {
 			} catch (Exception e) {
 				Log.e(TAG, "Error during remove files " + e);
 			}
-			
+			updateProgress(100);
 		}
 		return true;
 	}

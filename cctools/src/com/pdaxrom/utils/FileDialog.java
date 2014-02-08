@@ -519,6 +519,8 @@ public class FileDialog extends SherlockListActivity {
     		super.onPreExecute();
     		progressDialog = new ProgressDialog(context);
     		progressDialog.setMessage("...");
+    		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+    		progressDialog.setCancelable(false);
     		progressDialog.show();
     	}
     	
@@ -537,12 +539,16 @@ public class FileDialog extends SherlockListActivity {
     			break;
     		}
     		progressDialog.setMessage(message + " " + (new File(value[0])).getName());
+    		progressDialog.setProgress(Integer.parseInt(value[1]));
+    		progressDialog.setMax(Integer.parseInt(value[2]));
     	}
     	
 		protected Boolean doInBackground(List<String>... params) {
+			int max = params[0].size();
+			int count = 0;
 			for (String file: params[0]) {
 				try {
-					publishProgress(file);
+					publishProgress(file, String.valueOf(++count), String.valueOf(max));
 					if (actionOp == R.id.file_copy || actionOp == R.id.file_cut) {
 						Log.i(TAG, "Copy " + file + " to " + currentPath);
 						if (new File(currentPath + "/" + (new File(file).getName())).getCanonicalPath()
