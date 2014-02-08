@@ -28,6 +28,7 @@ TARGET_ARCH="$2"
 HOST_ARCH="$2"
 WORK_DIR="$3"
 NDK_DIR="$4"
+SDK_DIR="$5"
 
 if [ "x$SRC_PREFIX" = "x" ]; then
     echo "No source dir"
@@ -45,6 +46,10 @@ fi
 
 if [ "x$NDK_DIR" = "x" ]; then
     NDK_DIR=/opt/android-ndk
+fi
+
+if [ "x$SDK_DIR" = "x" ]; then
+    SDK_DIR=/opt/adt-bundle-linux/sdk
 fi
 
 if [ "x$MAKEARGS" = "x" ]; then
@@ -530,5 +535,6 @@ build_mingw_w64_examples
 build_build_essential_mingw_w64
 
 build_libpng
-build_sdktools
 build_pkgman
+build_sdktools
+build_sdk_android
