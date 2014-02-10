@@ -1,14 +1,33 @@
 #!/system/bin/sh
 
+TOPDIR=$PWD
+
+if [ "$TOPDIR" = "" ]; then
+    TOPDIR="."
+fi
+
+TOPDIR=`realpath $TOPDIR`
+
 error() {
     echo "ERROR: $@"
     exit 1
+}
+
+get_ext_libdirs() {
+    test -e ${TOPDIR}/project.properties && cat ${TOPDIR}/project.properties | grep android.library.reference | cut -f2 -d=
 }
 
 if [ ! -f AndroidManifest.xml ]; then
     echo "Not android project directory!"
     exit 1
 fi
+
+PROJECTNAME=`aproject-helper AppName`
+if [ "$PROJECTNAME" = "" ]; then
+    PROJECTNAME=`basename $TOPDIR`
+fi
+
+APROJECT_BIN=`realpath $0`
 
 VERBOSE_JAVAC=
 VERBOSE_JAR=
@@ -26,29 +45,32 @@ if [ "$1" = "-v" ]; then
 fi
 
 if [ "$1" = "clean" ]; then
-    rm -rf build gen
+    echo "Cleaning $PROJECTNAME"
+    rm -rf bin gen
+    for d in `get_ext_libdirs`; do
+	cd $d && $APROJECT_BIN $VERBOSE_AAPT clean
+	cd $TOPDIR
+    done
     exit 0
 fi
+
+for d in `get_ext_libdirs`; do
+    cd $d
+    $APROJECT_BIN $VERBOSE_AAPT $@ || error "external library"
+    cd $TOPDIR
+done
+
+echo "Build $PROJECTNAME"
 
 PROJECT_RELEASE="no"
 if [ "$1" = "release" ]; then
     PROJECT_RELEASE="yes"
 fi
 
-TOPDIR=$1
+mkdir -p bin/classes gen
+mkdir -p bin/res
 
-if [ "$TOPDIR" = "" ]; then
-    TOPDIR="."
-fi
-
-TOPDIR=`realpath $TOPDIR`
-
-PROJECTNAME=`aproject-helper AppName`
-if [ "$PROJECTNAME" = "" ]; then
-    PROJECTNAME=`basename $TOPDIR`
-fi
-
-mkdir -p build/classes gen
+cp -f AndroidManifest.xml bin/
 
 ANDROID_SDK_VER=`aproject-helper TargetSDK`
 if [ "$ANDROID_SDK_VER" = "" ]; then
@@ -68,7 +90,7 @@ if [ ! -d $ANDROID_SDK ]; then
     exit 1
 fi
 
-find_jar_for_aapt() {
+find_libs_for_aapt() {
     local d=
     for d in $@; do
 	test -d $d && find $d -name "*.jar" -type f -exec printf "-I {} " \;
@@ -82,8 +104,7 @@ find_aidl_for_aidl() {
     done
 }
 
-find_jar_for_javac() {
-    printf "-cp "
+find_libs_for_javac() {
     local d=
     local x=
     for d in $@; do
@@ -91,26 +112,159 @@ find_jar_for_javac() {
     done
 }
 
+find_libs_for_dex() {
+    local d=
+    local x=
+    for d in $@; do
+	test -d $d && find $d -name "*.jar" -type f -exec printf "{} " \;
+    done
+}
+
+get_ext_resources() {
+    local d
+    for d in $@; do
+	printf "-S ${d}/bin/res -S ${d}/res"
+    done
+}
+
+find_ext_libs_for_javac() {
+    local d
+    for d in $@; do
+	find_libs_for_javac ${d}/bin ${d}/libs
+    done
+}
+
+find_ext_libs_for_dex() {
+    local d
+    for d in $@; do
+	find_libs_for_dex ${d}/bin ${d}/libs
+    done
+}
+
+ACTIVITIES=`aproject-helper Activities`
+EXT_LIBDIRS=`get_ext_libdirs`
+
 if [ "$PROJECT_RELEASE" = "yes" ]; then
     aproject-helper BuildConfig release
 else
     aproject-helper BuildConfig debug
 fi
 
-aapt p -f $VERBOSE_AAPT -M AndroidManifest.xml -F ./build/resources.res `find_jar_for_aapt $ANDROID_SDK libs $ANDROID_LIBS` -S res/ -J gen || error "aapt"
+if [ ! "$EXT_LIBDIRS" = "" ]; then
+    AAPT_OVERLAY="--auto-add-overlay"
+fi
+
+echo "Starting aapt..."
+
+if [ "$ACTIVITIES" = "" ]; then
+    aapt p \
+	--non-constant-id \
+	-f $VERBOSE_AAPT \
+	-m \
+	--output-text-symbols ${TOPDIR}/bin \
+	${AAPT_OVERLAY} \
+	-M ${TOPDIR}/bin/AndroidManifest.xml \
+	-F ${TOPDIR}/bin/resources.res \
+	-S ${TOPDIR}/bin/res \
+	-S ${TOPDIR}/res \
+	`get_ext_resources $EXT_LIBDIRS`\
+	`find_libs_for_aapt $ANDROID_SDK libs $ANDROID_LIBS` \
+	-J ${TOPDIR}/gen \
+	--generate-dependencies \
+	 || error "aapt"
+else
+    aapt p \
+	-f $VERBOSE_AAPT \
+	-m \
+	--output-text-symbols ${TOPDIR}/bin \
+	${AAPT_OVERLAY} \
+	-M ${TOPDIR}/bin/AndroidManifest.xml \
+	-F ${TOPDIR}/bin/resources.res \
+	-S ${TOPDIR}/bin/res \
+	-S ${TOPDIR}/res \
+	`get_ext_resources $EXT_LIBDIRS`\
+	`find_libs_for_aapt $ANDROID_SDK libs $ANDROID_LIBS` \
+	-J ${TOPDIR}/gen \
+	--generate-dependencies \
+	 || error "aapt"
+fi
+
+echo "Starting aidl..."
 
 find . -name "*.aidl" -exec aidl -Isrc `find_aidl_for_aidl $ANDROID_SDK $ANDROID_AIDL` -ogen {} \;
 
-javac $VERBOSE_JAVAC `find_jar_for_javac $ANDROID_SDK libs $ANDROID_LIBS` -d build/classes `find src -name "*.java"` `find gen -name "*.java"` || error "javac"
+echo "Starting javac..."
 
-ACTIVITIES=`aproject-helper Activities`
+javac $VERBOSE_JAVAC \
+    -d ${TOPDIR}/bin/classes \
+    -classpath ${TOPDIR}/bin/classes:`find_ext_libs_for_javac $EXT_LIBDIRS`:`find_libs_for_javac $ANDROID_SDK libs $ANDROID_LIBS` \
+    -sourcepath ${TOPDIR}/src:${TOPDIR}/gen \
+    -target 1.5 \
+    -bootclasspath ${ANDROID_SDK}/android.jar \
+    -encoding UTF-8 \
+    -source 1.5 \
+    `find src -name "*.java"` \
+    `find gen -name "*.java"` \
+    || error "javac"
 
 if [ "$ACTIVITIES" = "" ]; then
-    jar c${VERBOSE_JAR}f build/${PROJECTNAME}.jar -C build/classes .
+
+    echo "Build library..."
+
+    jar c${VERBOSE_JAR}f bin/${PROJECTNAME}.jar -C bin/classes .
 else
-    dx --dex $VERBOSE_DEX --no-strict --output=build/${PROJECTNAME}.dex `find build/classes -maxdepth 1 -not -path "build/classes"` || error "dx"
 
-    apkbuilder build/${PROJECTNAME}.apk $VERBOSE_APKBUILDER -u -z ./build/resources.res -f ./build/${PROJECTNAME}.dex || error "apkbuilder"
+    mkdir -p ${TOPDIR}/bin/dexedLibs
+    DEX_LIBS=
+    DEXED_LIBS=
+    for f in `find_ext_libs_for_dex $EXT_LIBDIRS` `find_libs_for_dex libs`; do
+	for v in $DEX_LIBS; do
+	    if cmp -s $f $v; then
+		f=""
+		break
+	    fi
+	done
+	if [ ! "$f" = "" ]; then
+	    DEX_LIBS="$DEX_LIBS $f"
+	    fname=`basename $f`
+	    
+	    echo "Pre-dexing library ${fname}..."
+	    
+	    dx --dex \
+		$VERBOSE_DEX \
+		--output ${TOPDIR}/bin/dexedLibs/${fname} \
+		$f \
+		|| error "dx"
+	    DEXED_LIBS="$DEXED_LIBS ${TOPDIR}/bin/dexedLibs/${fname}"
+	fi
+    done
 
-    apksigner build/${PROJECTNAME}.apk build/${PROJECTNAME}-signed.apk || error "apksigner"
+    echo "Starting dx..."
+
+    dx --dex \
+	$VERBOSE_DEX \
+	--no-strict \
+	--output=bin/${PROJECTNAME}.dex \
+	`find bin/classes -maxdepth 1 -not -path "bin/classes"` \
+	$DEXED_LIBS \
+	|| error "dx"
+
+    NATIVE_LIBS=
+    if [ -d libs ]; then
+	NATIVE_LIBS="-nf libs"
+    fi
+
+    echo "Starting apkbuilder..."
+
+    apkbuilder bin/${PROJECTNAME}.apk \
+	$VERBOSE_APKBUILDER \
+	-u \
+	-z ./bin/resources.res \
+	-f ./bin/${PROJECTNAME}.dex \
+	$NATIVE_LIBS \
+	|| error "apkbuilder"
+
+    echo "Starting apksigner..."
+
+    apksigner bin/${PROJECTNAME}.apk bin/${PROJECTNAME}-signed.apk || error "apksigner"
 fi
