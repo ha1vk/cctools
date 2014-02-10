@@ -33,7 +33,7 @@ build_sdktools() {
     install -D -m 755 aapt/zipalign ${TMPINST_DIR}/${PKG}/cctools/bin/zipalign
     install -D -m 755 aidl/aidl     ${TMPINST_DIR}/${PKG}/cctools/bin/aidl
 
-    install -D -m 755 buildapk.sh   ${TMPINST_DIR}/${PKG}/cctools/bin/aprojectbuild
+    install -D -m 755 buildapk.sh   ${TMPINST_DIR}/${PKG}/cctools/bin/aproject
 
     $STRIP ${TMPINST_DIR}/${PKG}/cctools/bin/*
 
@@ -67,11 +67,11 @@ exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES proguard.ProGuard \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/proguard
 
-    cat > ${TMPINST_DIR}/${PKG}/cctools/bin/aproject << EOF
+    cat > ${TMPINST_DIR}/${PKG}/cctools/bin/aproject-helper << EOF
 #!/system/bin/sh
-exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES com.pdaxrom.cmdline.AProject \$@
+exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES com.pdaxrom.cmdline.AProjectHelper \$@
 EOF
-    chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/aproject
+    chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/aproject-helper
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "fastjar"
