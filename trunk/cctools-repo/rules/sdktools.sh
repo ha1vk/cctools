@@ -65,6 +65,12 @@ exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES proguard.ProGuard \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/proguard
 
+    cat > ${TMPINST_DIR}/${PKG}/cctools/bin/aproject << EOF
+#!/system/bin/sh
+exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES com.pdaxrom.cmdline.AProject \$@
+EOF
+    chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/aproject
+
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
