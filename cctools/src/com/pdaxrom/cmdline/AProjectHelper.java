@@ -11,11 +11,14 @@ import org.w3c.dom.NodeList;
 
 import com.pdaxrom.utils.XMLParser;
 
-public class AProject {
+public class AProjectHelper {
 	public final static int PROJECT_PACKAGE		= 1;
-	public final static int PROJECT_TARGETSDK	= 2;
-	public final static int PROJECT_MINSDK		= 3;
-	public final static int PROJECT_APPNAME		= 4;
+	public final static int PROJECT_VERSIONCODE = 2;
+	public final static int PROJECT_VERSIONNAME = 3;
+	public final static int PROJECT_TARGETSDK	= 4;
+	public final static int PROJECT_MINSDK		= 5;
+	public final static int PROJECT_APPNAME		= 6;
+	public final static int PROJECT_ACTIVITIES  = 7;
 	
 	public static void main(String[] args) {
 		int argc = 0;
@@ -34,6 +37,27 @@ public class AProject {
 				if (result == false) {
 					System.exit(1);
 				}
+			} else if (args[argc].equals("Package")) {
+				String str = getManifestInfo(".", PROJECT_PACKAGE);
+				if (str == null) {
+					str = "";
+				}
+				System.out.println(str);
+				return;
+			} else if (args[argc].equals("VersionCode")) {
+				String str = getManifestInfo(".", PROJECT_VERSIONCODE);
+				if (str == null) {
+					str = "";
+				}
+				System.out.println(str);
+				return;
+			} else if (args[argc].equals("VersionName")) {
+				String str = getManifestInfo(".", PROJECT_VERSIONNAME);
+				if (str == null) {
+					str = "";
+				}
+				System.out.println(str);
+				return;
 			} else if (args[argc].equals("TargetSDK")) {
 				String str = getManifestInfo(".", PROJECT_TARGETSDK);
 				if (str == null) {
@@ -55,13 +79,24 @@ public class AProject {
 				}
 				System.out.println(str);
 				return;
+			} else if (args[argc].equals("Activities")) {
+				String str = getManifestInfo(".", PROJECT_ACTIVITIES);
+				if (str == null) {
+					str = "";
+				}
+				System.out.println(str);
+				return;
 			} else if (args[argc].equals("help")) {
 				System.out.println("Usage:");
-				System.out.println("aproject help");
-				System.out.println("aproject BuildConfig debug|release");
-				System.out.println("aproject TargetSDK");
-				System.out.println("aproject MinSDK");
-				System.out.println("aproject AppName");
+				System.out.println("aproject-helper help");
+				System.out.println("aproject-helper BuildConfig debug|release");
+				System.out.println("aproject-helper Package");
+				System.out.println("aproject-helper VersionCode");
+				System.out.println("aproject-helper VersionName");
+				System.out.println("aproject-helper TargetSDK");
+				System.out.println("aproject-helper MinSDK");
+				System.out.println("aproject-helper AppName");
+				System.out.println("aproject-helper Activities");
 				return;
 			}
 			argc++;
@@ -134,6 +169,10 @@ public class AProject {
 		switch(request) {
 		case PROJECT_PACKAGE:
 			return e.getAttribute("package");
+		case PROJECT_VERSIONCODE:
+			return e.getAttribute("android:versionCode");
+		case PROJECT_VERSIONNAME:
+			return e.getAttribute("android:versionName");
 		case PROJECT_TARGETSDK:
 	    	e = (Element) e.getElementsByTagName("uses-sdk").item(0);
 	    	if (e != null) {
@@ -150,6 +189,23 @@ public class AProject {
 			e = (Element) e.getElementsByTagName("application").item(0);
 			if (e != null) {
 				return e.getAttribute("android:name");
+			}
+			break;
+		case PROJECT_ACTIVITIES:
+			e = (Element) e.getElementsByTagName("application").item(0);
+			if (e != null) {
+				String activities = "";
+				NodeList al = e.getElementsByTagName("activity");
+				for (int i = 0; i < al.getLength(); i++) {
+					String name = ((Element) al.item(i)).getAttribute("android:name");
+					if (name != null) {
+						if (i > 0) {
+							activities += " ";
+						}
+						activities += name;
+					}
+				}
+				return activities;
 			}
 			break;
 		}
