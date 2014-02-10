@@ -536,5 +536,6 @@ build_build_essential_mingw_w64
 
 build_libpng
 build_pkgman
+build_fastjar
 build_sdktools
 build_sdk_android

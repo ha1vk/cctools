@@ -27,14 +27,41 @@ APKNAME=`basename $TOPDIR`
 
 mkdir -p build/classes gen
 
-aapt p -f -v -M AndroidManifest.xml -F ./build/resources.res -I ~/android.jar -S res/ -J gen || error "aapt"
+ANDROID_SDK_VER=17
 
-find . -name "*.aidl" -exec aidl -Isrc -p../android-17/framework.aidl -ogen {} \;
+ANDROID_SDK=${CCTOOLSDIR}/sdk/android-${ANDROID_SDK_VER}
 
-javac -verbose -cp ~/android.jar -d build/classes `find src -name "*.java"` `find gen -name "*.java"` || error "aapt"
+find_jar_for_aapt() {
+    local d=
+    for d in $@; do
+	test -d $d && find $d -name "*.jar" -type f -exec printf "-I {} " \;
+    done
+}
 
-dx --dex --verbose --no-strict --output=build/${APKNAME}.dex `find build/classes -maxdepth 1 -not -path "build/classes"`
+find_aidl_for_aidl() {
+    local d=
+    for d in $@; do
+	test -d $d && find $d -name "*.aidl" -type f -exec printf "-p{} " \;
+    done
+}
 
-apkbuilder build/${APKNAME}.apk -v -u -z ./build/resources.res -f ./build/${APKNAME}.dex
+find_jar_for_javac() {
+    printf "-cp "
+    local d=
+    local x=
+    for d in $@; do
+	test -d $d && find $d -name "*.jar" -type f -exec printf "{}:" \;
+    done
+}
 
-apksigner build/${APKNAME}.apk build/${APKNAME}-signed.apk
+aapt p -f -v -M AndroidManifest.xml -F ./build/resources.res `find_jar_for_aapt $ANDROID_SDK libs $ANDROID_LIBS` -S res/ -J gen || error "aapt"
+
+find . -name "*.aidl" -exec aidl -Isrc `find_aidl_for_aidl $ANDROID_SDK $ANDROID_AIDL` -ogen {} \;
+
+javac -verbose `find_jar_for_javac $ANDROID_SDK libs $ANDROID_LIBS` -d build/classes `find src -name "*.java"` `find gen -name "*.java"` || error "javac"
+
+dx --dex --verbose --no-strict --output=build/${APKNAME}.dex `find build/classes -maxdepth 1 -not -path "build/classes"` || error "dx"
+
+apkbuilder build/${APKNAME}.apk -v -u -z ./build/resources.res -f ./build/${APKNAME}.dex || error "apkbuilder"
+
+apksigner build/${APKNAME}.apk build/${APKNAME}-signed.apk || error "apksigner"

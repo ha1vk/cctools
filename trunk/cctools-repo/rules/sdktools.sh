@@ -33,6 +33,8 @@ build_sdktools() {
     install -D -m 755 aapt/zipalign ${TMPINST_DIR}/${PKG}/cctools/bin/zipalign
     install -D -m 755 aidl/aidl     ${TMPINST_DIR}/${PKG}/cctools/bin/aidl
 
+    install -D -m 755 buildapk.sh   ${TMPINST_DIR}/${PKG}/cctools/bin/aprojectbuild
+
     $STRIP ${TMPINST_DIR}/${PKG}/cctools/bin/*
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/bin/javac << EOF
@@ -72,7 +74,7 @@ EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/aproject
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "fastjar"
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
