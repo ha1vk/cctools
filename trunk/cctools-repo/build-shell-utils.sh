@@ -539,3 +539,5 @@ build_pkgman
 build_fastjar
 build_sdktools
 build_sdk_android
+build_java_examples
+build_build_essential_java
