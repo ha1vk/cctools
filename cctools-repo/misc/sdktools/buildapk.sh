@@ -13,8 +13,71 @@ error() {
     exit 1
 }
 
+if [ "$1" = "init" -a "$2" = "project" ]; then
+    PROJECT_PATH="$3"
+    PROJECT_PACKAGE=$4
+    PROJECT_NAME=$5
+    PROJECT_APPNAME="$6"
+
+    if [ "$PROJECT_APPNAME" = "" ]; then
+	PROJECT_APPNAME=$PROJECT_NAME
+    fi
+
+    ANDROID_SDK_VER=`getprop ro.build.version.sdk`
+    ANDROID_SDK=${CCTOOLSDIR}/sdk/android-${ANDROID_SDK_VER}
+
+    if [ ! -d $ANDROID_SDK ]; then
+	echo "ERROR: No SDK Android-${ANDROID_SDK_VER} found!"
+	exit 1
+    fi
+
+    p="${PROJECT_PATH}/${PROJECT_NAME}"
+    p1="${p}/src/`echo $PROJECT_PACKAGE | tr '.' '/'`"
+
+    for d in drawable-hdpi drawable-ldpi drawable-mdpi drawable-xhdpi drawable-xxhdpi layout menu values xml; do
+	mkdir -p ${p}/res/$d
+    done
+
+    mkdir -p $p1
+    cp -f ${ANDROID_SDK}/template/AndroidManifest.template ${p}/AndroidManifest.xml
+    cp -f ${ANDROID_SDK}/template/java_file.template       ${p1}/${PROJECT_NAME}.java
+    cp -f ${ANDROID_SDK}/template/layout.template          ${p}/res/layout/main.xml
+    cp -f ${ANDROID_SDK}/template/strings.template         ${p}/res/values/strings.xml
+    cp -f ${ANDROID_SDK}/template/ic_launcher_ldpi.png     ${p}/res/drawable-ldpi/ic_launcher.png
+    cp -f ${ANDROID_SDK}/template/ic_launcher_mdpi.png     ${p}/res/drawable-mdpi/ic_launcher.png
+    cp -f ${ANDROID_SDK}/template/ic_launcher_hdpi.png     ${p}/res/drawable-hdpi/ic_launcher.png
+
+    sed -i -e "s|PACKAGE|$PROJECT_PACKAGE|" \
+           -e "s|ACTIVITY_ENTRY_NAME|$PROJECT_NAME|" \
+           -e "s|ACTIVITY_CLASS_NAME|$PROJECT_NAME|" \
+           -e "s|ICON|android:icon=\"@drawable/ic_launcher\"|" ${p}/AndroidManifest.xml ${p1}/${PROJECT_NAME}.java
+
+    sed -i -e "s|PACKAGE|$PROJECT_PACKAGE|" \
+           -e "s|ACTIVITY_ENTRY_NAME|$PROJECT_APPNAME|" \
+           -e "s|ACTIVITY_CLASS_NAME|$PROJECT_APPNAME|" \
+           -e "s|ICON|android:icon=\"@drawable/ic_launcher\"|" ${p}/res/layout/main.xml ${p}/res/values/strings.xml
+
+    sed -i -e "s|<application|<uses-sdk android:targetSdkVersion=\"$ANDROID_SDK_VER\" />\n    <application|" ${p}/AndroidManifest.xml
+
+    exit 0
+fi
+
 get_ext_libdirs() {
-    test -e ${TOPDIR}/project.properties && cat ${TOPDIR}/project.properties | grep android.library.reference | cut -f2 -d=
+    for f in project.properties default.properties; do
+	if [ -e ${TOPDIR}/$f ]; then
+	    cat ${TOPDIR}/$f | grep android.library.reference | cut -f2 -d=
+	    break
+	fi
+    done
+}
+
+is_library() {
+    for f in project.properties default.properties; do
+	if [ -e ${TOPDIR}/$f ]; then
+	    cat ${TOPDIR}/$f | grep android.library | head -n1 | cut -f2 -d=
+	    break
+	fi
+    done
 }
 
 if [ ! -f AndroidManifest.xml ]; then
@@ -207,7 +270,9 @@ javac $VERBOSE_JAVAC \
     `find gen -name "*.java"` \
     || error "javac"
 
-if [ "$ACTIVITIES" = "" ]; then
+IS_LIBRARY=`is_library`
+
+if [ "$IS_LIBRARY" = "true" -o "$ACTIVITIES" = "" ]; then
 
     echo "Build library..."
 
