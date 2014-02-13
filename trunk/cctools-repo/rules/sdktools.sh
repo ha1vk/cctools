@@ -33,43 +33,43 @@ build_sdktools() {
     install -D -m 755 aapt/zipalign ${TMPINST_DIR}/${PKG}/cctools/bin/zipalign
     install -D -m 755 aidl/aidl     ${TMPINST_DIR}/${PKG}/cctools/bin/aidl
 
-    install -D -m 755 buildapk.sh   ${TMPINST_DIR}/${PKG}/cctools/bin/aproject
+    install -D -m 755 aproject   ${TMPINST_DIR}/${PKG}/cctools/bin/aproject
 
     $STRIP ${TMPINST_DIR}/${PKG}/cctools/bin/*
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/bin/javac << EOF
 #!/system/bin/sh
-exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES com.sun.tools.javac.Main \$@
+exec dalvikvm -Xss262912 -Xmx256M -cp \$CCTOOLSRES com.sun.tools.javac.Main \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/javac
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/bin/dx << EOF
 #!/system/bin/sh
-exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES com.android.dx.command.Main \$@
+exec dalvikvm -Xss262912 -Xmx256M -cp \$CCTOOLSRES com.android.dx.command.Main \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/dx
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/bin/apkbuilder << EOF
 #!/system/bin/sh
-exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES com.android.sdklib.build.ApkBuilderMain \$@
+exec dalvikvm -Xss262912 -Xmx256M -cp \$CCTOOLSRES com.android.sdklib.build.ApkBuilderMain \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/apkbuilder
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/bin/apksigner << EOF
 #!/system/bin/sh
-exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES com.pdaxrom.cmdline.ApkSigner \$@
+exec dalvikvm -Xss262912 -Xmx256M -cp \$CCTOOLSRES com.pdaxrom.cmdline.ApkSigner \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/apksigner
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/bin/proguard << EOF
 #!/system/bin/sh
-exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES proguard.ProGuard \$@
+exec dalvikvm -Xss262912 -Xmx256M -cp \$CCTOOLSRES proguard.ProGuard \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/proguard
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/bin/aproject-helper << EOF
 #!/system/bin/sh
-exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES com.pdaxrom.cmdline.AProjectHelper \$@
+exec dalvikvm -Xss262912 -Xmx256M -cp \$CCTOOLSRES com.pdaxrom.cmdline.AProjectHelper \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/aproject-helper
 
