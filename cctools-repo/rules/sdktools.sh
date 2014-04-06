@@ -73,6 +73,9 @@ exec dalvikvm -Xss262912 -Xmx256M -cp \$CCTOOLSRES com.pdaxrom.cmdline.AProjectH
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/aproject-helper
 
+    mkdir -p ${TMPINST_DIR}/${PKG}/cctools/share/project
+    cp -f project/*java.xml ${TMPINST_DIR}/${PKG}/cctools/share/project/
+
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "fastjar"
     cd ${TMPINST_DIR}/${PKG}
