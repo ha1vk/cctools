@@ -77,6 +77,16 @@
     <string name="goto_line">Cтрока</string>
     <string name="search_string">Строка для поиска</string>
 
+    <string name="projectButton">Проект</string>
+    <string name="project_new">Новый</string>
+    <string name="project_open">Открыть</string>
+    <string name="project_close">Закрыть</string>
+    <string name="project_import">Импортировать</string>
+    <string name="project_properties">Настройки</string>
+    
+	<string name="project_new_project">Новый проект</string>
+    <string name="project_new_project_message">Тип проекта</string>
+    
     <string name="buildwindow_name">Собрать</string>
     <string name="buildwindow_name_error">Неудачно</string>
     <string name="buildwindow_name_done">Собрано</string>
@@ -114,6 +124,7 @@
 
     <string name="open_file">Открыть файл</string>
     <string name="save_file">Сохранить файл</string>
+	<string name="select_folder">Выбор папки</string>
     <string name="location">Путь</string>
     <string name="cant_read_folder">папка не может быть прочитана!</string>
     <string name="nnew">Новый</string>

@@ -77,6 +77,16 @@
     <string name="goto_line">Line</string>
     <string name="search_string">Search string</string>
 
+    <string name="projectButton">Project</string>
+    <string name="project_new">New</string>
+    <string name="project_open">Open</string>
+    <string name="project_close">Close</string>
+    <string name="project_import">Import</string>
+    <string name="project_properties">Properties</string>
+    
+    <string name="project_new_project">New project</string>
+    <string name="project_new_project_message">Select project type</string>
+    
     <string name="buildwindow_name">Build</string>
     <string name="buildwindow_name_error">Failed</string>
     <string name="buildwindow_name_done">Finished</string>
@@ -114,6 +124,7 @@
 
     <string name="open_file">Open file</string>
     <string name="save_file">Save file</string>
+    <string name="select_folder">Select folder</string>
     <string name="location">Location</string>
     <string name="cant_read_folder">folder can\'t be read!</string>
     <string name="nnew">New</string>
