@@ -904,7 +904,7 @@ public class PkgManagerActivity extends SherlockListActivity {
 				"BOOTCLASSPATH=" + bootClassPath,
 				"CCTOOLSDIR=" + cctoolsDir,
 				"CCTOOLSRES=" + getPackageResourcePath(),
-				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
+				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib:/system/lib:/vendor/lib",
 				"HOME=" + cctoolsDir + "/home",
 				"SHELL=" + getShell(),
 				"TERM=xterm",
