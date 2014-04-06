@@ -18,10 +18,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.droidparts.widget.ClearableEditText;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
-import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.pdaxrom.editor.CodeEditor;
@@ -31,6 +33,7 @@ import com.pdaxrom.utils.FileDialog;
 import com.pdaxrom.utils.LogItem;
 import com.pdaxrom.utils.SelectionMode;
 import com.pdaxrom.utils.Utils;
+import com.pdaxrom.utils.XMLParser;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -71,19 +74,13 @@ import android.widget.TextView.BufferType;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-public class CCToolsActivity extends SherlockActivity implements ActionBar.TabListener, OnSharedPreferenceChangeListener, CodeEditorInterface {
+public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity implements ActionBar.TabListener, OnSharedPreferenceChangeListener, CodeEditorInterface {
 	private Context context = this;
 	public static final String SHARED_PREFS_NAME = "cctoolsSettings";
 	private static final String SHARED_PREFS_FILES_EDITPOS = "FilesPosition";
 	private SharedPreferences mPrefs;
 	private static final String website_url = "http://cctools.info";
-	private static final String PKGS_LISTS_DIR = "/installed/";
 	private String TAG = "cctools";
-	private String toolchainDir;
-	private String sdCardDir;
-	private String tmpDir;
-	private String filesDir;
-	private String serviceDir;
 	private String buildBaseDir; // Project base directory
 	private boolean buildAfterSave = false;
 	private boolean buildAfterLoad = false;
@@ -102,7 +99,6 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
 	private ViewFlipper flipper;
 	private List<CodeEditor> editors = null;	
 	private CodeEditor codeEditor;
-	
 	
 	private static final int REQUEST_OPEN = 1;
 	private static final int REQUEST_SAVE = 2;
@@ -141,41 +137,6 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
         getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         getSupportActionBar().setDisplayShowHomeEnabled(false);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        sdCardDir = Environment.getExternalStorageDirectory().getPath() + "/CCTools";
-        tmpDir = sdCardDir + "/tmp";
-        filesDir = sdCardDir + "/backup";
-
-        if (!(new File(sdCardDir)).exists()) {
-        	(new File(sdCardDir)).mkdir();
-        }
-        if (!(new File(tmpDir)).exists()) {
-        	(new File(tmpDir)).mkdir();
-        }
-        if (!(new File(filesDir)).exists()) {
-        	(new File(filesDir)).mkdir();
-        }
-        
-        toolchainDir = getCacheDir().getParentFile().getAbsolutePath() + "/root";
-        if (!(new File(toolchainDir)).exists()) {
-        	(new File(toolchainDir)).mkdir();
-        }
-        
-        String dalvikCache = toolchainDir + "/cctools/var/dalvik/dalvik-cache";
-        if (!(new File(dalvikCache)).exists()) {
-        	(new File(dalvikCache)).mkdirs();
-        }
-        
-        updateClassPathEnv();
-        
-        if (!(new File(toolchainDir + PKGS_LISTS_DIR)).exists()) {
-        	(new File(toolchainDir + PKGS_LISTS_DIR)).mkdir();
-        }
-
-        serviceDir = toolchainDir + "/cctools/services";
-        if (!(new File(serviceDir)).exists()) {
-        	(new File(serviceDir)).mkdir();
-        }
         
         mPrefs = getSharedPreferences(SHARED_PREFS_NAME, 0);
 
@@ -357,7 +318,7 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
 		}
 		
 		Log.i(TAG, "Clean temp directory");
-		Utils.deleteDirectory(new File(toolchainDir + "/tmp"));
+		Utils.deleteDirectory(new File(getToolchainDir() + "/tmp"));
 		super.onDestroy();
 	}
 
@@ -469,6 +430,13 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
         		break;
         	case TEXT_REDO:
         		codeEditor.redo();
+        		break;
+        	case R.id.project_new:
+        		newProject();
+        		break;
+        	case R.id.project_open:
+        		break;
+        	case R.id.project_close:
         		break;
         }
         return true;
@@ -629,7 +597,6 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
 		}
 		
 		intent.putExtra(FileDialog.START_PATH, dir);
-		intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
 		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
 		startActivityForResult(intent, REQUEST_OPEN);
     }
@@ -646,7 +613,6 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
 			}
     		Intent intent = new Intent(getBaseContext(), FileDialog.class);
     		intent.putExtra(FileDialog.START_PATH, dir);
-    		intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
     		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_CREATE);
     		startActivityForResult(intent, REQUEST_SAVE);
 		} else {
@@ -675,7 +641,6 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
 			dir = Environment.getExternalStorageDirectory().getPath();
 		}
 		intent.putExtra(FileDialog.START_PATH, dir);
-		intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
 		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_CREATE);
 		startActivityForResult(intent, REQUEST_SAVE);    	
     }
@@ -720,7 +685,7 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
 				if (ext.contentEquals(".sh")) {
 		    		Intent intent = new Intent(CCToolsActivity.this, LauncherConsoleActivity.class);
 		    		intent.putExtra("executable_file", fileName);
-		    		intent.putExtra("cctoolsdir", toolchainDir + "/cctools");
+		    		intent.putExtra("cctoolsdir", getToolchainDir() + "/cctools");
 		    		SharedPreferences mPrefs = getSharedPreferences(CCToolsActivity.SHARED_PREFS_NAME, 0);
 		    		if (force) {
 		    			intent.putExtra("force", mPrefs.getBoolean("force_run", false));
@@ -730,10 +695,10 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
 		    		startActivity(intent);
 		    		return;
 				}
-				if (ext.contentEquals(".lua") && (new File(toolchainDir + "/cctools/bin/luajit")).exists()) {
+				if (ext.contentEquals(".lua") && (new File(getToolchainDir() + "/cctools/bin/luajit")).exists()) {
 		    		Intent intent = new Intent(CCToolsActivity.this, LauncherConsoleActivity.class);
-		    		intent.putExtra("executable_file", toolchainDir + "/cctools/bin/luajit " + fileName);
-		    		intent.putExtra("cctoolsdir", toolchainDir + "/cctools");
+		    		intent.putExtra("executable_file", getToolchainDir() + "/cctools/bin/luajit " + fileName);
+		    		intent.putExtra("cctoolsdir", getToolchainDir() + "/cctools");
 		    		intent.putExtra("workdir", (new File(fileName)).getParentFile().getAbsolutePath());
 		    		SharedPreferences mPrefs = getSharedPreferences(CCToolsActivity.SHARED_PREFS_NAME, 0);
 		    		if (force) {
@@ -745,10 +710,10 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
 		    		return;					
 				}
 				if ((ext.equals(".pl") || ext.equals(".pm")) &&
-					(new File(toolchainDir + "/cctools/bin/perl")).exists()) {
+					(new File(getToolchainDir() + "/cctools/bin/perl")).exists()) {
 		    		Intent intent = new Intent(CCToolsActivity.this, LauncherConsoleActivity.class);
-		    		intent.putExtra("executable_file", toolchainDir + "/cctools/bin/perl " + fileName);
-		    		intent.putExtra("cctoolsdir", toolchainDir + "/cctools");
+		    		intent.putExtra("executable_file", getToolchainDir() + "/cctools/bin/perl " + fileName);
+		    		intent.putExtra("cctoolsdir", getToolchainDir() + "/cctools");
 		    		intent.putExtra("workdir", (new File(fileName)).getParentFile().getAbsolutePath());
 		    		SharedPreferences mPrefs = getSharedPreferences(CCToolsActivity.SHARED_PREFS_NAME, 0);
 		    		if (force) {
@@ -762,8 +727,8 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
 			}
 			Intent intent = new Intent(CCToolsActivity.this, BuildActivity.class);
 			intent.putExtra("filename", fileName);
-			intent.putExtra("cctoolsdir", toolchainDir + "/cctools");
-			intent.putExtra("tmpdir", tmpDir);
+			intent.putExtra("cctoolsdir", getToolchainDir() + "/cctools");
+			intent.putExtra("tmpdir", getTempDir());
 			intent.putExtra("force", force);
 			startActivity(intent);
 		}
@@ -1052,8 +1017,8 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
     private void runTerminal() {
 		Intent myIntent = new Intent(this, TermActivity.class);
 		myIntent.putExtra("filename", "-" + getShell());
-		myIntent.putExtra("cctoolsdir", toolchainDir + "/cctools");
-		String workDir = toolchainDir + "/cctools/home";
+		myIntent.putExtra("cctoolsdir", getToolchainDir() + "/cctools");
+		String workDir = getToolchainDir() + "/cctools/home";
 		String fileName = codeEditor.getFileName();
 		if (fileName != null && (new File(fileName)).exists()) {
 			workDir = (new File(fileName)).getParentFile().getAbsolutePath();
@@ -1061,7 +1026,90 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
 		myIntent.putExtra("workdir", workDir);
 		startActivity(myIntent);
     }
+    
+    //TODO: new project
+    private void newProject() {
+    	final Spinner spinner = new Spinner(this);
+    	List<String> list = new ArrayList<String>();
+    	final List<String> projects = new ArrayList<String>();
 
+    	FilenameFilter filter = new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				String lowercaseName = name.toLowerCase();
+				if (lowercaseName.endsWith(".xml")) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		};
+
+		String[] rulesDirs = {
+			getToolchainDir() + "/cctools/share/project",
+			getSDHomeDir() + "/share/project"
+		};
+		
+		for (String rulesDir: rulesDirs) {
+			File dir = new File(rulesDir);
+			if (dir.exists() && dir.isDirectory()) {
+				for (String fileName: dir.list(filter)) {
+					XMLParser xmlParser = new XMLParser();
+					String xml = xmlParser.getXmlFromFile(rulesDir + "/" + fileName);
+					if (xml == null) {
+						continue;
+					}
+					Document doc = xmlParser.getDomElement(xml);
+					if (doc == null) {
+						Log.i(TAG, "bad xml file " + rulesDir + "/" + fileName);
+						continue;
+					}
+					NodeList nl = doc.getElementsByTagName("cctools-project");
+					Element e = (Element) nl.item(0);
+					if (e == null) {
+						continue;
+					}
+					String title = e.getAttribute("title");
+					if (title != null && ! title.equals("")) {
+						list.add(title);
+						projects.add(rulesDir + "/" + fileName);
+					}
+				}
+			}
+		}
+		
+		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_spinner_item, list);
+		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		
+		spinner.setAdapter(dataAdapter);
+		
+		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+			public void onItemSelected(AdapterView<?> arg0, View view,
+					int position, long id) {
+				Log.i(TAG, "selected " + projects.get(position));
+				toolchainPackageToInstall = position;
+			}
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+			}
+		});
+
+		new AlertDialog.Builder(this)
+		.setTitle(getText(R.string.project_new_project))
+		.setMessage(getText(R.string.project_new_project_message))
+		.setView(spinner)
+		.setPositiveButton(getText(R.string.button_continue), new DialogInterface.OnClickListener() {			
+			public void onClick(DialogInterface dialog, int which) {
+				int i = spinner.getSelectedItemPosition();
+				Log.i(TAG, "selected project rule " + projects.get(i));
+				
+				dialogFromRule(projects.get(i), getLastOpenedDir());
+			}
+		})
+		.setCancelable(true)
+		.show();
+    }
+        
     private void showInfoAndCheckToolchain() {
     	PackageInfo packageInfo;
 		try {
@@ -1219,7 +1267,7 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
 					return false;
 				}
 			};
-			File dir = new File(toolchainDir + PKGS_LISTS_DIR);
+			File dir = new File(getToolchainDir() + PKGS_LISTS_DIR);
 			if (dir.isDirectory()) {
 				for (String fileName: dir.list(filter)) {
 					try {
@@ -1230,7 +1278,7 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
 						String line = "";
 						while((line = reader.readLine()) != null) {
 							Log.i(TAG, "Delete file: " + line);
-							(new File(toolchainDir + "/" + line)).delete();
+							(new File(getToolchainDir() + "/" + line)).delete();
 						}
 						in.close();
 						(new File(dir.getPath() + "/" + fileName)).delete();
@@ -1293,7 +1341,7 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
 			serviceCmd = "stop";
 		}
 		Log.i(TAG, "Console services " + serviceCmd);
-		File dir = new File(serviceDir);
+		File dir = new File(getServiceDir());
 		if (dir.exists()) {
 			String services[] = dir.list();
 			for (final String service: services) {
@@ -1306,121 +1354,14 @@ public class CCToolsActivity extends SherlockActivity implements ActionBar.TabLi
 						} else {
 							serviceCmd = "stop";
 						}
-						String app = serviceDir + "/" + service + " " + serviceCmd;
-						system(app);
+						String[] argv = {
+							getServiceDir() + "/" + service,
+							serviceCmd
+						};
+						system(argv);
 					}
 				}.start();
 			}			
 		}
-	}
-	
-	private void system(String cmdline) {
-		String cctoolsDir = toolchainDir + "/cctools";
-		String bootClassPath = getEnv(cctoolsDir, "BOOTCLASSPATH");
-		if (bootClassPath == null) {
-			bootClassPath = Utils.getBootClassPath();
-		}
-		if (bootClassPath == null) {
-			bootClassPath = "/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar"; 
-		}
-		String[] envp = {
-				"TMPDIR=" + Environment.getExternalStorageDirectory().getPath(),
-				"PATH=" + cctoolsDir + "/bin:" + cctoolsDir + "/sbin:/sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin",
-				"ANDROID_ASSETS=/system/app",
-				"ANDROID_BOOTLOGO=1",				
-				"ANDROID_DATA=" + cctoolsDir + "/var/dalvik",
-				"ANDROID_PROPERTY_WORKSPACE=" + getEnv(cctoolsDir, "ANDROID_PROPERTY_WORKSPACE"),
-				"ANDROID_ROOT=/system",
-				"BOOTCLASSPATH=" + bootClassPath,
-				"CCTOOLSDIR=" + cctoolsDir,
-				"CCTOOLSRES=" + getPackageResourcePath(),
-				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
-				"HOME=" + cctoolsDir + "/home",
-				"SHELL=" + getShell(),
-				"TERM=xterm",
-				"PS1=$ ",
-				"SDDIR=" + sdCardDir,
-				"EXTERNAL_STORAGE=" + Environment.getExternalStorageDirectory().getPath(),
-				};
-		try {
-			Log.i(TAG, "exec cmd " + cmdline + ", cctoolsdir " + cctoolsDir);
-			Process p = Runtime.getRuntime().exec(cmdline, envp);
-			p.waitFor();
-		} catch (Exception e) {
-			Log.i(TAG, "Exec exception " + e);
-		}		
-	}
-	
-	private void updateClassPathEnv() {
-		String cpEnvDir = toolchainDir + "/cctools/etc";
-		if (! (new File(cpEnvDir)).exists()) {
-			(new File(cpEnvDir)).mkdirs();
-		}
-		try {
-			String env = "CCTOOLSCP=" + getPackageResourcePath() + "\n";
-			FileOutputStream outf = new FileOutputStream(cpEnvDir + "/cp.env");
-			outf.write(env.getBytes());
-			outf.close();
-		} catch (IOException e) {
-			Log.e(TAG, "create cp.env " + e);
-		}	
-	}
-	
-	private String getEnv(String baseDir, String variable) {
-		String ret = null;
-		String[] envp = {
-				"TMPDIR=" + Environment.getExternalStorageDirectory().getPath(),
-				"PATH=" + baseDir + "/bin:" + baseDir + "/sbin:/sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin",
-				"ANDROID_ASSETS=/system/app",
-				"ANDROID_BOOTLOGO=1",				
-				"ANDROID_DATA=" + baseDir + "/var/dalvik",
-				"ANDROID_ROOT=/system",
-				"CCTOOLSDIR=" + baseDir,
-				"CCTOOLSRES=" + getPackageResourcePath(),
-				"LD_LIBRARY_PATH=" + baseDir + "/lib",
-				"HOME=" + baseDir + "/home",
-				"SHELL=" + getShell(),
-				"TERM=xterm",
-				"PS1=$ ",
-				"SDDIR=" + sdCardDir,
-				"EXTERNAL_STORAGE=" + Environment.getExternalStorageDirectory().getPath(),
-				};
-		String[] argv = { "/system/bin/sh", "-c", "set"};
-		int[] pId = new int[1];
-		FileDescriptor fd = Utils.createSubProcess(baseDir, argv[0], argv, envp, pId);
-		FileInputStream fis = new FileInputStream(fd);
-		DataInputStream in = new DataInputStream(fis);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		String line = "";
-		try {
-			while((line = reader.readLine()) != null) {
-				if (line.startsWith(variable + "=")) {
-					if (line.indexOf("=") != -1) {
-						ret = line.substring(line.indexOf("=") + 1);
-						break;
-					}
-				}
-			}
-			in.close();
-			Utils.waitFor(pId[0]);
-		} catch (Exception e) {
-			Log.e(TAG, "exception " + e);
-		}
-		return ret;
-	}
-	
-	private String getShell() {
-		String[] shellList = {
-				toolchainDir + "/cctools/bin/bash",
-				toolchainDir + "/cctools/bin/ash",
-		};
-		
-		for (String shell: shellList) {
-			if ((new File(shell)).exists()) {
-				return shell;
-			}
-		}
-
-		return "/system/bin/sh";
-	}
+	}	
 }
