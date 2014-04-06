@@ -521,7 +521,7 @@ class Main {
 				"ANDROID_ROOT=/system",
 				"CCTOOLSDIR=" + baseDir,
 //				"CCTOOLSRES=" + getPackageResourcePath(),
-				"LD_LIBRARY_PATH=" + baseDir + "/lib",
+				"LD_LIBRARY_PATH=" + baseDir + "/lib:/system/lib:/vendor/lib",
 				"HOME=" + baseDir + "/home",
 //				"SHELL=" + getShell(),
 				"TERM=xterm",
