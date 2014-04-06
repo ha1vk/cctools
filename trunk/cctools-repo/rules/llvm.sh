@@ -1,6 +1,6 @@
 build_llvm() {
     PKG=llvm
-    PKG_VERSION=3.3
+    PKG_VERSION=3.4
     PKG_SUBVERSION="-1"
     PKG_URL="http://ya.ru/${PKG}-${PKG_VERSION}.tgz"
     PKG_DESC="Low-Level Virtual Machine (LLVM), runtime library"

@@ -3,7 +3,7 @@ build_build_essential_java() {
     PKG_VERSION=1.0
     local SDK_VERSION=19
     PKG_DESC="Informational list of java build-essential packages"
-    PKG_DEPS="busybox sdktools sdk-android-${SDK_VERSION} java-examples"
+    PKG_DEPS="adialog busybox sdktools sdk-android-${SDK_VERSION} java-examples"
     c_tag ${PKG} && return
 
     banner "Build java build essential"

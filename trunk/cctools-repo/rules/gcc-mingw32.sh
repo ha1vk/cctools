@@ -1,7 +1,7 @@
 build_gcc_mingw32() {
     PKG=gcc-mingw-w64
     PKG_VERSION=$gcc_version
-    PKG_SUBVERSION=
+    PKG_SUBVERSION=-1
     PKG_DESC="The GNU C compiler (cross compiler for mingw32)"
     O_DIR=$SRC_PREFIX/gcc/gcc-${PKG_VERSION}
     S_DIR=$src_dir/gcc-${PKG_VERSION}
