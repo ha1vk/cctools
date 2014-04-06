@@ -48,7 +48,6 @@ public class FileDialog extends SherlockListActivity {
 	public static final String FORMAT_FILTER	= "FORMAT_FILTER";
 	public static final String RESULT_PATH		= "RESULT_PATH";
 	public static final String SELECTION_MODE	= "SELECTION_MODE";
-	public static final String CAN_SELECT_DIR	= "CAN_SELECT_DIR";
 
 	private List<String> path = null;
 	private TextView myPath;
@@ -66,8 +65,6 @@ public class FileDialog extends SherlockListActivity {
 	private int selectionMode = SelectionMode.MODE_CREATE;
 
 	private String[] formatFilter = null;
-
-	private boolean canSelectDir = false;
 
 	private File selectedFile;
 	private HashMap<String, Integer> lastPositions = new HashMap<String, Integer>();
@@ -124,17 +121,18 @@ public class FileDialog extends SherlockListActivity {
 
 		formatFilter = getIntent().getStringArrayExtra(FORMAT_FILTER);
 
-		canSelectDir = getIntent().getBooleanExtra(CAN_SELECT_DIR, false);
-
 		layoutSelect = (LinearLayout) findViewById(R.id.fdLinearLayoutSelect);
 		layoutCreate = (LinearLayout) findViewById(R.id.fdLinearLayoutCreate);
 
 		if (selectionMode == SelectionMode.MODE_OPEN) {
 			setTitle(getString(R.string.open_file));
 			layoutCreate.setVisibility(View.GONE);
-		} else {
+		} else if (selectionMode == SelectionMode.MODE_CREATE) {
 			setTitle(getString(R.string.save_file));
 			layoutSelect.setVisibility(View.GONE);
+		} else {
+			setTitle(getString(R.string.select_folder));
+			layoutCreate.setVisibility(View.GONE);			
 		}
 
 		final Button cancelButton = (Button) findViewById(R.id.fdButtonCancel);
@@ -178,7 +176,7 @@ public class FileDialog extends SherlockListActivity {
 		
 		String startPath = getIntent().getStringExtra(START_PATH);
 		startPath = startPath != null ? startPath : ROOT;
-		if (canSelectDir) {
+		if (selectionMode == SelectionMode.MODE_SELECT_DIR) {
 			File file = new File(startPath);
 			selectedFile = file;
 			selectButton.setEnabled(true);
@@ -205,6 +203,11 @@ public class FileDialog extends SherlockListActivity {
         	}
         	if (!currentPath.startsWith(getCacheDir().getParentFile().getAbsolutePath())) {
         		getDir(homeDirectory);
+        		if (selectionMode == SelectionMode.MODE_SELECT_DIR) {
+        			selectedFile = new File(currentPath); 
+        			mFileName.setText(selectedFile.getName());
+        			selectButton.setEnabled(true);
+        		}
         	}
         	break;
         case R.id.sd_folder:
@@ -213,6 +216,11 @@ public class FileDialog extends SherlockListActivity {
         	}
         	if (!currentPath.startsWith(Environment.getExternalStorageDirectory().getPath())) {
             	getDir(sdDirectory);
+        		if (selectionMode == SelectionMode.MODE_SELECT_DIR) {
+        			selectedFile = new File(currentPath); 
+        			mFileName.setText(selectedFile.getName());
+        			selectButton.setEnabled(true);
+        		}
         	}
         	break;
         case R.id.new_folder:
@@ -237,8 +245,14 @@ public class FileDialog extends SherlockListActivity {
 		    	    	.setTitle(R.string.newDirectory)
 		    	    	.setMessage(getString(R.string.cannot_create))
 		    	    	.show();
-		        	} else
+		        	} else {
 		        		getDir(currentPath + "/" + input.getText().toString());
+		        		if (selectionMode == SelectionMode.MODE_SELECT_DIR) {
+		        			selectedFile = new File(currentPath); 
+		        			mFileName.setText(selectedFile.getName());
+		        			selectButton.setEnabled(true);
+		        		}
+		        	}
 		        }
 		    })
 		    .setNegativeButton(getString(R.string.button_cancel), new DialogInterface.OnClickListener() {
@@ -377,15 +391,17 @@ public class FileDialog extends SherlockListActivity {
 
 		if (file.isDirectory()) {
 			if (file.canRead()) {
-				if (canSelectDir || mMode != null) {
+				if (mMode != null) {
 					selectedFile = file;
 					mFileName.setText(file.getName());
-					if (mMode == null) {
-						selectButton.setEnabled(true);
-					}
 				} else {
 					lastPositions.put(currentPath, position);
-					getDir(path.get(position));					
+					getDir(path.get(position));
+					if (selectionMode == SelectionMode.MODE_SELECT_DIR) {
+						selectedFile = file;
+						mFileName.setText(file.getName());
+						selectButton.setEnabled(true);
+					}
 				}
 			} else {
 				new AlertDialog.Builder(this).setIcon(R.drawable.ic_launcher)
@@ -397,7 +413,7 @@ public class FileDialog extends SherlockListActivity {
 							}
 						}).show();
 			}
-		} else {
+		} else if (selectionMode != SelectionMode.MODE_SELECT_DIR) {
 			selectedFile = file;
 			mFileName.setText(file.getName());
 			if (mMode == null) {
