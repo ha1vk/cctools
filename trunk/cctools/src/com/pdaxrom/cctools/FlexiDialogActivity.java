@@ -301,8 +301,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 							
 							Log.i(TAG, ":: " + argv[i]);
 						}
-						
-						system(argv);
+						system(argv, false);
 						namedViews = null;
 					}
 				})
@@ -317,7 +316,16 @@ public class FlexiDialogActivity extends SherlockActivity {
      * Execute a shell command
      * @param argv
      */
-	protected void system(String[] argv) {
+    protected void system(String[] argv) {
+    	system(argv, true);
+    }
+    
+    /**
+     * Execute a shell command
+     * @param argv
+     * @param waitForFinish
+     */
+	protected void system(String[] argv, boolean waitForFinish) {
 		String cctoolsDir = toolchainDir + "/cctools";
 		String bootClassPath = getEnv(cctoolsDir, "BOOTCLASSPATH");
 		if (bootClassPath == null) {
@@ -347,15 +355,15 @@ public class FlexiDialogActivity extends SherlockActivity {
 				};
 		try {
 			Process p = Runtime.getRuntime().exec(argv, envp);
-
-			BufferedReader in = new BufferedReader(  
-					new InputStreamReader(p.getErrorStream()));  
-			String line = null;  
-			while ((line = in.readLine()) != null) {  
-				Log.i(TAG, "stderr: " + line);
-			}			
-			p.waitFor();
-
+			if (waitForFinish) {
+				BufferedReader in = new BufferedReader(  
+						new InputStreamReader(p.getErrorStream()));  
+				String line = null;  
+				while ((line = in.readLine()) != null) {  
+					Log.i(TAG, "stderr: " + line);
+				}			
+				p.waitFor();
+			}
 		} catch (Exception e) {
 			Log.i(TAG, "Exec exception " + e);
 		}		
